@@ -33,7 +33,7 @@ npm run dev
 ## 📅 Roadmap
 - [x] Initial UI Foundation (Layout, Cards, Stream)
 - [x] Smart NLP Input Implementation
-- [ ] Supabase Integration (Real-time DB)
-- [ ] Auth (Google/Magic Link)
-- [ ] Parking Lot & Sidebar logic
-- [ ] PWA Configuration
+- [x] Supabase Integration (Real-time DB)
+- [x] Auth (Magic Link)
+- [x] Parking Lot & Sidebar logic
+- [x] PWA Configuration & Launch

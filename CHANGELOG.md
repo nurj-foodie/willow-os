@@ -12,14 +12,17 @@ All notable changes to the Willow project will be documented in this file.
 - **Task Cards:** Pill-shaped task components with color themes and status toggles.
 - **Smart Input:** Integrated `chrono-node` for real-time NLP date/time parsing with dynamic "Caught" badge.
 - **Supabase Integration:** Implemented real-time persistence layer with Supabase. Added PostgreSQL schema, `useTasks` hook, and optimistic UI for reordering.
-- **Mock Data:** Replaced local mock data with Supabase real-time stream.
+- **Authentication:** Integrated Magic Link sign-in. Tasks are now synced and secured per user.
+- **Parking Lot:** Created a persistent sidebar for dateless tasks with cross-container drag-and-drop.
+- **Reset Ritual:** Added end-of-day rollover logic with confetti animations and comforting feedback.
+- **Mobile PWA:** Configured `vite-plugin-pwa` for native standalone mobile experience.
+- **Deployment:** Successfully deployed to Cloudflare Pages (willow-os.pages.dev).
+- **Mock Mode:** Robust fallback to LocalStorage when Supabase keys are not present.
 
-### Fixed
-- **Tailwind v4 Integration (Bug):** Fixed critical error where Vite failed to process Tailwind v4 directives. Added `@tailwindcss/postcss` and eventually pivoted to the `@tailwindcss/vite` plugin for native v4 support. [Timestamp: 21:10]
-- **CSS Pre-processing (Bug):** Resolved "Internal Server Error" caused by unprocessed `@tailwind` and `@apply` rules in `index.css`. [Timestamp: 21:15]
-- **TypeScript Types (Bug):** Fixed `verbatimModuleSyntax` errors by using `import type` for all type declarations. [Timestamp: 21:05]
-- **Component Sync:** Fixed state synchronization in `LiquidStream` to ensure props update internal state correctly. [Timestamp: 21:12]
-- **Position Ranking:** Implemented fractional indexing (Float) for tasks to allow infinite reordering without conflict. [Timestamp: 21:40]
+- **Supabase Initialization (Bug):** Fixed crash when `VITE_SUPABASE_URL` was empty by implementing a conditional client and "Mock Mode" fallback. [Timestamp: 22:30]
+- **Git Leak (Security):** Fixed `.gitignore` to exclude `.env` files and purged repository history to secure API keys. [Timestamp: 23:10]
+- **Cloudflare Build (Bug):** Resolved `vitepress` build conflict and `verbatimModuleSyntax` errors during deployment. [Timestamp: 23:40]
+- **Relative Imports (Bug):** Fixed path resolution errors in `Auth.tsx` for production bundles. [Timestamp: 23:30]
 
 ### Build Stats
 - **Primary Dependencies:** `framer-motion`, `dnd-kit`, `chrono-node`, `lucide-react`, `tailwindcss@4`.

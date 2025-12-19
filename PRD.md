@@ -1,7 +1,7 @@
 # Willow - Product Requirements Document (PRD)
 
 **Version:** 0.1 (Alpha)  
-**Date:** December 2025  
+**Date:** December 2025 (Launched)  
 **Target Audience:** Gen Z / Modern Professional ("Sofia")  
 **Platform:** Web PWA (Mobile & Desktop)
 
@@ -14,8 +14,11 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Frontend:** React (Vite) + TypeScript
 - **Styling:** Tailwind CSS (Gen Z / Glassmorphism aesthetic)
 - **Animation/Physics:** `framer-motion` + `dnd-kit` (Liquid feel)
-- **Backend/Database:** Supabase (PostgreSQL)
+- **Backend/Database:** Supabase (PostgreSQL + Real-time)
+- **Authentication:** Supabase Auth (Magic Links)
 - **NLP:** `chrono-node` (Date/Time extraction)
+- **Deployment:** Cloudflare Pages
+- **Mobile Support:** Progressive Web App (Vite PWA)
 
 ## 3. Core Features (MVP)
 
