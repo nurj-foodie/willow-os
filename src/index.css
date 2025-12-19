@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-oat: #FDFCF8;
+  --color-charcoal: #2D2D2D;
+  --color-matcha: #D1E2C4;
+  --color-clay: #E8D5C4;
+  --color-lavender: #E1D5E8;
+  --color-sage: #B2C5B2;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+  --radius-pill: 100px;
+}
+
+@layer base {
+  body {
+    @apply bg-oat text-charcoal font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+}
+
+@utility glass {
+  @apply bg-white/30 backdrop-blur-md border border-white/20;
+}
+
+@utility pill {
+  @apply rounded-pill px-6 py-3 transition-all duration-300;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-matcha/50 rounded-full h-12;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-matcha;
+}
