@@ -4,10 +4,21 @@ import { Star } from 'lucide-react';
 
 interface VibeHeaderProps {
     onMoodChange: (mood: number) => void;
-    currentMood?: number;
+    currentMood: number;
+    priorities: string[];
+    onPriorityChange: (index: number, value: string) => void;
+    onPriorityBlur: () => void;
+    saving?: boolean;
 }
 
-export const VibeHeader: React.FC<VibeHeaderProps> = ({ onMoodChange, currentMood = 3 }) => {
+export const VibeHeader: React.FC<VibeHeaderProps> = ({
+    onMoodChange,
+    currentMood,
+    priorities,
+    onPriorityChange,
+    onPriorityBlur,
+    saving
+}) => {
     const [hoverMood, setHoverMood] = useState<number | null>(null);
 
     const moods = [
@@ -19,20 +30,29 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({ onMoodChange, currentMoo
     ];
 
     return (
-        <section className="mb-8 p-6 bg-white/40 backdrop-blur-xl rounded-[2rem] border border-clay/10 shadow-sm overflow-hidden">
+        <section className="mb-8 p-6 bg-white/40 backdrop-blur-xl rounded-[2rem] border border-clay/10 shadow-sm overflow-hidden relative">
+            {saving && (
+                <div className="absolute top-4 right-6 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-matcha animate-pulse" />
+                    <span className="text-[10px] text-charcoal/30 uppercase tracking-widest font-bold">Syncing...</span>
+                </div>
+            )}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* Top 3 Priorities Section */}
                 <div className="flex-1">
                     <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-4 font-bold">Today's Non-Negotiables</h3>
                     <div className="space-y-3">
-                        {[1, 2, 3].map((i) => (
+                        {[0, 1, 2].map((i) => (
                             <div key={i} className="flex items-center gap-3 group">
                                 <div className="w-5 h-5 rounded-full border border-clay/20 flex-shrink-0 flex items-center justify-center text-[10px] text-charcoal/20 group-hover:border-matcha group-hover:text-matcha transition-colors">
-                                    {i}
+                                    {i + 1}
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder={`Priority ${i}...`}
+                                    placeholder={`Priority ${i + 1}...`}
+                                    value={priorities[i] || ''}
+                                    onChange={(e) => onPriorityChange(i, e.target.value)}
+                                    onBlur={onPriorityBlur}
                                     className="bg-transparent border-none outline-none font-serif text-lg text-charcoal/60 placeholder:text-charcoal/10 focus:text-charcoal transition-all w-full"
                                 />
                             </div>
@@ -56,8 +76,8 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({ onMoodChange, currentMoo
                                 <Star
                                     size={18}
                                     className={`transition-all duration-300 ${(hoverMood || currentMood) >= m.val
-                                            ? `${m.val <= (hoverMood || currentMood) ? 'fill-current text-matcha shadow-glow' : 'text-charcoal/10'}`
-                                            : 'text-charcoal/10'
+                                        ? `${m.val <= (hoverMood || currentMood) ? 'fill-current text-matcha shadow-glow' : 'text-charcoal/10'}`
+                                        : 'text-charcoal/10'
                                         } ${m.color}`}
                                 />
                                 {currentMood === m.val && (
