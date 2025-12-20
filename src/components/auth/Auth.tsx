@@ -89,9 +89,8 @@ export const Auth: React.FC = () => {
                             type="text"
                             placeholder="000000"
                             value={otp}
-                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').substring(0, 6))}
-                            className="w-full pl-12 pr-6 py-4 rounded-full bg-white border border-clay/10 focus:border-matcha focus:ring-4 focus:ring-matcha/5 outline-none transition-all font-sans text-charcoal tracking-[0.5em] text-center font-bold"
-                            maxLength={6}
+                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                            className="w-full pl-12 pr-6 py-4 rounded-full bg-white border border-clay/10 focus:border-matcha focus:ring-4 focus:ring-matcha/5 outline-none transition-all font-sans text-charcoal tracking-[0.3em] text-center font-bold"
                             required
                         />
                     </div>
