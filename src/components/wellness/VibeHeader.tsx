@@ -76,8 +76,8 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                                 <Star
                                     size={18}
                                     className={`transition-all duration-300 ${(hoverMood || currentMood) >= m.val
-                                        ? `${m.val <= (hoverMood || currentMood) ? 'fill-current text-matcha shadow-glow' : 'text-charcoal/10'}`
-                                        : 'text-charcoal/10'
+                                            ? 'fill-current text-matcha shadow-glow'
+                                            : 'text-charcoal/10'
                                         } ${m.color}`}
                                 />
                                 {currentMood === m.val && (
@@ -89,8 +89,8 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                             </button>
                         ))}
                     </div>
-                    <p className="text-[10px] font-sans italic text-charcoal/30 mt-3">
-                        {hoverMood ? moods[hoverMood - 1].label : moods[currentMood - 1].label}
+                    <p className="text-[10px] font-sans italic text-charcoal/30 mt-3 h-3">
+                        {hoverMood ? moods[hoverMood - 1].label : (currentMood ? moods[currentMood - 1].label : '')}
                     </p>
                 </div>
             </div>

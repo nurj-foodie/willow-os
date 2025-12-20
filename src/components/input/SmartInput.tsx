@@ -51,7 +51,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
                     type="text"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder="What's the main character energy today?"
+                    placeholder="Plant a task in your stream..."
                     className="w-full h-14 pl-6 pr-14 rounded-pill border-2 border-clay/20 bg-white/70 backdrop-blur-sm focus:outline-none focus:border-matcha transition-all font-sans text-lg placeholder:text-charcoal/30 shadow-sm"
                 />
 

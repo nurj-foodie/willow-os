@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -11,6 +11,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { AnimatePresence } from 'framer-motion';
 import { Layout } from './components/layout/Layout';
 import { LiquidStream } from './components/stream/LiquidStream';
 import { SmartInput } from './components/input/SmartInput';
@@ -23,12 +24,41 @@ import { useNotifications } from './hooks/useNotifications';
 import { LogOut, Shield, ShieldOff } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { useWellbeing } from './hooks/useWellbeing';
+import { useProfile } from './hooks/useProfile';
+import { RitualOverlay } from './components/analytics/RitualOverlay';
 
 function App() {
-  const { tasks, loading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
+  const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
-  const { mood, priorities, saving, updateMood, updatePriority, persistPriorities } = useWellbeing(user);
+  const { mood, priorities, saving, updateMood, updatePriority, persistPriorities, loading: wellbeingLoading } = useWellbeing(user);
+  const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
+  const [showRitual, setShowRitual] = useState(false);
+
+  // Ritual trigger logic
+  useEffect(() => {
+    if (!profileLoading && profile && user) {
+      const lastLogin = profile.last_login_at ? new Date(profile.last_login_at) : null;
+      const now = new Date();
+
+      const isNewUser = !profile.display_name;
+      const isFirstLoginToday = !lastLogin || lastLogin.toDateString() !== now.toDateString();
+
+      if (isNewUser || isFirstLoginToday) {
+        setShowRitual(true);
+      }
+    }
+  }, [profileLoading, profile, user]);
+
+  const handleRitualComplete = async (name: string) => {
+    if (name !== profile?.display_name) {
+      await updateProfile({ display_name: name });
+    }
+    await recordLogin();
+    setShowRitual(false);
+  };
+
+  const loading = tasksLoading || wellbeingLoading || profileLoading;
 
   useNotifications(tasks);
 
@@ -108,8 +138,19 @@ function App() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col md:flex-row min-h-screen bg-oat">
-        <div className="flex-grow max-w-2xl mx-auto px-4 py-8 md:py-16 w-full">
+      <div className="flex flex-col md:flex-row min-h-screen bg-oat relative overflow-x-hidden">
+        <AnimatePresence>
+          {showRitual && (
+            <RitualOverlay
+              userName={profile?.display_name || null}
+              onComplete={handleRitualComplete}
+              yesterdayPriorities={priorities}
+              isNewUser={!profile?.display_name}
+            />
+          )}
+        </AnimatePresence>
+
+        <div className={`flex-grow max-w-2xl mx-auto px-4 py-8 md:py-16 w-full transition-all duration-1000 ${showRitual ? 'blur-xl scale-95 opacity-0 pointer-events-none' : 'blur-0 scale-100 opacity-100'}`}>
           <header className="mb-12 flex justify-between items-center">
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-charcoal tracking-tight">
               Willow
