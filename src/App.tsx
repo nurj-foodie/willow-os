@@ -21,11 +21,13 @@ import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
 import { LogOut, Shield, ShieldOff } from 'lucide-react';
+import { VibeHeader } from './components/wellness/VibeHeader';
 
 function App() {
   const { tasks, loading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
+  const [mood, setMood] = useState(3);
 
   useNotifications(tasks);
 
@@ -137,6 +139,7 @@ function App() {
           </header>
 
           <main>
+            <VibeHeader currentMood={mood} onMoodChange={setMood} />
             <SmartInput onAddTask={addTask} />
             <div className="mt-8">
               <LiquidStream
