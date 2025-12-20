@@ -131,6 +131,16 @@ function App() {
 
   const activeTask = tasks.find(t => t.id === activeId);
 
+  // Time-based atmospheric hue
+  const hour = new Date().getHours();
+  const isMorning = hour >= 5 && hour < 12;
+  const isAfternoon = hour >= 12 && hour < 18;
+  const bgGradient = isMorning
+    ? 'from-amber-50/30 via-oat to-oat'
+    : isAfternoon
+      ? 'from-blue-50/20 via-oat to-oat'
+      : 'from-slate-100/30 via-oat to-oat';
+
   return (
     <DndContext
       sensors={sensors}
@@ -138,7 +148,7 @@ function App() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col md:flex-row min-h-screen bg-oat relative overflow-x-hidden">
+      <div className={`flex flex-col md:flex-row min-h-screen bg-gradient-to-br ${bgGradient} relative overflow-x-hidden`}>
         <AnimatePresence>
           {showRitual && (
             <RitualOverlay
