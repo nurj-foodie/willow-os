@@ -31,7 +31,7 @@ export const Auth: React.FC = () => {
         const { error } = await supabase.auth.verifyOtp({
             email,
             token: otp,
-            type: 'email'
+            type: 'magiclink'
         });
         if (error) {
             alert(error.message);
@@ -47,11 +47,18 @@ export const Auth: React.FC = () => {
             <h1 className="text-3xl font-serif font-bold text-charcoal mb-2">
                 {step === 'email' ? 'Welcome to your flow.' : 'Verify your vibe.'}
             </h1>
-            <p className="text-charcoal/50 font-sans italic mb-8 max-w-xs">
-                {step === 'email'
-                    ? 'Enter your email to reclaim your space and sync your vibe.'
-                    : `Enter the 6-digit code sent to ${email}`}
-            </p>
+            <div className="space-y-2 mb-8">
+                <p className="text-charcoal/50 font-sans italic max-w-xs">
+                    {step === 'email'
+                        ? 'Enter your email to reclaim your space and sync your vibe.'
+                        : `Enter the 6-digit code sent to ${email}`}
+                </p>
+                {step === 'otp' && (
+                    <p className="text-[10px] text-orange-600/60 font-medium uppercase tracking-widest">
+                        ⚠️ Do not click the link in the email
+                    </p>
+                )}
+            </div>
 
             {step === 'email' ? (
                 <form onSubmit={handleSendOtp} className="w-full max-w-sm space-y-4">
