@@ -58,7 +58,8 @@ function App() {
     setShowRitual(false);
   };
 
-  const loading = tasksLoading || wellbeingLoading || profileLoading;
+  // Only consider wellbeing/profile loading when user is logged in
+  const loading = tasksLoading || (user && (wellbeingLoading || profileLoading));
 
   useNotifications(tasks);
 
