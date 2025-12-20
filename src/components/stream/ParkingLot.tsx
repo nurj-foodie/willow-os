@@ -8,9 +8,10 @@ import type { Task } from '../../types';
 interface ParkingLotProps {
     tasks: Task[];
     onToggle: (id: string, done: boolean) => void;
+    privacyMode?: boolean;
 }
 
-export const ParkingLot: React.FC<ParkingLotProps> = ({ tasks, onToggle }) => {
+export const ParkingLot: React.FC<ParkingLotProps> = ({ tasks, onToggle, privacyMode }) => {
     const { setNodeRef, isOver } = useDroppable({
         id: 'parking-lot',
     });
@@ -47,6 +48,7 @@ export const ParkingLot: React.FC<ParkingLotProps> = ({ tasks, onToggle }) => {
                                     key={task.id}
                                     task={task}
                                     onToggle={(id) => onToggle(id, task.status !== 'done')}
+                                    privacyMode={privacyMode}
                                 />
                             ))}
                         </div>

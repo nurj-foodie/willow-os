@@ -19,14 +19,22 @@ import { ResetRitual } from './components/ui/ResetRitual';
 import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
-import { LogOut } from 'lucide-react';
+import { useNotifications } from './hooks/useNotifications';
+import { LogOut, Shield, ShieldOff } from 'lucide-react';
 
 function App() {
   const { tasks, loading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [privacyMode, setPrivacyMode] = useState(false);
+
+  useNotifications(tasks);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -105,13 +113,22 @@ function App() {
             </h1>
             <div className="flex items-center gap-4">
               {user && (
-                <button
-                  onClick={logout}
-                  className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                  title="Logout"
-                >
-                  <LogOut size={20} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPrivacyMode(!privacyMode)}
+                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title={privacyMode ? "Disable Privacy Mode" : "Enable Privacy Mode"}
+                  >
+                    {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
+                  </button>
+                  <button
+                    onClick={logout}
+                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title="Logout"
+                  >
+                    <LogOut size={20} />
+                  </button>
+                </div>
               )}
               <div className="w-10 h-10 rounded-full bg-clay/30 flex items-center justify-center text-xl">
                 ✨
@@ -125,6 +142,7 @@ function App() {
               <LiquidStream
                 tasks={streamTasks}
                 onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
+                privacyMode={privacyMode}
               />
             </div>
           </main>
@@ -134,6 +152,7 @@ function App() {
           <ParkingLot
             tasks={parkedTasks}
             onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'parked' })}
+            privacyMode={privacyMode}
           />
         </aside>
 

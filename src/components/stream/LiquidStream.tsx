@@ -9,9 +9,10 @@ import type { Task } from '../../types';
 interface LiquidStreamProps {
     tasks: Task[];
     onToggle: (id: string, done: boolean) => void;
+    privacyMode?: boolean;
 }
 
-export const LiquidStream: React.FC<LiquidStreamProps> = ({ tasks, onToggle }) => {
+export const LiquidStream: React.FC<LiquidStreamProps> = ({ tasks, onToggle, privacyMode }) => {
     return (
         <SortableContext
             items={tasks.map(t => t.id)}
@@ -23,6 +24,7 @@ export const LiquidStream: React.FC<LiquidStreamProps> = ({ tasks, onToggle }) =
                         key={task.id}
                         task={task}
                         onToggle={(id) => onToggle(id, task.status !== 'done')}
+                        privacyMode={privacyMode}
                     />
                 ))}
             </div>

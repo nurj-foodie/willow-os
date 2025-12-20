@@ -8,9 +8,10 @@ import type { Task } from '../../types';
 interface TaskCardProps {
     task: Task;
     onToggle?: (id: string) => void;
+    privacyMode?: boolean;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, privacyMode }) => {
     const {
         attributes,
         listeners,
@@ -46,7 +47,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
                 <div
                     {...attributes}
                     {...listeners}
-                    className="cursor-grab active:cursor-grabbing text-charcoal/20 group-hover:text-charcoal/40 transition-colors"
+                    className="cursor-grab active:cursor-grabbing text-charcoal/20 group-hover:text-charcoal/40 transition-colors p-1 -ml-1 touch-none select-none"
+                    style={{ WebkitTouchCallout: 'none' }}
                 >
                     <GripVertical size={20} />
                 </div>
@@ -54,14 +56,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
                 <button
                     onClick={() => onToggle?.(task.id)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${task.status === 'done'
-                            ? 'bg-matcha border-matcha text-white'
-                            : 'border-charcoal/10 bg-white/50 hover:border-matcha'
+                        ? 'bg-matcha border-matcha text-white'
+                        : 'border-charcoal/10 bg-white/50 hover:border-matcha'
                         }`}
                 >
                     {task.status === 'done' && <Check size={14} />}
                 </button>
 
-                <span className={`flex-grow font-sans text-lg ${task.status === 'done' ? 'line-through text-charcoal/40' : 'text-charcoal'}`}>
+                <span className={`flex-grow font-sans text-lg transition-all duration-500 ${task.status === 'done' ? 'line-through text-charcoal/40' : 'text-charcoal'} ${privacyMode ? 'blur-md select-none' : ''}`}>
                     {task.emoji && <span className="mr-2">{task.emoji}</span>}
                     {task.title}
                 </span>
