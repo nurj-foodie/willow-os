@@ -46,6 +46,7 @@ export function useProfile(user: User | null) {
         } catch (err) {
             console.error('Error fetching profile:', err);
         } finally {
+            console.log('Profile fetch complete. Profile:', profile);
             setLoading(false);
         }
     }, [user]);
