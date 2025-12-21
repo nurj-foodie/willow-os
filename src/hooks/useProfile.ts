@@ -18,6 +18,17 @@ export function useProfile(user: User | null) {
             return;
         }
 
+        // Demo mode: skip Supabase, use localStorage
+        if (user.id.startsWith('demo_')) {
+            setProfile({
+                id: user.id,
+                display_name: user.email?.split('@')[0] || 'Demo User',
+                last_login_at: new Date().toISOString()
+            });
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
 

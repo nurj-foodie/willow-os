@@ -16,6 +16,7 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     const [supportsPasskey, setSupportsPasskey] = useState(false);
     const [scanStatus, setScanStatus] = useState<'idle' | 'preparing' | 'scanning' | 'success'>('idle');
     const [usePasskey, setUsePasskey] = useState(true);
+    const [demoMode, setDemoMode] = useState(false);
 
     useEffect(() => {
         const checkSupport = async () => {
@@ -63,6 +64,17 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
         setLoading(false);
     };
 
+    const handleDemoLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email.trim()) return;
+
+        setLoading(true);
+        // Store demo email in localStorage
+        localStorage.setItem('willow_demo_email', email);
+        // Trigger page reload to load app with demo user
+        window.location.reload();
+    };
+
     const handlePasskeyLogin = async () => {
         setLoading(true);
         setScanStatus('preparing');
@@ -84,17 +96,25 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
             <div className="w-16 h-16 rounded-3xl bg-matcha/20 flex items-center justify-center text-3xl mb-6 animate-bounce">
-                🌿
+                {demoMode ? '🎭' : '🌿'}
             </div>
             <h1 className="text-3xl font-serif font-bold text-charcoal mb-2">
-                {step === 'email' ? 'Welcome to your flow.' : 'Verify your vibe.'}
+                {demoMode ? 'Demo Mode' : (step === 'email' ? 'Welcome to your flow.' : 'Verify your vibe.')}
             </h1>
             <div className="space-y-2 mb-8">
                 <p className="text-charcoal/50 font-sans italic max-w-xs">
-                    {step === 'email'
-                        ? 'Enter your space and sync your vibe.'
-                        : `Enter the 6-digit code sent to ${email}`}
+                    {demoMode
+                        ? 'Try Willow without signing up. All data stays on your device.'
+                        : (step === 'email'
+                            ? 'Enter your space and sync your vibe.'
+                            : `Enter the 6-digit code sent to ${email}`)}
                 </p>
+                <button
+                    onClick={() => setDemoMode(!demoMode)}
+                    className="text-[10px] text-charcoal/30 hover:text-matcha transition-colors underline"
+                >
+                    {demoMode ? '← Back to Login' : 'Try Demo Mode'}
+                </button>
                 {step === 'otp' && (
                     <p className="text-[10px] text-orange-600/60 font-medium uppercase tracking-widest">
                         ⚠️ Do not click the link in the email
@@ -102,7 +122,31 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
                 )}
             </div>
 
-            {step === 'email' ? (
+            {step === 'email' && demoMode ? (
+                <form onSubmit={handleDemoLogin} className="w-full max-w-sm space-y-4">
+                    <div className="relative group">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/20 group-focus-within:text-matcha transition-colors" size={20} />
+                        <input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-12 pr-6 py-4 rounded-full bg-white border border-clay/10 focus:border-matcha focus:ring-4 focus:ring-matcha/5 outline-none transition-all font-sans text-charcoal"
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 rounded-full bg-charcoal text-white font-medium hover:bg-matcha hover:text-charcoal transition-all disabled:opacity-50"
+                    >
+                        {loading ? 'Entering...' : 'Enter Demo 🎭'}
+                    </button>
+                    <div className="pt-4 text-[10px] text-charcoal/30 font-medium">
+                        Demo mode stores data locally. No account needed.
+                    </div>
+                </form>
+            ) : step === 'email' ? (
                 <div className="w-full max-w-sm space-y-6">
                     {supportsPasskey && usePasskey ? (
                         <div className="space-y-4">

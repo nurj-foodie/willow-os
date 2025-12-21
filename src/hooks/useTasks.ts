@@ -10,8 +10,24 @@ export function useTasks() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
 
-    // Monitor auth state
+    // Monitor auth state OR demo mode
     useEffect(() => {
+        const demoEmail = localStorage.getItem('willow_demo_email');
+
+        // Demo mode: create mock user from localStorage
+        if (demoEmail) {
+            setUser({
+                id: `demo_${btoa(demoEmail)}`,
+                email: demoEmail,
+                app_metadata: {},
+                user_metadata: {},
+                aud: 'demo',
+                created_at: new Date().toISOString()
+            } as User);
+            return;
+        }
+
+        // Normal Supabase auth
         if (!isSupabaseConfigured) return;
 
         supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
@@ -195,6 +211,13 @@ export function useTasks() {
     }
 
     const logout = async () => {
+        const demoEmail = localStorage.getItem('willow_demo_email');
+        if (demoEmail) {
+            localStorage.removeItem('willow_demo_email');
+            window.location.reload();
+            return;
+        }
+
         if (isSupabaseConfigured) {
             await supabase.auth.signOut();
         }

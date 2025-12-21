@@ -13,6 +13,18 @@ export function useWellbeing(user: User | null) {
     const fetchWellbeing = useCallback(async () => {
         if (!user) return;
 
+        // Demo mode: use localStorage
+        if (user.id.startsWith('demo_')) {
+            const saved = localStorage.getItem('willow_demo_wellbeing');
+            if (saved) {
+                const data = JSON.parse(saved);
+                setMood(data.mood || 3);
+                setPriorities(data.priorities || ['', '', '']);
+            }
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             const { data, error } = await supabase
@@ -43,6 +55,15 @@ export function useWellbeing(user: User | null) {
 
     const saveWellbeing = async (updates: { mood?: number; priorities?: string[] }) => {
         if (!user) return;
+
+        // Demo mode: save to localStorage
+        if (user.id.startsWith('demo_')) {
+            const current = { mood, priorities };
+            localStorage.setItem('willow_demo_wellbeing', JSON.stringify({ ...current, ...updates }));
+            setSaving(true);
+            setTimeout(() => setSaving(false), 300);
+            return;
+        }
 
         try {
             setSaving(true);
