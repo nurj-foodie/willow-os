@@ -18,18 +18,25 @@ export const Auth: React.FC = () => {
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                shouldCreateUser: true,
+        try {
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                    shouldCreateUser: true,
+                }
+            });
+            if (error) {
+                console.error('OTP Error:', error);
+                alert(`Could not send OTP: ${error.message}`);
+            } else {
+                setStep('otp');
             }
-        });
-        if (error) {
-            alert(error.message);
-        } else {
-            setStep('otp');
+        } catch (err) {
+            console.error('OTP Exception:', err);
+            alert('Network error. Please check your connection.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleVerifyOtp = async (e: React.FormEvent) => {
@@ -89,7 +96,7 @@ export const Auth: React.FC = () => {
                                 className="w-full py-6 rounded-3xl bg-charcoal text-white font-bold text-lg shadow-xl hover:bg-matcha hover:text-charcoal transition-all flex items-center justify-center gap-3 active:scale-95"
                             >
                                 <Fingerprint size={24} />
-                                {loading ? 'Looking for you...' : 'Sign in with FaceID'}
+                                {loading ? 'Looking for you...' : 'Sign in with Biometrics'}
                             </button>
                             <button
                                 onClick={() => setUsePasskey(false)}
@@ -129,7 +136,7 @@ export const Auth: React.FC = () => {
                                     onClick={() => setUsePasskey(true)}
                                     className="text-xs text-charcoal/30 hover:text-charcoal transition-colors"
                                 >
-                                    Enable FaceID login
+                                    Use Biometrics instead
                                 </button>
                             )}
                             <div className="pt-4 text-[10px] text-charcoal/30 font-medium">
