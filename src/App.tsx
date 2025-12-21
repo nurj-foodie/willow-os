@@ -34,6 +34,7 @@ import { Footer } from './components/layout/Footer';
 import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
 function App() {
+  console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
   const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
