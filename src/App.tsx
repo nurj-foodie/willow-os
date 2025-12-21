@@ -131,8 +131,12 @@ function App() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="text-charcoal/40 font-serif italic animate-pulse">
-            Loading your vibe...
+          <div className="flex flex-col items-center gap-2">
+            <div className="text-charcoal/40 font-serif italic animate-pulse">
+              {profileLoading ? 'Syncing Profile...' :
+                wellbeingLoading ? 'Checking Vibe...' :
+                  tasksLoading ? 'Loading Tasks...' : 'Almost there...'}
+            </div>
           </div>
         </div>
       </Layout>
