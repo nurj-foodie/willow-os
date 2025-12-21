@@ -30,7 +30,12 @@ export const PasskeyService = {
                 body: { action: 'generate-options', userId }
             });
 
-            if (optError) throw optError;
+            if (optError) {
+                if (optError.message?.includes('404')) {
+                    throw new Error("Edge Function 'webauthn-registration' not found. Sila 'deploy' functions dlm terminal dulu!");
+                }
+                throw optError;
+            }
 
             // Step 2: Trigger the browser's native Passkey prompt
             const regResponse = await startRegistration(options);
