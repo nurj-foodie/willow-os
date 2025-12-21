@@ -174,7 +174,7 @@ function App() {
       onDragEnd={handleDragEnd}
     >
       <div className={`flex flex-col md:flex-row min-h-screen bg-gradient-to-br ${bgGradient} relative overflow-x-hidden`}>
-        {user && <PasskeyBanner userId={user.id} />}
+        {user && !user.id.startsWith('demo_') && <PasskeyBanner userId={user.id} />}
         <AnimatePresence>
           {showRitual && (
             <RitualOverlay
