@@ -12,17 +12,10 @@ export interface LedgerEntry {
     created_at: string;
 }
 
-export const useLedger = (user: User | null, profile: any, updateProfile: any) => {
+export const useLedger = (user: User | null, _profile: any, updateProfile: any) => {
     const [entries, setEntries] = useState<LedgerEntry[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isTrialActive, setIsTrialActive] = useState(false);
-    const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
-
-    const checkTrialStatus = useCallback(() => {
-        // Gatekeeper disabled for testing/review - Always active and RM 999 days left
-        setIsTrialActive(true);
-        setTrialDaysLeft(999);
-    }, []);
+    // Gatekeeper disabled for testing - trial logic removed
 
     const fetchEntries = useCallback(async () => {
         if (!user) return;
@@ -40,9 +33,8 @@ export const useLedger = (user: User | null, profile: any, updateProfile: any) =
     useEffect(() => {
         if (user) {
             fetchEntries();
-            checkTrialStatus();
         }
-    }, [user, fetchEntries, checkTrialStatus]);
+    }, [user, fetchEntries]);
 
     const startTrial = async () => {
         if (!user) return;
@@ -64,5 +56,5 @@ export const useLedger = (user: User | null, profile: any, updateProfile: any) =
         return data;
     };
 
-    return { entries, loading, isTrialActive, trialDaysLeft, startTrial, addEntry, hasStartedTrial: !!profile?.trial_started_at };
+    return { entries, loading, isTrialActive: true, trialDaysLeft: 999, startTrial, addEntry, hasStartedTrial: true };
 };
