@@ -18,13 +18,20 @@ export function useProfile(user: User | null) {
             return;
         }
 
-        // Demo mode: skip Supabase, use localStorage
+        // Demo mode: skip Supabase, use localStorage keyed by email
         if (user.id.startsWith('demo_')) {
-            setProfile({
-                id: user.id,
-                display_name: user.email?.split('@')[0] || 'Demo User',
-                last_login_at: new Date().toISOString()
-            });
+            const storageKey = `willow_profile_${user.email}`;
+            const saved = localStorage.getItem(storageKey);
+
+            if (saved) {
+                setProfile(JSON.parse(saved));
+            } else {
+                setProfile({
+                    id: user.id,
+                    display_name: null, // Force naming ritual
+                    last_login_at: new Date().toISOString()
+                });
+            }
             setLoading(false);
             return;
         }
@@ -77,6 +84,16 @@ export function useProfile(user: User | null) {
 
     const updateProfile = async (updates: Partial<Profile>) => {
         if (!user) return;
+
+        // Demo mode: update localStorage
+        if (user.id.startsWith('demo_')) {
+            setProfile(prev => {
+                const next = prev ? { ...prev, ...updates } : { id: user.id, display_name: null, last_login_at: new Date().toISOString(), ...updates };
+                localStorage.setItem(`willow_profile_${user.email}`, JSON.stringify(next));
+                return next;
+            });
+            return;
+        }
 
         try {
             const { error } = await supabase

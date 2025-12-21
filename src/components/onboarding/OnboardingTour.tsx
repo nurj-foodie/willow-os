@@ -26,16 +26,34 @@ const STEPS = [
         color: "bg-clay/10"
     },
     {
-        title: "The Four Colors",
-        description: "Focus on what matters. Red for urgent, Amber for important, Green for maintenance, and Grey for later. Just add ! (urgent) or !! (crucial) to your tasks.",
-        icon: <div className="flex gap-1"><div className="w-4 h-4 rounded-full bg-rose-400" /><div className="w-4 h-4 rounded-full bg-amber-400" /><div className="w-4 h-4 rounded-full bg-sage" /><div className="w-4 h-4 rounded-full bg-charcoal/20" /></div>,
+        title: "The Priority Matrix",
+        description: "Add '!' for Urgent or '!!' for Crucial. Willow uses colors to help you focus: Rose for Urgent, Amber for Important, Sage for Tasks.",
+        icon: <div className="flex gap-1"><div className="w-4 h-4 rounded-full bg-rose-400" /><div className="w-4 h-4 rounded-full bg-amber-400" /><div className="w-4 h-4 rounded-full bg-sage" /></div>,
         color: "bg-amber-50"
     },
     {
-        title: "The 24-Hour Cycle",
-        description: "Every day is a fresh start. Use the 'Wrap Up' ritual at night to clear your mind and archive your wins.",
+        title: "The Parking Lot (Top-Left)",
+        description: "Got tasks without a date? Drop them in the Parking Lot. It's your 'Someday' list, accessible from the top-left sidebar.",
+        icon: <div className="p-2 bg-charcoal/5 rounded-lg"><Layout size={24} className="text-charcoal/40" /></div>,
+        color: "bg-clay/5"
+    },
+    {
+        title: "Receipt Scanner (Top-Right)",
+        description: "Manage your vibe and your budget. Tap the receipt icon at the top-right to scan and log expenses with AI.",
+        icon: <div className="p-2 bg-matcha/20 rounded-lg">🎞️</div>,
+        color: "bg-matcha/10"
+    },
+    {
+        title: "Wrap Today (Top-Right)",
+        description: "When you're done, tap 'Wrap Today'. It clears your completed tasks into a satisfying history archive.",
         icon: <RefreshCw className="text-matcha" size={32} />,
         color: "bg-matcha/10"
+    },
+    {
+        title: "Ready to Roam?",
+        description: "Flow, don't force. Your space is ready.",
+        icon: <Sparkles className="text-amber-400" size={32} />,
+        color: "bg-amber-50"
     }
 ];
 
