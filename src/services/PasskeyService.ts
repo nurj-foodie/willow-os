@@ -92,10 +92,20 @@ export const PasskeyService = {
      */
     login: async (onReady?: () => void) => {
         try {
-            // Step 1: Request options
-            const { data: options, error: optError } = await supabase.functions.invoke('webauthn-authentication', {
+            // Step 1: Request options with 10s timeout
+            const fetchOptions = supabase.functions.invoke('webauthn-authentication', {
                 body: { action: 'generate-options' }
             });
+
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Server Timeout: Edge Function took too long")), 10000)
+            );
+
+            // DEBUG: Alert start
+            // alert('Debug: Requesting keys from server...');
+
+            const { data: options, error: optError } = await Promise.race([fetchOptions, timeout]) as any;
+
 
             if (optError) {
                 if (optError.message?.includes('404')) {
