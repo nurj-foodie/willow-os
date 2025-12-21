@@ -21,7 +21,7 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { LogOut, Shield, ShieldOff, History, Wallet, Trash2 } from 'lucide-react';
+import { LogOut, Shield, ShieldOff, History, Wallet, Trash2, ShieldCheck } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
@@ -213,6 +213,13 @@ function App() {
                     {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
                   </button>
                   <button
+                    onClick={() => setShowLegal('privacy')}
+                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title="Privacy Policy"
+                  >
+                    <ShieldCheck size={20} />
+                  </button>
+                  <button
                     onClick={logout}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
                     title="Logout"
@@ -279,7 +286,7 @@ function App() {
           user={user}
         />
 
-        <Footer onOpenLegal={setShowLegal} />
+        <Footer />
 
         {/* Legal Modal Overlay */}
         <AnimatePresence>
