@@ -1,0 +1,102 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Fingerprint, X, ShieldCheck } from 'lucide-react';
+import { PasskeyService } from '../../services/PasskeyService';
+
+interface PasskeyBannerProps {
+    userId: string;
+}
+
+export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [status, setStatus] = useState<'invite' | 'loading' | 'success' | 'hidden'>('invite');
+
+    useEffect(() => {
+        // Only show if browser supports WebAuthn and we haven't dismissed it this session
+        const isDismissed = sessionStorage.getItem('passkey_banner_dismissed');
+        if (PasskeyService.isSupported() && !isDismissed) {
+            // Small delay for better UX
+            const timer = setTimeout(() => setIsVisible(true), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    const handleRegister = async () => {
+        setStatus('loading');
+        try {
+            await PasskeyService.register(userId);
+            setStatus('success');
+            setTimeout(() => {
+                setIsVisible(false);
+                setStatus('hidden');
+            }, 3000);
+        } catch (err) {
+            console.error(err);
+            setStatus('invite');
+            setIsVisible(false); // Hide on error to not annoy user
+        }
+    };
+
+    const handleDismiss = () => {
+        setIsVisible(false);
+        sessionStorage.setItem('passkey_banner_dismissed', 'true');
+    };
+
+    if (status === 'hidden') return null;
+
+    return (
+        <AnimatePresence>
+            {isVisible && (
+                <motion.div
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4"
+                >
+                    <div className="bg-white/80 backdrop-blur-md border border-matcha/20 shadow-xl rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden">
+                        {status === 'loading' && (
+                            <motion.div
+                                className="absolute bottom-0 left-0 h-1 bg-matcha"
+                                initial={{ width: 0 }}
+                                animate={{ width: '100%' }}
+                                transition={{ duration: 2 }}
+                            />
+                        )}
+
+                        <div className="w-10 h-10 rounded-full bg-matcha/10 flex items-center justify-center text-matcha shrink-0">
+                            {status === 'success' ? <ShieldCheck size={20} /> : <Fingerprint size={20} />}
+                        </div>
+
+                        <div className="flex-grow">
+                            <h3 className="text-sm font-bold text-charcoal">
+                                {status === 'invite' && "Secure this app with FaceID?"}
+                                {status === 'loading' && "Setting up Passkey..."}
+                                {status === 'success' && "Success! FaceID enabled."}
+                            </h3>
+                            {status === 'invite' && (
+                                <p className="text-[10px] text-charcoal/50 font-medium">Next time, just look at your phone to log in.</p>
+                            )}
+                        </div>
+
+                        {status === 'invite' ? (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleRegister}
+                                    className="bg-charcoal text-white text-[10px] font-bold px-3 py-1.5 rounded-full hover:bg-matcha hover:text-charcoal transition-colors"
+                                >
+                                    Setup
+                                </button>
+                                <button
+                                    onClick={handleDismiss}
+                                    className="p-1.5 text-charcoal/20 hover:text-charcoal transition-colors"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ) : null}
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+};
