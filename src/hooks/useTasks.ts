@@ -200,5 +200,24 @@ export function useTasks() {
         }
     };
 
-    return { tasks, loading, user, addTask, updateTask, reorderTasks, logout };
+    const deleteAccount = async () => {
+        if (!user) return;
+        const confirmDelete = window.confirm("Are you sure? This will permanently delete your tasks, priorities, and legal records. This cannot be undone.");
+        if (!confirmDelete) return;
+
+        try {
+            // RLS will allow user to delete their own rows in tasks, user_credentials, wellbeing, profiles
+            const { error: tasksError } = await supabase.from('tasks').delete().eq('user_id', user.id);
+            if (tasksError) throw tasksError;
+
+            // Log out after deletion
+            await logout();
+            window.location.reload();
+        } catch (err) {
+            console.error('Account deletion failed:', err);
+            alert("Failed to delete account data. Please contact support.");
+        }
+    };
+
+    return { tasks, loading, user, addTask, updateTask, reorderTasks, logout, deleteAccount };
 }

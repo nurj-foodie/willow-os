@@ -1,0 +1,170 @@
+import React, { useState, useRef } from 'react';
+import { Camera, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface ReceiptScannerProps {
+    onProcessed: (data: { amount: number; merchant: string; category: string; date: string }) => void;
+    onClose: () => void;
+    userId: string;
+}
+
+export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, userId }) => {
+    const [status, setStatus] = useState<'idle' | 'uploading' | 'processing' | 'done' | 'error'>('idle');
+    const [progress, setProgress] = useState(0);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setStatus('uploading');
+        setProgress(10);
+
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${userId}/${fileName}`;
+
+            // 1. Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('receipts')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+            setProgress(50);
+            setStatus('processing');
+
+            // 2. Invoke Edge Function for AI extraction
+            const { data, error: functionError } = await supabase.functions.invoke('process-receipt', {
+                body: { filePath }
+            });
+
+            if (functionError) throw functionError;
+
+            setProgress(100);
+            setStatus('done');
+
+            // Artificial delay to let user see the "Done" state
+            setTimeout(() => {
+                onProcessed(data);
+                onClose();
+            }, 1000);
+
+        } catch (err) {
+            console.error('Extraction failed:', err);
+            setStatus('error');
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="p-6 bg-charcoal rounded-3xl text-white shadow-2xl space-y-6"
+        >
+            <div className="flex justify-between items-center">
+                <h3 className="text-xl font-serif font-bold flex items-center gap-2">
+                    <Camera size={24} className="text-matcha" />
+                    Receipt Scanner
+                </h3>
+                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <X size={20} />
+                </button>
+            </div>
+
+            <div className="relative aspect-video rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-8 text-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                    {status === 'idle' && (
+                        <motion.div
+                            key="idle"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="space-y-4"
+                        >
+                            <p className="text-sm text-white/50 italic">Snap a clear photo of your receipt</p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex items-center gap-2 px-6 py-3 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
+                                >
+                                    <Upload size={18} />
+                                    Choose Photo
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {(status === 'uploading' || status === 'processing') && (
+                        <motion.div
+                            key="working"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex flex-col items-center gap-4"
+                        >
+                            <Loader2 size={40} className="text-matcha animate-spin" />
+                            <div className="space-y-1">
+                                <p className="text-sm font-bold uppercase tracking-widest text-matcha">
+                                    {status === 'uploading' ? 'Uploading...' : 'Gemini is reading...'}
+                                </p>
+                                <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-matcha"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {status === 'done' && (
+                        <motion.div
+                            key="done"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex flex-col items-center gap-2 text-matcha"
+                        >
+                            <CheckCircle2 size={48} />
+                            <p className="font-bold">Sync Complete</p>
+                        </motion.div>
+                    )}
+
+                    {status === 'error' && (
+                        <motion.div
+                            key="error"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="space-y-4 text-orange-400"
+                        >
+                            <p>Something went wrong.</p>
+                            <button
+                                onClick={() => setStatus('idle')}
+                                className="text-sm underline"
+                            >
+                                Try again
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+            />
+
+            <p className="text-[10px] text-white/30 text-center font-medium leading-relaxed">
+                Receipts are processed securely by Google AI.<br />
+                No manual data entry required.
+            </p>
+        </motion.div>
+    );
+};

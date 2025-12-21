@@ -21,7 +21,7 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { LogOut, Shield, ShieldOff, History, Wallet } from 'lucide-react';
+import { LogOut, Shield, ShieldOff, History, Wallet, Trash2 } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
@@ -30,9 +30,11 @@ import { ArchiveDrawer } from './components/analytics/ArchiveDrawer';
 import { LedgerDrawer } from './components/finance/LedgerDrawer';
 import { useLedger } from './hooks/useLedger';
 import { PasskeyBanner } from './components/auth/PasskeyBanner';
+import { Footer } from './components/layout/Footer';
+import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
 function App() {
-  const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
+  const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -43,6 +45,7 @@ function App() {
   const { entries, trialDaysLeft, startTrial, addEntry, hasStartedTrial } = useLedger(user, profile, updateProfile);
 
   const [showRitual, setShowRitual] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Ritual trigger logic
   useEffect(() => {
@@ -65,6 +68,11 @@ function App() {
     }
     await recordLogin();
     setShowRitual(false);
+
+    // If new user, trigger onboarding tour right after naming ritual
+    if (!profile?.display_name) {
+      setShowOnboarding(true);
+    }
   };
 
   // Only show loading state when user is logged in
@@ -169,6 +177,9 @@ function App() {
               isNewUser={!profile?.display_name}
             />
           )}
+          {showOnboarding && (
+            <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+          )}
         </AnimatePresence>
 
         <div className={`flex-grow max-w-2xl mx-auto px-4 py-8 md:py-16 w-full transition-all duration-1000 ${showRitual ? 'blur-xl scale-95 opacity-0 pointer-events-none' : 'blur-0 scale-100 opacity-100'}`}>
@@ -206,6 +217,13 @@ function App() {
                     title="Logout"
                   >
                     <LogOut size={20} />
+                  </button>
+                  <button
+                    onClick={deleteAccount}
+                    className="text-clay/30 hover:text-clay transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title="Delete Account & Data"
+                  >
+                    <Trash2 size={20} />
                   </button>
                 </div>
               )}
@@ -257,7 +275,10 @@ function App() {
           onStartTrial={startTrial}
           onAddEntry={addEntry}
           hasStartedTrial={hasStartedTrial}
+          user={user}
         />
+
+        <Footer />
 
         <ResetRitual
           hasTasks={tasks.some(t => t.status === 'done')}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Sparkles, AlertCircle } from 'lucide-react';
+import { X, Plus, Sparkles, AlertCircle, Camera } from 'lucide-react';
 import type { LedgerEntry } from '../../hooks/useLedger';
+import { ReceiptScanner } from './ReceiptScanner';
 
 interface LedgerDrawerProps {
     isOpen: boolean;
@@ -11,15 +12,25 @@ interface LedgerDrawerProps {
     onStartTrial: () => void;
     onAddEntry: (entry: any) => Promise<void>;
     hasStartedTrial: boolean;
+    user: any;
 }
 
 export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
-    isOpen, onClose, entries, trialDaysLeft, onStartTrial, onAddEntry, hasStartedTrial
+    isOpen, onClose, entries, trialDaysLeft, onStartTrial, onAddEntry, hasStartedTrial, user
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
+    const [showScanner, setShowScanner] = useState(false);
+
+    const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
+        setAmount(data.amount.toString());
+        setCategory(data.category);
+        setDescription(data.merchant);
+        setShowForm(true);
+        setShowScanner(false);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -80,6 +91,32 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                             <span>{trialDaysLeft} Days Remaining in Trial</span>
                                         </div>
                                     )}
+
+                                    {/* Receipt Scanner Entry */}
+                                    <AnimatePresence mode="wait">
+                                        {showScanner ? (
+                                            <ReceiptScanner
+                                                userId={user?.id || ''}
+                                                onProcessed={handleScannerSuccess}
+                                                onClose={() => setShowScanner(false)}
+                                            />
+                                        ) : (
+                                            <motion.button
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                onClick={() => setShowScanner(true)}
+                                                className="w-full py-8 border-2 border-dashed border-charcoal/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-matcha/5 hover:border-matcha/30 transition-all group"
+                                            >
+                                                <div className="w-12 h-12 rounded-2xl bg-matcha/20 flex items-center justify-center text-matcha group-hover:scale-110 transition-transform">
+                                                    <Camera size={24} />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-bold text-charcoal/60">Scan Receipt</p>
+                                                    <p className="text-[10px] font-bold text-charcoal/20 uppercase tracking-widest">Powered by AI</p>
+                                                </div>
+                                            </motion.button>
+                                        )}
+                                    </AnimatePresence>
 
                                     {/* Quick Summary */}
                                     <div className="grid grid-cols-2 gap-4">

@@ -97,6 +97,11 @@ export const Auth: React.FC = () => {
                             >
                                 Use Email instead
                             </button>
+                            <div className="pt-2 text-[10px] text-charcoal/30 font-medium">
+                                By signing in, you agree to our{' '}
+                                <a href="/privacy" className="underline hover:text-matcha">Privacy Policy</a> and{' '}
+                                <a href="/terms" className="underline hover:text-matcha">Terms</a>.
+                            </div>
                         </div>
                     ) : (
                         <form onSubmit={handleSendOtp} className="space-y-4">
@@ -127,6 +132,11 @@ export const Auth: React.FC = () => {
                                     Enable FaceID login
                                 </button>
                             )}
+                            <div className="pt-4 text-[10px] text-charcoal/30 font-medium">
+                                By continuing, you agree to our{' '}
+                                <a href="/privacy" className="underline hover:text-matcha">Privacy Policy</a> and{' '}
+                                <a href="/terms" className="underline hover:text-matcha">Terms</a>.
+                            </div>
                         </form>
                     )}
                 </div>
