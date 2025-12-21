@@ -82,6 +82,10 @@ serve(async (req) => {
 
         return new Response('Not Found', { status: 404, headers: corsHeaders })
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: corsHeaders })
+        // Return full error details for debugging
+        return new Response(JSON.stringify({
+            error: err.message,
+            stack: err.stack
+        }), { status: 400, headers: corsHeaders })
     }
 })
