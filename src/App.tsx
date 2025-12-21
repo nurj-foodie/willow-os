@@ -143,7 +143,7 @@ function App() {
   if (!user && import.meta.env.VITE_SUPABASE_URL) {
     return (
       <Layout>
-        <Auth />
+        <Auth onOpenLegal={setShowLegal} />
       </Layout>
     );
   }
@@ -286,7 +286,7 @@ function App() {
           user={user}
         />
 
-        <Footer />
+        <Footer onOpenLegal={setShowLegal} />
 
         {/* Legal Modal Overlay */}
         <AnimatePresence>

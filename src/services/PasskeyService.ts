@@ -42,8 +42,14 @@ export const PasskeyService = {
 
             if (verError) throw verError;
             return verification;
-        } catch (err) {
+        } catch (err: any) {
             console.error('Passkey Registration Failed:', err);
+            // Higher resolution logging for debugging
+            if (err.name === 'NotAllowedError') {
+                console.warn('Biometrics: User cancelled or timed out.');
+            } else if (err.message?.includes('invoke')) {
+                console.error('Biometrics: Edge Function connection failed. Check Supabase deployment.');
+            }
             throw err;
         }
     },

@@ -3,7 +3,11 @@ import { supabase } from '../../lib/supabase';
 import { Mail, Sparkles, Fingerprint } from 'lucide-react';
 import { PasskeyService } from '../../services/PasskeyService';
 
-export const Auth: React.FC = () => {
+interface AuthProps {
+    onOpenLegal: (type: 'privacy' | 'terms') => void;
+}
+
+export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -106,8 +110,8 @@ export const Auth: React.FC = () => {
                             </button>
                             <div className="pt-2 text-[10px] text-charcoal/30 font-medium">
                                 By signing in, you agree to our{' '}
-                                <a href="/privacy" className="underline hover:text-matcha">Privacy Policy</a> and{' '}
-                                <a href="/terms" className="underline hover:text-matcha">Terms</a>.
+                                <button onClick={() => onOpenLegal('privacy')} className="underline hover:text-matcha">Privacy Policy</button> and{' '}
+                                <button onClick={() => onOpenLegal('terms')} className="underline hover:text-matcha">Terms</button>.
                             </div>
                         </div>
                     ) : (
@@ -141,8 +145,8 @@ export const Auth: React.FC = () => {
                             )}
                             <div className="pt-4 text-[10px] text-charcoal/30 font-medium">
                                 By continuing, you agree to our{' '}
-                                <a href="/privacy" className="underline hover:text-matcha">Privacy Policy</a> and{' '}
-                                <a href="/terms" className="underline hover:text-matcha">Terms</a>.
+                                <button onClick={() => onOpenLegal('privacy')} className="underline hover:text-matcha">Privacy Policy</button> and{' '}
+                                <button onClick={() => onOpenLegal('terms')} className="underline hover:text-matcha">Terms</button>.
                             </div>
                         </form>
                     )}
