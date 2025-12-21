@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send } from 'lucide-react';
 
 interface SmartInputProps {
-    onAddTask: (title: string, date: Date | null) => void;
+    onAddTask: (title: string, date: Date | null, priority: number) => void;
 }
 
 export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
     const [value, setValue] = useState('');
     const [parsedDate, setParsedDate] = useState<Date | null>(null);
     const [dateText, setDateText] = useState<string>('');
+    const [priority, setPriority] = useState<number>(4);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -34,17 +35,39 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
             title = value.replace(dateText, '').trim();
         }
 
-        onAddTask(title || value, parsedDate);
+        onAddTask(title || value, parsedDate, priority);
         setValue('');
         setParsedDate(null);
         setDateText('');
+        setPriority(4); // Reset to default priority
     };
+
+    const priorityLevels = [
+        { id: 1, label: 'Urgent/Important', color: 'bg-clay' },
+        { id: 2, label: 'Important', color: 'bg-sage' },
+        { id: 3, label: 'Urgent', color: 'bg-matcha' },
+        { id: 4, label: 'Normal', color: 'bg-lavender' },
+    ];
 
     return (
         <form
             onSubmit={handleSubmit}
             className="relative w-full max-w-2xl mt-8 mb-4 px-2"
         >
+            <div className="flex justify-end gap-2 mb-2 px-4">
+                {priorityLevels.map((p) => (
+                    <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setPriority(p.id)}
+                        title={p.label}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${priority === p.id
+                            ? `${p.color} ring-2 ring-offset-2 ring-charcoal/20 scale-125`
+                            : 'bg-charcoal/10 hover:bg-charcoal/20'}`}
+                    />
+                ))}
+            </div>
+
             <div className="relative flex items-center">
                 <input
                     ref={inputRef}

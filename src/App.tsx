@@ -21,18 +21,26 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { LogOut, Shield, ShieldOff } from 'lucide-react';
+import { LogOut, Shield, ShieldOff, History, Wallet } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
 import { RitualOverlay } from './components/analytics/RitualOverlay';
+import { ArchiveDrawer } from './components/analytics/ArchiveDrawer';
+import { LedgerDrawer } from './components/finance/LedgerDrawer';
+import { useLedger } from './hooks/useLedger';
 
 function App() {
   const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [showLedger, setShowLedger] = useState(false);
+
   const { mood, priorities, saving, updateMood, updatePriority, persistPriorities, loading: wellbeingLoading } = useWellbeing(user);
   const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
+  const { entries, trialDaysLeft, startTrial, addEntry, hasStartedTrial } = useLedger(user, profile, updateProfile);
+
   const [showRitual, setShowRitual] = useState(false);
 
   // Ritual trigger logic
@@ -170,6 +178,20 @@ function App() {
               {user && (
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => setShowArchive(true)}
+                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title="View Archive"
+                  >
+                    <History size={20} />
+                  </button>
+                  <button
+                    onClick={() => setShowLedger(true)}
+                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                    title="Willow Ledger"
+                  >
+                    <Wallet size={20} />
+                  </button>
+                  <button
                     onClick={() => setPrivacyMode(!privacyMode)}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
                     title={privacyMode ? "Disable Privacy Mode" : "Enable Privacy Mode"}
@@ -219,11 +241,27 @@ function App() {
           />
         </aside>
 
+        <ArchiveDrawer
+          isOpen={showArchive}
+          onClose={() => setShowArchive(false)}
+          tasks={tasks}
+        />
+
+        <LedgerDrawer
+          isOpen={showLedger}
+          onClose={() => setShowLedger(false)}
+          entries={entries}
+          trialDaysLeft={trialDaysLeft}
+          onStartTrial={startTrial}
+          onAddEntry={addEntry}
+          hasStartedTrial={hasStartedTrial}
+        />
+
         <ResetRitual
           hasTasks={tasks.some(t => t.status === 'done')}
           onReset={() => {
             tasks.filter(t => t.status === 'done').forEach(t => {
-              updateTask(t.id, { status: 'todo', due_date: new Date(Date.now() + 86400000).toISOString() });
+              updateTask(t.id, { status: 'archived' });
             });
           }}
         />

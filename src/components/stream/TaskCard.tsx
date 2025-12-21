@@ -26,12 +26,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, privacyMode 
         transition,
     };
 
-    const bgColors = {
-        oat: 'bg-white border-clay/20',
-        matcha: 'bg-matcha/40 border-matcha/20',
-        clay: 'bg-clay/40 border-clay/20',
-        lavender: 'bg-lavender/40 border-lavender/20',
-        sage: 'bg-sage/40 border-sage/20',
+    const priorityColors = {
+        1: 'bg-clay/40 border-clay/20',     // Urgent/Important
+        2: 'bg-sage/40 border-sage/20',     // Important
+        3: 'bg-matcha/40 border-matcha/20', // Urgent
+        4: 'bg-lavender/40 border-lavender/20', // Normal
     };
 
     return (
@@ -42,7 +41,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, privacyMode 
         >
             <motion.div
                 layout
-                className={`pill border flex items-center gap-4 ${bgColors[task.color_theme]} shadow-sm hover:shadow-md transition-shadow cursor-default`}
+                className={`pill border flex items-center gap-4 ${priorityColors[task.priority as keyof typeof priorityColors] || 'bg-white border-clay/20'} shadow-sm hover:shadow-md transition-shadow cursor-default`}
             >
                 <div
                     {...attributes}

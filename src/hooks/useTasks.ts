@@ -56,6 +56,7 @@ export function useTasks() {
                         due_date: new Date().toISOString(),
                         status: 'todo',
                         color_theme: 'clay',
+                        priority: 4,
                         position_rank: 1000,
                         emoji: '📝',
                     },
@@ -65,6 +66,7 @@ export function useTasks() {
                         due_date: new Date(Date.now() + 3600000).toISOString(),
                         status: 'todo',
                         color_theme: 'matcha',
+                        priority: 4,
                         position_rank: 2000,
                         emoji: '☕',
                     }
@@ -103,7 +105,7 @@ export function useTasks() {
         }
     }, [tasks, loading]);
 
-    async function addTask(title: string, dueDate: Date | null) {
+    async function addTask(title: string, dueDate: Date | null, priority: number = 4) {
         const newRank = tasks.length > 0 ? tasks[0].position_rank - 1000 : 1000;
         const emoji = title.toLowerCase().includes('coffee') ? '☕' :
             title.toLowerCase().includes('gym') || title.toLowerCase().includes('yoga') ? '🧘' :
@@ -115,6 +117,7 @@ export function useTasks() {
             position_rank: newRank,
             emoji,
             color_theme: (['matcha', 'clay', 'lavender', 'sage'][Math.floor(Math.random() * 4)]) as any,
+            priority,
             status: 'todo',
         };
 

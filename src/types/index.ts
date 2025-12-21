@@ -1,4 +1,4 @@
-export type TaskStatus = 'todo' | 'done' | 'parked';
+export type TaskStatus = 'todo' | 'done' | 'parked' | 'archived';
 export type ColorTheme = 'oat' | 'matcha' | 'clay' | 'lavender' | 'sage';
 
 export interface Task {
@@ -9,6 +9,7 @@ export interface Task {
     due_date: string | null;
     status: TaskStatus;
     color_theme: ColorTheme;
+    priority: number;
     position_rank: number;
     emoji?: string;
     created_at?: string;

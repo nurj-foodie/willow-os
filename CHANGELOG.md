@@ -2,6 +2,26 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-20] - Personalization, Priorities & Archive
+
+### Added
+- **Eisenhower Priority Matrix:** Implemented a 4-quadrant priority system for tasks.
+    - Added `priority` column to Supabase `tasks` table.
+    - Updated `SmartInput` with a "Dot Selector" for assigning priorities (Urgent/Important).
+    - Updated `TaskCard` to dynamically color-code based on priority (Clay, Sage, Matcha, Lavender).
+- **Task Archive System:**
+    - Repurposed the "Wrap Up" ritual to move completed tasks to an `'archived'` status instead of resetting them.
+    - Created `ArchiveDrawer` component to view task history, grouped by date.
+    - Added "History" icon to the app header for accessing the archive.
+- **Personalization & Rituals (Phase 3):**
+    - **Atmospheric UI:** Implemented dynamic background gradients that shift based on time of day (Morning/Afternoon/Evening).
+    - **Reset Ritual:** Added a full-screen entry overlay with "Hold to Focus" interaction.
+    - **Smart Greetings:** Logic to welcome new users differently than returning users, with support for `display_name` persistence.
+
+### Fixed
+- **Stuck Loading State:** Resolved a critical bug where `tasksLoading` was gating the rendering of the Auth screen, causing the app to hang on "Loading your vibe..." for users with empty states. Logic now correctly checks for `user` existence before blocking UI.
+- **Cross-Device Sync:** Verified and fixed session handling to allow smoother transitions between devices without "Expired Token" errors.
+
 ## [2025-12-19] - Initial Foundation & Core UI
 
 ### Added

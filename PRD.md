@@ -38,10 +38,17 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Requirement:** Storage area for tasks without specific times.
 - **Logic:** Sidebar on Desktop, Drawer on Mobile. Removing a time from a task moves it here.
 
-### D. The "Reset Ritual"
-- **Requirement:** End-of-day cleanup.
-- **Logic:** Moves all uncompleted tasks from "Today" to "Tomorrow".
-- **Visuals:** Validating message ("You did enough today") to reduce guilt.
+### D. The "Reset Ritual" & Archive
+- **Requirement:** End-of-day cleanup and history logging.
+- **Logic:** Moves all completed tasks to the **Archive**. Uncompleted tasks stay in the stream.
+- **Visuals:** Validating confetti message ("You did enough today") and a new **History Drawer** to view past wins.
+
+### E. Personalization & Atmosphere [NEW]
+- **Requirement:** An app that feels "alive" and knows the user.
+- **Logic:** 
+  - **Biometric Vibe:** Hold-to-enter interaction.
+  - **Dynamic Backgrounds:** Hue shifts based on time of day (Morning/Afternoon/Evening).
+  - **Eisenhower Matrix:** Tasks categorized by priority (Urgent/Important) with color coding.
 
 ## 4. Design Guidelines ("The Vibe")
 - **Palette:** 
