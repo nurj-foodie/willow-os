@@ -45,7 +45,12 @@ export const PasskeyService = {
                 body: { action: 'verify-registration', response: regResponse, userId }
             });
 
-            if (verError) throw verError;
+            if (verError) {
+                if (verError.message?.includes('404')) {
+                    throw new Error("Edge Function 'webauthn-registration' (verify) not found. Sila 'deploy' functions dlm terminal!");
+                }
+                throw verError;
+            }
             return verification;
         } catch (err: any) {
             console.error('Passkey Registration Failed:', err);
@@ -72,7 +77,12 @@ export const PasskeyService = {
                 body: { action: 'generate-options' }
             });
 
-            if (optError) throw optError;
+            if (optError) {
+                if (optError.message?.includes('404')) {
+                    throw new Error("Edge Function 'webauthn-authentication' (options) not found. Sila 'deploy' dlm terminal!");
+                }
+                throw optError;
+            }
 
             // Step 2: Trigger Biometrics prompt
             const authResponse = await startAuthentication(options);
@@ -82,7 +92,12 @@ export const PasskeyService = {
                 body: { action: 'verify-authentication', response: authResponse }
             });
 
-            if (verError) throw verError;
+            if (verError) {
+                if (verError.message?.includes('404')) {
+                    throw new Error("Edge Function 'webauthn-authentication' (verify) not found. Sila 'deploy' dlm terminal!");
+                }
+                throw verError;
+            }
 
             // Step 4: Manually set the session in Supabase Auth
             if (session?.access_token) {
