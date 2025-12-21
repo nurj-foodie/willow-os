@@ -57,6 +57,8 @@ export const PasskeyService = {
             // Higher resolution logging for debugging
             if (err.name === 'NotAllowedError') {
                 console.warn('Biometrics: User cancelled or timed out.');
+            } else if (err.message?.includes('Failed to send a request')) {
+                throw new Error("Cannot reach Edge Function. Sila pastikan abang dah run 'npx supabase functions deploy webauthn-registration' kat terminal!");
             } else if (err.message?.includes('invoke')) {
                 console.error('Biometrics: Edge Function connection failed. Check Supabase deployment.');
             }
@@ -105,8 +107,11 @@ export const PasskeyService = {
             }
 
             return session;
-        } catch (err) {
+        } catch (err: any) {
             console.error('Passkey Login Failed:', err);
+            if (err.message?.includes('Failed to send a request')) {
+                throw new Error("Cannot reach Edge Function. Sila pastikan abang dah run 'npx supabase functions deploy webauthn-authentication' kat terminal!");
+            }
             throw err;
         }
     }
