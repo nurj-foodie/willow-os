@@ -2,6 +2,22 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-21] - Biometrics Fix & Demo Mode
+
+### Added
+- **Instant Demo Mode:** Created a "Direct Access" flow for remote testers (specifically for the user's sister).
+    - Added "Try Demo Mode" toggle to the `Auth` screen.
+    - Implemented `localStorage`-based session persistence, bypassing Supabase Auth for zero-friction testing.
+    - Integrated **Naming Ritual** and **Onboarding Tour** into the demo flow for a complete "first-look" experience.
+- **Biometric "Direct Line" Fix:** Resolved the "Black Hole" network issue impacting both registration and login.
+    - Replaced `supabase.functions.invoke` with direct `fetch` calls in `PasskeyService.ts`.
+    - Added 10-second timeouts to prevent silent hangs.
+    - Implemented granular debug alerts to surface precise WebAuthn errors (e.g., `Credentials Not Found`).
+
+### Fixed
+- **Biometric Prompt Hang:** Root caused and resolved an issue where Edge Function requests would hang indefinitely without throwing errors, preventing the OS biometric prompt from firing.
+- **Loading State Loop:** Fixed a bug in `App.tsx` where failed profile fetches would trap users in a "Syncing Profile..." screen indefinitely. Added 5-second timeouts to all core database hooks.
+
 ## [2025-12-20] - Personalization, Priorities & Archive
 
 ### Added

@@ -11,6 +11,7 @@ Willow is a minimal, low-anxiety task manager that replaces rigid calendars with
 - **Eisenhower Matrix:** Prioritize tasks with color-coded "dots" (Clay, Sage, Matcha, Lavender).
 - **Personalized Rituals:** Time-aware greetings, atmospheric background shifts, and a "Hold to Enter" focus moment.
 - **Permanent Archive:** A "Wrap Up" ritual that moves completed tasks to a searchable history drawer.
+- **Instant Demo Mode:** 🎭 Try the app immediately with zero-config localStorage persistence.
 
 ## 🛠️ Tech Stack
 - **React (Vite)** + TypeScript
@@ -18,6 +19,7 @@ Willow is a minimal, low-anxiety task manager that replaces rigid calendars with
 - **Framer Motion** (Animations)
 - **dnd-kit** (Drag & Drop)
 - **chrono-node** (NLP Parsing)
+- **WebAuthn API** (Biometric Passkeys)
 
 ## 📦 Getting Started
 
@@ -35,9 +37,10 @@ npm run dev
 - [x] Initial UI Foundation (Layout, Cards, Stream)
 - [x] Smart NLP Input Implementation
 - [x] Supabase Integration (Real-time DB)
-- [x] Auth (Magic Link)
+- [x] Auth (Magic Link + Biometric Passkeys)
 - [x] Parking Lot & Sidebar logic
 - [x] Personalization (Rituals, Greetings, Atmospheric UI)
 - [x] Task Priorities (Eisenhower Matrix)
 - [x] Task Archive & History Drawer
+- [x] Instant Demo Mode for testers
 - [x] PWA Configuration & Launch

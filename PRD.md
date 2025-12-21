@@ -43,12 +43,17 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Logic:** Moves all completed tasks to the **Archive**. Uncompleted tasks stay in the stream.
 - **Visuals:** Validating confetti message ("You did enough today") and a new **History Drawer** to view past wins.
 
-### E. Personalization & Atmosphere [NEW]
+### E. Personalization & Atmosphere
 - **Requirement:** An app that feels "alive" and knows the user.
 - **Logic:** 
-  - **Biometric Vibe:** Hold-to-enter interaction.
+  - **Biometric Vibe:** Native Passkey support (FaceID/Fingerprint) with a "Direct Line" implementation for reliability.
   - **Dynamic Backgrounds:** Hue shifts based on time of day (Morning/Afternoon/Evening).
   - **Eisenhower Matrix:** Tasks categorized by priority (Urgent/Important) with color coding.
+
+### F. Demo Mode (Guest Access) [NEW]
+- **Requirement:** Instant access for reviewers/testers without registration.
+- **Logic:** Toggles between Cloud-sync and Local-only mode.
+- **Visuals:** 🎭 branded "Guest" experience that still includes full Onboarding and Rituals.
 
 ## 4. Design Guidelines ("The Vibe")
 - **Palette:** 
