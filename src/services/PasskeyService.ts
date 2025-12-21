@@ -106,7 +106,15 @@ export const PasskeyService = {
 
             // Step 2: Trigger Biometrics prompt
             if (onReady) onReady();
+
+            // DEBUG: Alert before starting auth to confirm options
+            console.log('Starting Auth with options:', options);
+            if (options.allowCredentials?.length === 0) {
+                console.warn('Warning: allowCredentials is empty. This might prevent prompting on some devices.');
+            }
+
             const authResponse = await startAuthentication(options);
+            console.log('Auth Response received:', authResponse);
 
             // Step 3: Verify and log in
             const { data: session, error: verError } = await supabase.functions.invoke('webauthn-authentication', {
@@ -132,6 +140,10 @@ export const PasskeyService = {
             return session;
         } catch (err: any) {
             console.error('Passkey Login Failed:', err);
+
+            // DEBUG: Explicit alert for failure
+            alert(`DEBUG: Auth Failed. Error Name: ${err.name}, Message: ${err.message}`);
+
             if (err.message?.includes('Failed to send a request')) {
                 throw new Error("Cannot reach Edge Function. Sila pastikan abang dah run 'npx supabase functions deploy webauthn-authentication' kat terminal!");
             }
