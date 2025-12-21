@@ -17,9 +17,9 @@ export const PasskeyService = {
     },
 
     /**
-     * Sarah's Journey: Registration (Setup FaceID)
+     * Sarah's Journey: Registration (Setup Biometrics)
      * 1. Get registration options from Edge Function.
-     * 2. Trigger browser's FaceID prompt.
+     * 2. Trigger browser's Biometrics prompt.
      * 3. Send result back to Edge Function for verification and storage.
      */
     register: async (userId: string) => {
@@ -51,7 +51,7 @@ export const PasskeyService = {
     /**
      * Sarah's Journey: Login (Instant Entry)
      * 1. Get authentication options from Edge Function.
-     * 2. Trigger browser's FaceID prompt.
+     * 2. Trigger browser's Biometrics prompt.
      * 3. Send result back to Edge Function to get a Supabase Auth session.
      */
     login: async () => {
@@ -63,7 +63,7 @@ export const PasskeyService = {
 
             if (optError) throw optError;
 
-            // Step 2: Trigger FaceID/TouchID prompt
+            // Step 2: Trigger Biometrics prompt
             const authResponse = await startAuthentication(options);
 
             // Step 3: Verify and log in
