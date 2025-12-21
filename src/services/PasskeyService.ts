@@ -38,37 +38,62 @@ export const PasskeyService = {
         try {
             // Step 1: Request options from our future Edge Function
             // Note: Replace with actual function URL once deployed
-            const { data: options, error: optError } = await supabase.functions.invoke('webauthn-registration', {
-                body: { action: 'generate-options', userId }
+            // Step 1: Request options (Direct fetch)
+            const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+            const functionUrl = 'https://upfhsnupdfyzqzdwwqmt.supabase.co/functions/v1/webauthn-registration';
+
+            console.log('Fetching registration options from:', functionUrl);
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify({ action: 'generate-options', userId })
             });
 
-            if (optError) {
-                if (optError.message?.includes('404')) {
-                    throw new Error("Edge Function 'webauthn-registration' not found. Sila 'deploy' functions dlm terminal dulu!");
-                }
-                throw optError;
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Edge Function Error (${response.status}): ${text}`);
             }
+
+            const options = await response.json();
+
+
+
 
             // Step 2: Trigger the browser's native Passkey prompt
             const regResponse = await startRegistration(options);
 
             // Step 3: Verify the response with our Edge Function
             // Note: We pass the challenge back because our Edge Functions are stateless (simplification for personal app)
-            const { data: verification, error: verError } = await supabase.functions.invoke('webauthn-registration', {
-                body: {
+            // Step 3: Verify the response (Direct fetch)
+            console.log('Verifying registration with server...');
+
+            const verifyResponse = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify({
                     action: 'verify-registration',
                     response: regResponse,
                     userId,
-                    challenge: options.challenge // <--- Echo the challenge back
-                }
+                    challenge: options.challenge
+                })
             });
 
-            if (verError) {
-                if (verError.message?.includes('404')) {
-                    throw new Error("Edge Function 'webauthn-registration' (verify) not found. Sila 'deploy' functions dlm terminal!");
-                }
-                throw verError;
+            if (!verifyResponse.ok) {
+                const text = await verifyResponse.text();
+                throw new Error(`Registration Verification Failed (${verifyResponse.status}): ${text}`);
             }
+
+            const verification = await verifyResponse.json();
+
+
+
             return verification;
         } catch (err: any) {
             console.error('Passkey Registration Failed:', err);
