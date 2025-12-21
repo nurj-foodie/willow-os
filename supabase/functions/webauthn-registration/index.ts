@@ -8,14 +8,23 @@ import {
 const rpID = 'willow-os.pages.dev';
 const origin = `https://${rpID}`;
 
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
     const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     try {
-        const { action, userId, response } = await req.json()
+        const { action, userId, response, challenge } = await req.json()
 
         if (action === 'generate-options') {
             const { data: user } = await supabase.auth.admin.getUserById(userId)
@@ -44,14 +53,14 @@ serve(async (req) => {
             })
 
             // Store challenge in a short-lived table or cache (omitted for brevity, assume signed cookie or session)
-            return new Response(JSON.stringify(options), { headers: { 'Content-Type': 'application/json' } })
+            return new Response(JSON.stringify(options), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
         if (action === 'verify-registration') {
             // In a real app, you'd verify the challenge from Step 1 here
             const verification = await verifyRegistrationResponse({
                 response,
-                expectedChallenge: 'TODO_VERIFY_CHALLENGE',
+                expectedChallenge: challenge, // <--- Verify against the echoed challenge
                 expectedOrigin: origin,
                 expectedRPID: rpID,
             })
@@ -68,11 +77,11 @@ serve(async (req) => {
                 })
             }
 
-            return new Response(JSON.stringify({ verified: verification.verified }), { headers: { 'Content-Type': 'application/json' } })
+            return new Response(JSON.stringify({ verified: verification.verified }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
-        return new Response('Not Found', { status: 404 })
+        return new Response('Not Found', { status: 404, headers: corsHeaders })
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 400 })
+        return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: corsHeaders })
     }
 })

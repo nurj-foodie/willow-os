@@ -8,14 +8,23 @@ import {
 const rpID = 'willow-os.pages.dev';
 const origin = `https://${rpID}`;
 
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
     const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     try {
-        const { action, response } = await req.json()
+        const { action, response, challenge } = await req.json()
 
         if (action === 'generate-options') {
             const options = await generateAuthenticationOptions({
@@ -23,7 +32,7 @@ serve(async (req) => {
                 allowCredentials: [], // Allow any credential from this RP
                 userVerification: 'preferred',
             })
-            return new Response(JSON.stringify(options), { headers: { 'Content-Type': 'application/json' } })
+            return new Response(JSON.stringify(options), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
         if (action === 'verify-authentication') {
@@ -39,7 +48,7 @@ serve(async (req) => {
             // 2. Verify assertion
             const verification = await verifyAuthenticationResponse({
                 response,
-                expectedChallenge: 'TODO_VERIFY_CHALLENGE',
+                expectedChallenge: challenge, // <--- Verify against the echoed challenge
                 expectedOrigin: origin,
                 expectedRPID: rpID,
                 authenticator: {
@@ -63,14 +72,12 @@ serve(async (req) => {
                     email: (await supabase.auth.admin.getUserById(credential.user_id)).data.user.email
                 })
 
-                return new Response(JSON.stringify({ access_token: magic.properties.access_token }), { headers: { 'Content-Type': 'application/json' } })
+                return new Response(JSON.stringify({ access_token: magic.properties.access_token }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
             }
 
-            return new Response(JSON.stringify({ verified: false }), { status: 401 })
+            return new Response(JSON.stringify({ verified: false }), { status: 401, headers: corsHeaders })
         }
 
-        return new Response('Not Found', { status: 404 })
+        return new Response('Not Found', { status: 404, headers: corsHeaders })
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 400 })
-    }
-})
+    })

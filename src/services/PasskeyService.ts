@@ -41,8 +41,14 @@ export const PasskeyService = {
             const regResponse = await startRegistration(options);
 
             // Step 3: Verify the response with our Edge Function
+            // Note: We pass the challenge back because our Edge Functions are stateless (simplification for personal app)
             const { data: verification, error: verError } = await supabase.functions.invoke('webauthn-registration', {
-                body: { action: 'verify-registration', response: regResponse, userId }
+                body: {
+                    action: 'verify-registration',
+                    response: regResponse,
+                    userId,
+                    challenge: options.challenge // <--- Echo the challenge back
+                }
             });
 
             if (verError) {
@@ -91,7 +97,11 @@ export const PasskeyService = {
 
             // Step 3: Verify and log in
             const { data: session, error: verError } = await supabase.functions.invoke('webauthn-authentication', {
-                body: { action: 'verify-authentication', response: authResponse }
+                body: {
+                    action: 'verify-authentication',
+                    response: authResponse,
+                    challenge: options.challenge // <--- Echo the challenge back
+                }
             });
 
             if (verError) {
