@@ -58,6 +58,7 @@ function App() {
       const isNewUser = !profile.display_name;
       const isFirstLoginToday = !lastLogin || lastLogin.toDateString() !== now.toDateString();
 
+      // Always show ritual for demo users on first visit OR existing users on new day
       if (isNewUser || isFirstLoginToday) {
         setShowRitual(true);
       }
