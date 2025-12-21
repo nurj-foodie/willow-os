@@ -30,7 +30,7 @@ export const ResetRitual: React.FC<ResetRitualProps> = ({ onReset, hasTasks }) =
     };
 
     return (
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-8 right-8 z-40">
             <AnimatePresence>
                 {isResetting ? (
                     <motion.div

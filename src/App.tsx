@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Layout } from './components/layout/Layout';
 import { LiquidStream } from './components/stream/LiquidStream';
 import { SmartInput } from './components/input/SmartInput';
@@ -46,6 +46,7 @@ function App() {
 
   const [showRitual, setShowRitual] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
 
   // Ritual trigger logic
   useEffect(() => {
@@ -278,7 +279,58 @@ function App() {
           user={user}
         />
 
-        <Footer />
+        <Footer onOpenLegal={setShowLegal} />
+
+        {/* Legal Modal Overlay */}
+        <AnimatePresence>
+          {showLegal && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowLegal(null)}
+                className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+              >
+                <div className="p-8 overflow-y-auto font-sans leading-relaxed text-charcoal/80">
+                  {showLegal === 'privacy' ? (
+                    <div className="prose prose-slate">
+                      <h2 className="text-2xl font-serif font-bold text-charcoal mb-6">Privacy Policy</h2>
+                      <p>Your privacy is our priority. Willow OS is designed with offline-first principles. Your task data is encrypted and only accessible by you.</p>
+                      <h4 className="font-bold mt-4">Data We Collect</h4>
+                      <p>We collect your email for authentication and basic profile info to personalize your flow.</p>
+                      <h4 className="font-bold mt-4">Your Rights</h4>
+                      <p>You have the right to export or delete your data at any time via the "Delete Account" button in the header.</p>
+                    </div>
+                  ) : (
+                    <div className="prose prose-slate">
+                      <h2 className="text-2xl font-serif font-bold text-charcoal mb-6">Terms of Service</h2>
+                      <p>By using Willow, you agree to treat your productivity with mindfulness and respect.</p>
+                      <h4 className="font-bold mt-4">Usage</h4>
+                      <p>Willow is provided "as is". We are not responsible for any missed deadlines or excessive zen states.</p>
+                      <h4 className="font-bold mt-4">Subscription</h4>
+                      <p>Receipt scanning is part of the Willow Ledger premium suite, currently available as a 7-day trial.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 bg-oat border-t border-clay/10 flex justify-end">
+                  <button
+                    onClick={() => setShowLegal(null)}
+                    className="px-6 py-2 bg-charcoal text-white rounded-xl font-bold hover:bg-matcha hover:text-charcoal transition-all"
+                  >
+                    Acknowledged
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         <ResetRitual
           hasTasks={tasks.some(t => t.status === 'done')}

@@ -26,6 +26,12 @@ const STEPS = [
         color: "bg-clay/10"
     },
     {
+        title: "The Four Colors",
+        description: "Focus on what matters. Red for urgent, Amber for important, Green for maintenance, and Grey for later. Just add ! (urgent) or !! (crucial) to your tasks.",
+        icon: <div className="flex gap-1"><div className="w-4 h-4 rounded-full bg-rose-400" /><div className="w-4 h-4 rounded-full bg-amber-400" /><div className="w-4 h-4 rounded-full bg-sage" /><div className="w-4 h-4 rounded-full bg-charcoal/20" /></div>,
+        color: "bg-amber-50"
+    },
+    {
         title: "The 24-Hour Cycle",
         description: "Every day is a fresh start. Use the 'Wrap Up' ritual at night to clear your mind and archive your wins.",
         icon: <RefreshCw className="text-matcha" size={32} />,

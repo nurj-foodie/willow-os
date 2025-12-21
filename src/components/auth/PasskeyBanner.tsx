@@ -30,10 +30,11 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
                 setIsVisible(false);
                 setStatus('hidden');
             }, 3000);
-        } catch (err) {
-            console.error(err);
+        } catch (err: any) {
+            console.error('Registration Error:', err);
+            alert(`Setup failed: ${err.message || 'Unknown error'}. Please ensure your device supports biometrics and try again.`);
             setStatus('invite');
-            setIsVisible(false); // Hide on error to not annoy user
+            setIsVisible(false);
         }
     };
 
@@ -69,12 +70,12 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
 
                         <div className="flex-grow">
                             <h3 className="text-sm font-bold text-charcoal">
-                                {status === 'invite' && "Secure this app with FaceID?"}
+                                {status === 'invite' && "Secure this app with Biometrics?"}
                                 {status === 'loading' && "Setting up Passkey..."}
-                                {status === 'success' && "Success! FaceID enabled."}
+                                {status === 'success' && "Success! Biometrics enabled."}
                             </h3>
                             {status === 'invite' && (
-                                <p className="text-[10px] text-charcoal/50 font-medium">Next time, just look at your phone to log in.</p>
+                                <p className="text-[10px] text-charcoal/50 font-medium">Next time, use your glance or fingerprint to log in.</p>
                             )}
                         </div>
 
