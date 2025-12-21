@@ -20,11 +20,20 @@ export function useProfile(user: User | null) {
 
         try {
             setLoading(true);
-            const { data, error } = await supabase
+
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Profile fetch timed out')), 5000)
+            );
+
+            // Race the query against the timeout
+            const queryPromise = supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
                 .single();
+
+            const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
             if (error && error.code !== 'PGRST116') {
                 throw error;
