@@ -14,7 +14,7 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState<'email' | 'otp'>('email');
     const [supportsPasskey, setSupportsPasskey] = useState(false);
-    const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success'>('idle');
+    const [scanStatus, setScanStatus] = useState<'idle' | 'preparing' | 'scanning' | 'success'>('idle');
     const [usePasskey, setUsePasskey] = useState(true);
 
     useEffect(() => {
@@ -65,9 +65,9 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
 
     const handlePasskeyLogin = async () => {
         setLoading(true);
-        setScanStatus('scanning');
+        setScanStatus('preparing');
         try {
-            await PasskeyService.login();
+            await PasskeyService.login(() => setScanStatus('scanning'));
             setScanStatus('success');
             // Small delay to show success state before redirect happens
             await new Promise(resolve => setTimeout(resolve, 800));
@@ -108,7 +108,7 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
                         <div className="space-y-4">
                             <motion.button
                                 onClick={handlePasskeyLogin}
-                                disabled={loading || scanStatus === 'success'}
+                                disabled={loading || scanStatus === 'success' || scanStatus === 'preparing'}
                                 animate={scanStatus === 'scanning' ? { scale: [1, 0.98, 1] } : {}}
                                 transition={{ repeat: Infinity, duration: 2 }}
                                 className={`w-full py-6 rounded-3xl font-bold text-lg shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${scanStatus === 'success'
@@ -131,6 +131,7 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
                                 </div>
                                 <span>
                                     {scanStatus === 'idle' && "Sign in with Biometrics"}
+                                    {scanStatus === 'preparing' && "Connecting securely..."}
                                     {scanStatus === 'scanning' && "Scan Fingerprint on Device..."}
                                     {scanStatus === 'success' && "Verified! Entering..."}
                                 </span>

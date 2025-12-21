@@ -90,7 +90,7 @@ export const PasskeyService = {
      * 2. Trigger browser's Biometrics prompt.
      * 3. Send result back to Edge Function to get a Supabase Auth session.
      */
-    login: async () => {
+    login: async (onReady?: () => void) => {
         try {
             // Step 1: Request options
             const { data: options, error: optError } = await supabase.functions.invoke('webauthn-authentication', {
@@ -105,6 +105,7 @@ export const PasskeyService = {
             }
 
             // Step 2: Trigger Biometrics prompt
+            if (onReady) onReady();
             const authResponse = await startAuthentication(options);
 
             // Step 3: Verify and log in
