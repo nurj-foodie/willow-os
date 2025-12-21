@@ -19,38 +19,10 @@ export const useLedger = (user: User | null, profile: any, updateProfile: any) =
     const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
 
     const checkTrialStatus = useCallback(() => {
-        if (import.meta.env.DEV) {
-            setIsTrialActive(true);
-            setTrialDaysLeft(999);
-            return;
-        }
-
-        if (profile?.is_premium) {
-            setIsTrialActive(true);
-            setTrialDaysLeft(null);
-            return;
-        }
-
-        if (!profile?.trial_started_at) {
-            setIsTrialActive(false);
-            setTrialDaysLeft(null);
-            return;
-        }
-
-        const start = new Date(profile.trial_started_at);
-        const now = new Date();
-        const diffTime = now.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const remaining = 7 - diffDays;
-
-        if (remaining >= 0) {
-            setIsTrialActive(true);
-            setTrialDaysLeft(remaining);
-        } else {
-            setIsTrialActive(false);
-            setTrialDaysLeft(0);
-        }
-    }, [profile]);
+        // Gatekeeper disabled for testing/review - Always active and RM 999 days left
+        setIsTrialActive(true);
+        setTrialDaysLeft(999);
+    }, []);
 
     const fetchEntries = useCallback(async () => {
         if (!user) return;

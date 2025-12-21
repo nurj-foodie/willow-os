@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fingerprint, X, ShieldCheck } from 'lucide-react';
+import { Fingerprint, ShieldCheck } from 'lucide-react';
 import { PasskeyService } from '../../services/PasskeyService';
 
 interface PasskeyBannerProps {
@@ -12,10 +12,8 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
     const [status, setStatus] = useState<'invite' | 'loading' | 'success' | 'hidden'>('invite');
 
     useEffect(() => {
-        // Only show if browser supports WebAuthn and we haven't dismissed it this session
-        const isDismissed = sessionStorage.getItem('passkey_banner_dismissed');
-        if (PasskeyService.isSupported() && !isDismissed) {
-            // Small delay for better UX
+        // Persistent prompt: removed dismissal check
+        if (PasskeyService.isSupported()) {
             const timer = setTimeout(() => setIsVisible(true), 1500);
             return () => clearTimeout(timer);
         }
@@ -40,10 +38,7 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
         }
     };
 
-    const handleDismiss = () => {
-        setIsVisible(false);
-        sessionStorage.setItem('passkey_banner_dismissed', 'true');
-    };
+
 
     if (status === 'hidden') return null;
 
@@ -85,15 +80,9 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleRegister}
-                                    className="bg-charcoal text-white text-[10px] font-bold px-3 py-1.5 rounded-full hover:bg-matcha hover:text-charcoal transition-colors"
+                                    className="bg-charcoal text-white text-[10px] font-bold px-4 py-2 rounded-full hover:bg-matcha hover:text-charcoal transition-colors shadow-sm active:scale-95"
                                 >
-                                    Setup
-                                </button>
-                                <button
-                                    onClick={handleDismiss}
-                                    className="p-1.5 text-charcoal/20 hover:text-charcoal transition-colors"
-                                >
-                                    <X size={14} />
+                                    Setup Now
                                 </button>
                             </div>
                         ) : null}
