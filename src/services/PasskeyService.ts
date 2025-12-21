@@ -127,21 +127,28 @@ export const PasskeyService = {
             const authResponse = await startAuthentication(options);
             console.log('Auth Response received:', authResponse);
 
-            // Step 3: Verify and log in
-            const { data: session, error: verError } = await supabase.functions.invoke('webauthn-authentication', {
-                body: {
+            // Step 3: Verify and log in (Direct fetch)
+            console.log('Verifying assertion with server...');
+
+            const verifyResponse = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify({
                     action: 'verify-authentication',
                     response: authResponse,
-                    challenge: options.challenge // <--- Echo the challenge back
-                }
+                    challenge: options.challenge
+                })
             });
 
-            if (verError) {
-                if (verError.message?.includes('404')) {
-                    throw new Error("Edge Function 'webauthn-authentication' (verify) not found. Sila 'deploy' dlm terminal!");
-                }
-                throw verError;
+            if (!verifyResponse.ok) {
+                const text = await verifyResponse.text();
+                throw new Error(`Verification Failed (${verifyResponse.status}): ${text}`);
             }
+
+            const session = await verifyResponse.json();
 
             // Step 4: Manually set the session in Supabase Auth
             if (session?.access_token) {
