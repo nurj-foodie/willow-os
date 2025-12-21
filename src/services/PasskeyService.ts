@@ -92,27 +92,28 @@ export const PasskeyService = {
      */
     login: async (onReady?: () => void) => {
         try {
-            // Step 1: Request options with 10s timeout
-            const fetchOptions = supabase.functions.invoke('webauthn-authentication', {
-                body: { action: 'generate-options' }
+            // Step 1: Request options (Direct fetch to bypass client hang)
+            const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+            const functionUrl = 'https://upfhsnupdfyzqzdwwqmt.supabase.co/functions/v1/webauthn-authentication';
+
+            console.log('Fetching options from:', functionUrl);
+
+            // Manual Fetch to guarantee network control
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify({ action: 'generate-options' })
             });
 
-            const timeout = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Server Timeout: Edge Function took too long")), 10000)
-            );
-
-            // DEBUG: Alert start
-            // alert('Debug: Requesting keys from server...');
-
-            const { data: options, error: optError } = await Promise.race([fetchOptions, timeout]) as any;
-
-
-            if (optError) {
-                if (optError.message?.includes('404')) {
-                    throw new Error("Edge Function 'webauthn-authentication' (options) not found. Sila 'deploy' dlm terminal!");
-                }
-                throw optError;
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Edge Function Error (${response.status}): ${text}`);
             }
+
+            const options = await response.json();
 
             // Step 2: Trigger Biometrics prompt
             if (onReady) onReady();
