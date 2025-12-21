@@ -22,9 +22,11 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
     }, []);
 
     const handleRegister = async () => {
+        alert("Initializing Biometric setup... Please keep your screen active.");
         setStatus('loading');
         try {
-            await PasskeyService.register(userId);
+            const result = await PasskeyService.register(userId);
+            console.log('Registration Result:', result);
             setStatus('success');
             setTimeout(() => {
                 setIsVisible(false);
@@ -32,7 +34,7 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
             }, 3000);
         } catch (err: any) {
             console.error('Registration Error:', err);
-            alert(`Setup failed: ${err.message || 'Unknown error'}. Please ensure your device supports biometrics and try again.`);
+            alert(`Setup failed: ${err.message || 'Unknown error'}.\n\nCommon fixes:\n1. Ensure your device has Screen Lock (Pin/Fingerprint) enabled.\n2. Ensure you are using Chrome or Samsung Internet.\n3. Make sure you haven't blocked biometrics for this site.`);
             setStatus('invite');
             setIsVisible(false);
         }

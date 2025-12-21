@@ -23,6 +23,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [showScanner, setShowScanner] = useState(false);
+    const [isActivatingTrial, setIsActivatingTrial] = useState(false);
 
     const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
         setAmount(data.amount.toString());
@@ -76,10 +77,20 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                     <h3 className="text-xl font-serif font-bold">Start Your 7-Day Trial</h3>
                                     <p className="text-charcoal/60 text-sm italic">"Mindful spending is the sibling of mindful focus."</p>
                                     <button
-                                        onClick={onStartTrial}
-                                        className="w-full bg-charcoal text-oat py-4 rounded-xl font-bold shadow-lg hover:shadow-charcoal/20 transition-all"
+                                        onClick={async () => {
+                                            setIsActivatingTrial(true);
+                                            try {
+                                                await onStartTrial();
+                                            } catch (err) {
+                                                alert("Activation failed. Please check your connection.");
+                                            } finally {
+                                                setIsActivatingTrial(false);
+                                            }
+                                        }}
+                                        disabled={isActivatingTrial}
+                                        className="w-full bg-charcoal text-oat py-4 rounded-xl font-bold shadow-lg hover:shadow-charcoal/20 transition-all disabled:opacity-50"
                                     >
-                                        Activate Explorer Trial
+                                        {isActivatingTrial ? "Planting Trial..." : "Activate Explorer Trial"}
                                     </button>
                                 </div>
                             ) : (
