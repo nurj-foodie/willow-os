@@ -12,11 +12,15 @@ export const PasskeyBanner: React.FC<PasskeyBannerProps> = ({ userId }) => {
     const [status, setStatus] = useState<'invite' | 'loading' | 'success' | 'hidden'>('invite');
 
     useEffect(() => {
-        // Persistent prompt: removed dismissal check
-        if (PasskeyService.isSupported()) {
-            const timer = setTimeout(() => setIsVisible(true), 1500);
-            return () => clearTimeout(timer);
-        }
+        const checkSupport = async () => {
+            // Persistent prompt: removed dismissal check
+            const supported = await PasskeyService.isSupported();
+            if (supported) {
+                const timer = setTimeout(() => setIsVisible(true), 1500);
+                return () => clearTimeout(timer);
+            }
+        };
+        checkSupport();
     }, []);
 
     const handleRegister = async () => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Mail, Sparkles, Fingerprint } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { PasskeyService } from '../../services/PasskeyService';
 
 interface AuthProps {
@@ -13,10 +14,15 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState<'email' | 'otp'>('email');
     const [supportsPasskey, setSupportsPasskey] = useState(false);
+    const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success'>('idle');
     const [usePasskey, setUsePasskey] = useState(true);
 
     useEffect(() => {
-        setSupportsPasskey(PasskeyService.isSupported());
+        const checkSupport = async () => {
+            const supported = await PasskeyService.isSupported();
+            setSupportsPasskey(supported);
+        };
+        checkSupport();
     }, []);
 
     const handleSendOtp = async (e: React.FormEvent) => {
@@ -59,11 +65,17 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
 
     const handlePasskeyLogin = async () => {
         setLoading(true);
+        setScanStatus('scanning');
         try {
             await PasskeyService.login();
-        } catch (err) {
+            setScanStatus('success');
+            // Small delay to show success state before redirect happens
+            await new Promise(resolve => setTimeout(resolve, 800));
+        } catch (err: any) {
             console.error(err);
-            setUsePasskey(false); // Fallback to email on error
+            setScanStatus('idle');
+            alert(`Login failed: ${err.message}`);
+            // Do NOT hide the button on error, let them try again
         } finally {
             setLoading(false);
         }
@@ -94,14 +106,35 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
                 <div className="w-full max-w-sm space-y-6">
                     {supportsPasskey && usePasskey ? (
                         <div className="space-y-4">
-                            <button
+                            <motion.button
                                 onClick={handlePasskeyLogin}
-                                disabled={loading}
-                                className="w-full py-6 rounded-3xl bg-charcoal text-white font-bold text-lg shadow-xl hover:bg-matcha hover:text-charcoal transition-all flex items-center justify-center gap-3 active:scale-95"
+                                disabled={loading || scanStatus === 'success'}
+                                animate={scanStatus === 'scanning' ? { scale: [1, 0.98, 1] } : {}}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                                className={`w-full py-6 rounded-3xl font-bold text-lg shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${scanStatus === 'success'
+                                    ? 'bg-matcha text-charcoal'
+                                    : scanStatus === 'scanning'
+                                        ? 'bg-charcoal/80 text-white'
+                                        : 'bg-charcoal text-white hover:bg-matcha hover:text-charcoal'
+                                    }`}
                             >
-                                <Fingerprint size={24} />
-                                {loading ? 'Looking for you...' : 'Sign in with Biometrics'}
-                            </button>
+                                <div className="relative">
+                                    {scanStatus === 'scanning' && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 1 }}
+                                            animate={{ opacity: 0.5, scale: 2 }}
+                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                            className="absolute inset-0 bg-white rounded-full z-0"
+                                        />
+                                    )}
+                                    <Fingerprint size={24} className="relative z-10" />
+                                </div>
+                                <span>
+                                    {scanStatus === 'idle' && "Sign in with Biometrics"}
+                                    {scanStatus === 'scanning' && "Scan Fingerprint on Device..."}
+                                    {scanStatus === 'success' && "Verified! Entering..."}
+                                </span>
+                            </motion.button>
                             <button
                                 onClick={() => setUsePasskey(false)}
                                 className="text-xs text-charcoal/30 hover:text-charcoal transition-colors underline decoration-dotted"

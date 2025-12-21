@@ -9,11 +9,23 @@ export const PasskeyService = {
     /**
      * Check if the current device/browser supports WebAuthn Passkeys.
      */
-    isSupported: () => {
-        return (
-            window.PublicKeyCredential !== undefined &&
-            typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
-        );
+    isSupported: async () => {
+        if (!window.PublicKeyCredential) return false;
+
+        // Basic check for the API functions
+        if (typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function') {
+            return false;
+        }
+
+        try {
+            // Actual check for hardware/platform support (Promise)
+            const available = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            return available;
+        } catch (e) {
+            console.warn('WebAuthn availability check failed:', e);
+            // Fallback: if API exists, assume true to be safe and let user try
+            return true;
+        }
     },
 
     /**
