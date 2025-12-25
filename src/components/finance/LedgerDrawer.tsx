@@ -23,8 +23,20 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [showScanner, setShowScanner] = useState(false);
 
     const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
-        setAmount(data.amount.toString());
-        setCategory(data.category);
+        // Map Gemini categories to Willow categories
+        const categoryMap: Record<string, string> = {
+            'Food & Drink': 'Food',
+            'Transport': 'Transport',
+            'Wellness': 'Wellness',
+            'Shopping': 'Misc',
+            'bills': 'Misc',
+            'Other': 'Misc'
+        };
+
+        const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
+
+        setAmount(data.amount?.toString() || '0');
+        setCategory(mappedCategory);
         setDescription(data.merchant);
         setShowForm(true);
         setShowScanner(false);

@@ -2,7 +2,14 @@
 
 All notable changes to the Willow project will be documented in this file.
 
-## [2025-12-25] - Authentication Redesign & AI Upgrade
+## [2025-12-26] - Reliability & Performance Fixes [07:30 UTC+8]
+
+### Fixed
+- **Receipt Scanner Flow**: Added defensive parsing and sanitization for Gemini AI responses to prevent UI hangs.
+- **Bulk Archiving**: Refactored the "Reset Ritual" to use a single batch update for archiving tasks, improving performance and reliability.
+- **Category Mapping**: Automatic mapping of AI-detected categories (e.g., "Food & Drink") to Willow's internal ledger categories.
+
+## [2025-12-25] - Authentication Redesign & AI Upgrade [00:00 UTC+8]
 
 ### Changed
 - **Authentication System Overhaul:** Replaced biometric/passkey login with Google OAuth for improved reliability.

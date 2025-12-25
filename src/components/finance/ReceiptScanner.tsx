@@ -42,12 +42,22 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
             if (functionError) throw functionError;
 
+            console.log('Gemini Extraction Result:', data);
+
+            // Sanitization: Ensure data has expected keys and formats
+            const sanitizedData = {
+                amount: typeof data.amount === 'number' ? data.amount : parseFloat(data.amount) || 0,
+                merchant: data.merchant || data.vendor || 'Unknown Merchant',
+                category: data.category || 'Other',
+                date: data.date || new Date().toISOString()
+            };
+
             setProgress(100);
             setStatus('done');
 
             // Artificial delay to let user see the "Done" state
             setTimeout(() => {
-                onProcessed(data);
+                onProcessed(sanitizedData);
                 onClose();
             }, 1000);
 

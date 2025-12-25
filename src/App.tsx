@@ -35,7 +35,7 @@ import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
-  const { tasks, loading: tasksLoading, user, addTask, updateTask, reorderTasks, logout, deleteAccount } = useTasks();
+  const { tasks, loading: tasksLoading, user, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -339,9 +339,10 @@ function App() {
         <ResetRitual
           hasTasks={tasks.some(t => t.status === 'done')}
           onReset={() => {
-            tasks.filter(t => t.status === 'done').forEach(t => {
-              updateTask(t.id, { status: 'archived' });
-            });
+            const doneIds = tasks.filter(t => t.status === 'done').map(t => t.id);
+            if (doneIds.length > 0) {
+              updateTasks(doneIds, { status: 'archived' });
+            }
           }}
         />
 

@@ -170,6 +170,20 @@ export function useTasks() {
         }
     }
 
+    async function updateTasks(ids: string[], updates: Partial<Task>) {
+        if (isSupabaseConfigured && user) {
+            const { error } = await supabase
+                .from('tasks')
+                .update(updates)
+                .in('id', ids)
+                .eq('user_id', user.id);
+
+            if (error) console.error('Error updating tasks:', error);
+        } else {
+            setTasks(prev => prev.map(t => ids.includes(t.id) ? { ...t, ...updates } : t));
+        }
+    }
+
     async function reorderTasks(activeId: string, overId: string) {
         const activeTask = tasks.find(t => t.id === activeId);
         if (!activeTask) return;
@@ -242,5 +256,5 @@ export function useTasks() {
         }
     };
 
-    return { tasks, loading, user, addTask, updateTask, reorderTasks, logout, deleteAccount };
+    return { tasks, loading, user, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount };
 }
