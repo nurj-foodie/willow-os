@@ -1,7 +1,7 @@
 # Willow - Product Requirements Document (PRD)
 
-**Version:** 0.1 (Alpha)  
-**Date:** December 2025 (Launched)  
+**Version:** 0.2 (Alpha)  
+**Date:** December 26, 2025 (Updated)  
 **Target Audience:** Gen Z / Modern Professional ("Sofia")  
 **Platform:** Web PWA (Mobile & Desktop)
 
@@ -15,8 +15,10 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Styling:** Tailwind CSS (Gen Z / Glassmorphism aesthetic)
 - **Animation/Physics:** `framer-motion` + `dnd-kit` (Liquid feel)
 - **Backend/Database:** Supabase (PostgreSQL + Real-time)
-- **Authentication:** Supabase Auth (Magic Links)
-- **NLP:** `chrono-node` (Date/Time extraction)
+- **Authentication:** Supabase Auth (Google OAuth + Device-based OTP)
+- **AI/NLP:** 
+  - `chrono-node` (Date/Time extraction)
+  - **Google Gemini 2.0 Flash** (Receipt Scanning & Advanced Extraction)
 - **Deployment:** Cloudflare Pages
 - **Mobile Support:** Progressive Web App (Vite PWA)
 
@@ -46,11 +48,11 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 ### E. Personalization & Atmosphere
 - **Requirement:** An app that feels "alive" and knows the user.
 - **Logic:** 
-  - **Biometric Vibe:** Native Passkey support (FaceID/Fingerprint) with a "Direct Line" implementation for reliability.
+  - **Google Vibe:** Secure Google OAuth login with device-based OTP verification for new devices.
   - **Dynamic Backgrounds:** Hue shifts based on time of day (Morning/Afternoon/Evening).
   - **Eisenhower Matrix:** Tasks categorized by priority (Urgent/Important) with color coding.
 
-### F. Demo Mode (Guest Access) [NEW]
+### F. Demo Mode (Guest Access)
 - **Requirement:** Instant access for reviewers/testers without registration.
 - **Logic:** Toggles between Cloud-sync and Local-only mode.
 - **Visuals:** 🎭 branded "Guest" experience that still includes full Onboarding and Rituals.

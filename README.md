@@ -19,7 +19,8 @@ Willow is a minimal, low-anxiety task manager that replaces rigid calendars with
 - **Framer Motion** (Animations)
 - **dnd-kit** (Drag & Drop)
 - **chrono-node** (NLP Parsing)
-- **WebAuthn API** (Biometric Passkeys)
+- **Supabase Auth** (Google OAuth + Device-based OTP)
+- **Google Gemini 2.0 Flash** (Receipt AI)
 
 ## 📦 Getting Started
 
@@ -37,10 +38,11 @@ npm run dev
 - [x] Initial UI Foundation (Layout, Cards, Stream)
 - [x] Smart NLP Input Implementation
 - [x] Supabase Integration (Real-time DB)
-- [x] Auth (Magic Link + Biometric Passkeys)
+- [x] Auth (Google OAuth + Device-based OTP)
 - [x] Parking Lot & Sidebar logic
 - [x] Personalization (Rituals, Greetings, Atmospheric UI)
 - [x] Task Priorities (Eisenhower Matrix)
 - [x] Task Archive & History Drawer
 - [x] Instant Demo Mode for testers
+- [x] Gemini 2.0 Flash AI Integration
 - [x] PWA Configuration & Launch
