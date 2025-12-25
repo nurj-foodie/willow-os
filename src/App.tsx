@@ -29,7 +29,7 @@ import { RitualOverlay } from './components/analytics/RitualOverlay';
 import { ArchiveDrawer } from './components/analytics/ArchiveDrawer';
 import { LedgerDrawer } from './components/finance/LedgerDrawer';
 import { useLedger } from './hooks/useLedger';
-import { PasskeyBanner } from './components/auth/PasskeyBanner';
+
 import { Footer } from './components/layout/Footer';
 import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
@@ -174,7 +174,7 @@ function App() {
       onDragEnd={handleDragEnd}
     >
       <div className={`flex flex-col md:flex-row min-h-screen bg-gradient-to-br ${bgGradient} relative overflow-x-hidden`}>
-        {user && !user.id.startsWith('demo_') && <PasskeyBanner userId={user.id} />}
+
         <AnimatePresence>
           {showRitual && (
             <RitualOverlay

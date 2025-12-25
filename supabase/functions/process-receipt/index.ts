@@ -33,8 +33,8 @@ serve(async (req) => {
         const arrayBuffer = await fileData.arrayBuffer()
         const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
-        // 3. Send to Gemini
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`
+        // 3. Send to Gemini 2.0 Flash (upgraded from 1.5 - obsolete)
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`
 
         const response = await fetch(geminiUrl, {
             method: 'POST',

@@ -2,6 +2,31 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-25] - Authentication Redesign & AI Upgrade
+
+### Changed
+- **Authentication System Overhaul:** Replaced biometric/passkey login with Google OAuth for improved reliability.
+    - Removed `PasskeyService.ts`, `PasskeyBanner.tsx`, and all WebAuthn Edge Functions.
+    - Implemented Google OAuth with "Continue with Google" button.
+    - Added device-based OTP verification for new devices (first-time only).
+    - Device fingerprinting via `DeviceVerification.tsx` for seamless re-authentication on known devices.
+    - Demo Mode preserved unchanged for local-only testing.
+- **Gemini AI Model Upgrade:** Updated receipt scanning from `gemini-1.5-flash` (obsolete) to `gemini-2.0-flash-exp`.
+    - Improved accuracy and speed for receipt data extraction.
+    - Deployed updated Edge Function to production.
+
+### Removed
+- **Biometric Authentication:** Completely removed passkey/WebAuthn support.
+    - Deleted `PasskeyService.ts`, `PasskeyBanner.tsx`
+    - Removed `webauthn-registration` and `webauthn-authentication` Edge Functions
+    - Dropped `passkeys` database table
+- **Magic Link Email/OTP:** Removed email-based Magic Link flow (superseded by Google OAuth).
+
+### Breaking Changes
+- **Existing users must re-authenticate** using Google OAuth
+- First login after update requires OTP verification
+- Passkey credentials no longer valid
+
 ## [2025-12-21] - Biometrics Fix & Demo Mode
 
 ### Added
