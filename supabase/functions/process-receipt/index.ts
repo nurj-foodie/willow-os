@@ -29,9 +29,18 @@ serve(async (req) => {
 
         if (downloadError) throw downloadError
 
-        // 2. Convert to base64
+        // 2. Convert to base64 (chunked to avoid stack overflow on large images)
         const arrayBuffer = await fileData.arrayBuffer()
-        const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+        const uint8Array = new Uint8Array(arrayBuffer)
+
+        // Convert in chunks to avoid "Maximum call stack size exceeded"
+        const chunkSize = 8192
+        let binaryString = ''
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+            const chunk = uint8Array.slice(i, i + chunkSize)
+            binaryString += String.fromCharCode(...chunk)
+        }
+        const base64Image = btoa(binaryString)
 
         // 3. Send to Gemini 2.0 Flash (upgraded from 1.5 - obsolete)
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`
