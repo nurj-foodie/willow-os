@@ -16,8 +16,15 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
 
+        console.log('[Receipt Scanner] File selected:', file ? `${file.name} (${file.size} bytes)` : 'No file');
+
+        if (!file) {
+            console.warn('[Receipt Scanner] No file in input, aborting');
+            return;
+        }
+
+        console.log('[Receipt Scanner] Starting upload process...');
         setStatus('uploading');
         setProgress(10);
 
@@ -27,20 +34,29 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
             const filePath = `${userId}/${fileName}`;
 
             // 1. Upload to Supabase Storage
+            console.log('[Receipt Scanner] Uploading to Storage:', filePath);
             const { error: uploadError } = await supabase.storage
                 .from('receipts')
                 .upload(filePath, file);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error('[Receipt Scanner] Storage upload failed:', uploadError);
+                throw new Error(`Upload failed: ${uploadError.message}`);
+            }
+            console.log('[Receipt Scanner] Upload successful');
             setProgress(50);
             setStatus('processing');
 
             // 2. Invoke Edge Function for AI extraction
+            console.log('[Receipt Scanner] Calling Edge Function for AI extraction...');
             const { data, error: functionError } = await supabase.functions.invoke('process-receipt', {
                 body: { filePath }
             });
 
-            if (functionError) throw functionError;
+            if (functionError) {
+                console.error('[Receipt Scanner] Edge Function error:', functionError);
+                throw new Error(`AI processing failed: ${functionError.message}`);
+            }
 
             console.log('Gemini Extraction Result:', data);
 
@@ -61,9 +77,19 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 onClose();
             }, 1000);
 
-        } catch (err) {
-            console.error('Extraction failed:', err);
+        } catch (err: any) {
+            console.error('[Receipt Scanner] Complete error:', err);
+            console.error('[Receipt Scanner] Error details:', {
+                message: err?.message,
+                name: err?.name,
+                stack: err?.stack
+            });
             setStatus('error');
+        } finally {
+            // Reset file input for mobile compatibility
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -150,10 +176,11 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                             animate={{ opacity: 1 }}
                             className="space-y-4 text-orange-400"
                         >
-                            <p>Something went wrong.</p>
+                            <p className="font-bold">Upload Failed</p>
+                            <p className="text-xs text-white/60">Check console for details</p>
                             <button
                                 onClick={() => setStatus('idle')}
-                                className="text-sm underline"
+                                className="text-sm underline hover:text-orange-300"
                             >
                                 Try again
                             </button>
