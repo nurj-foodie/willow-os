@@ -55,7 +55,15 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
             if (functionError) {
                 console.error('[Receipt Scanner] Edge Function error:', functionError);
-                throw new Error(`AI processing failed: ${functionError.message}`);
+
+                // Try to extract the actual error message from the response
+                let errorDetails = 'Edge Function failed';
+                if (data && typeof data === 'object' && 'error' in data) {
+                    errorDetails = data.error || errorDetails;
+                }
+
+                console.error('[Receipt Scanner] Edge Function error details:', errorDetails);
+                throw new Error(`AI processing failed: ${errorDetails}`);
             }
 
             console.log('Gemini Extraction Result:', data);
