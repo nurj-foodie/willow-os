@@ -8,6 +8,12 @@ All notable changes to the Willow project will be documented in this file.
 - **Receipt Scanner Flow**: Added defensive parsing and sanitization for Gemini AI responses to prevent UI hangs.
 - **Bulk Archiving**: Refactored the "Reset Ritual" to use a single batch update for archiving tasks, improving performance and reliability.
 - **Category Mapping**: Automatic mapping of AI-detected categories (e.g., "Food & Drink") to Willow's internal ledger categories.
+- **Mobile Receipt Scanner**: Fixed "Maximum call stack size exceeded" error when processing large receipt images (2.8MB+) by implementing chunked base64 conversion in the Edge Function.
+- **Ledger Database**: Created `ledger` table in Supabase with RLS policies for storing receipt entries.
+
+### Added
+- **Demo Mode Ledger Support**: Added localStorage persistence for the Ledger to work fully offline in Demo Mode.
+- **Comprehensive Logging**: Added detailed diagnostic logging throughout the receipt scanner flow for easier debugging.
 
 ## [2025-12-25] - Authentication Redesign & AI Upgrade [00:00 UTC+8]
 
