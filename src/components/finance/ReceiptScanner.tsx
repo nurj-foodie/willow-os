@@ -56,13 +56,26 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
             if (functionError) {
                 console.error('[Receipt Scanner] Edge Function error:', functionError);
 
-                // Try to extract the actual error message from the response
-                let errorDetails = 'Edge Function failed';
-                if (data && typeof data === 'object' && 'error' in data) {
-                    errorDetails = data.error || errorDetails;
+                // Extract error details from the response body
+                let errorDetails = 'Unknown error';
+                try {
+                    // The FunctionsHttpError has a context.Response object
+                    if (functionError.context && typeof functionError.context.json === 'function') {
+                        const errorBody = await functionError.context.json();
+                        console.error('[Receipt Scanner] Error response body:', errorBody);
+                        errorDetails = errorBody.error || errorBody.message || JSON.stringify(errorBody);
+                    } else if (data && typeof data === 'object') {
+                        console.error('[Receipt Scanner] Error in data:', data);
+                        if ('error' in data) {
+                            errorDetails = data.error;
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('[Receipt Scanner] Failed to parse error:', parseError);
+                    errorDetails = functionError.message || 'Edge Function failed';
                 }
 
-                console.error('[Receipt Scanner] Edge Function error details:', errorDetails);
+                console.error('[Receipt Scanner] Final error details:', errorDetails);
                 throw new Error(`AI processing failed: ${errorDetails}`);
             }
 
