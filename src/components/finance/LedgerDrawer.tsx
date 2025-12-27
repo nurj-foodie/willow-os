@@ -22,6 +22,26 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [description, setDescription] = useState('');
     const [showScanner, setShowScanner] = useState(false);
 
+    // Check for pending scanned data on mount (survives app reloads)
+    React.useEffect(() => {
+        const pending = localStorage.getItem('willow_pending_receipt');
+        if (pending && isOpen) {
+            try {
+                const data = JSON.parse(pending);
+                console.log('[LedgerDrawer] Found pending receipt data:', data);
+                setAmount(data.amount || '');
+                setCategory(data.category || '');
+                setDescription(data.description || '');
+                setShowForm(true);
+                setShowScanner(false);
+                localStorage.removeItem('willow_pending_receipt');
+            } catch (e) {
+                console.error('[LedgerDrawer] Failed to parse pending data:', e);
+                localStorage.removeItem('willow_pending_receipt');
+            }
+        }
+    }, [isOpen]);
+
     // Debug: Log form state changes
     React.useEffect(() => {
         console.log('[LedgerDrawer] State changed:', { showForm, showScanner, amount, category, description });
@@ -41,15 +61,22 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         };
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
+        const amountStr = data.amount?.toString() || '0';
 
-        // Batch all state updates together to prevent race conditions
-        React.startTransition(() => {
-            setAmount(data.amount?.toString() || '0');
-            setCategory(mappedCategory);
-            setDescription(data.merchant);
-            setShowScanner(false);
-            setShowForm(true);
-        });
+        // Store in localStorage to survive app reloads
+        localStorage.setItem('willow_pending_receipt', JSON.stringify({
+            amount: amountStr,
+            category: mappedCategory,
+            description: data.merchant
+        }));
+        console.log('[LedgerDrawer] Saved pending receipt to localStorage');
+
+        // Also update state immediately in case app doesn't reload
+        setAmount(amountStr);
+        setCategory(mappedCategory);
+        setDescription(data.merchant);
+        setShowScanner(false);
+        setShowForm(true);
 
         console.log('[LedgerDrawer] Form state updated, showForm: true');
     };
