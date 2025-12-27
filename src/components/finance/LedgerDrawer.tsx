@@ -299,7 +299,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                 setEditCategory(entry.category);
                                                                 setEditDescription(entry.description || '');
                                                             }}
-                                                            className="p-2 opacity-0 group-hover:opacity-100 hover:bg-charcoal/5 rounded-lg transition-all"
+                                                            className="p-2 hover:bg-charcoal/5 rounded-lg transition-all"
                                                         >
                                                             <Pencil size={14} className="text-charcoal/40" />
                                                         </button>
@@ -309,7 +309,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                     await onDeleteEntry(entry.id);
                                                                 }
                                                             }}
-                                                            className="p-2 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded-lg transition-all"
+                                                            className="p-2 hover:bg-red-50 rounded-lg transition-all"
                                                         >
                                                             <Trash2 size={14} className="text-red-400" />
                                                         </button>
