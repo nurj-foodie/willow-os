@@ -72,6 +72,9 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
 
+        // Close scanner first to prevent modal overlap issues
+        setShowScanner(false);
+
         // Check for duplicate (same amount + merchant)
         const isDuplicate = entries.some(entry =>
             entry.amount === data.amount &&
@@ -79,14 +82,16 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         );
 
         if (isDuplicate) {
-            const proceed = confirm(`⚠️ Possible duplicate detected!\n\nAmount: RM ${data.amount?.toFixed(2)} \nMerchant: ${data.merchant} \n\nThis looks similar to an existing entry.Save anyway ? `);
+            // Small delay to let scanner close animation finish
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const proceed = confirm(`⚠️ Possible duplicate detected!\n\nAmount: RM ${data.amount?.toFixed(2)}\nMerchant: ${data.merchant}\n\nThis looks similar to an existing entry. Save anyway?`);
             if (!proceed) {
-                setShowScanner(false);
                 return;
             }
         }
 
         try {
+            console.log('[LedgerDrawer] Saving with receipt_url:', data.receipt_url);
             // Save directly to database - no form needed!
             await onAddEntry({
                 amount: data.amount || 0,
@@ -97,14 +102,12 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
             });
 
             console.log('[LedgerDrawer] Entry auto-saved successfully!');
-            setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant} `);
-            setShowScanner(false);
+            setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant}`);
 
             // Clear success message after 3 seconds
             setTimeout(() => setLastSavedEntry(null), 3000);
         } catch (error) {
             console.error('[LedgerDrawer] Failed to auto-save entry:', error);
-            setShowScanner(false);
         }
     };
 
