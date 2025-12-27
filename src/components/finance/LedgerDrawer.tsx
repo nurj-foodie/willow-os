@@ -148,7 +148,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 <h2 className="text-2xl font-serif font-bold text-charcoal">Willow Ledger</h2>
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             const pdf = new jsPDF();
                                             const monthYear = new Date().toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
                                             const total = entries.reduce((sum, e) => sum + e.amount, 0);
@@ -160,17 +160,36 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                             pdf.text(`${monthYear} Report`, 20, 30);
                                             pdf.text(`Total: RM ${total.toFixed(2)}`, 20, 40);
 
-                                            // Entries
+                                            // Entries with images
                                             let y = 55;
-                                            entries.forEach((entry, i) => {
-                                                if (y > 270) { pdf.addPage(); y = 20; }
+                                            for (let i = 0; i < entries.length; i++) {
+                                                const entry = entries[i];
+                                                if (y > 250) { pdf.addPage(); y = 20; }
+
+                                                // Try to add receipt image
+                                                if (entry.receipt_url) {
+                                                    try {
+                                                        const response = await fetch(entry.receipt_url);
+                                                        const blob = await response.blob();
+                                                        const base64 = await new Promise<string>((resolve) => {
+                                                            const reader = new FileReader();
+                                                            reader.onloadend = () => resolve(reader.result as string);
+                                                            reader.readAsDataURL(blob);
+                                                        });
+                                                        pdf.addImage(base64, 'JPEG', 20, y, 25, 25);
+                                                    } catch (e) {
+                                                        console.log('Could not load image:', e);
+                                                    }
+                                                }
+
+                                                const textX = entry.receipt_url ? 50 : 20;
                                                 pdf.setFontSize(10);
-                                                pdf.text(`${i + 1}. ${entry.description || entry.category}`, 20, y);
-                                                pdf.text(`RM ${entry.amount.toFixed(2)}`, 160, y);
+                                                pdf.text(`${i + 1}. ${entry.description || entry.category}`, textX, y + 8);
+                                                pdf.text(`RM ${entry.amount.toFixed(2)}`, 160, y + 8);
                                                 pdf.setFontSize(8);
-                                                pdf.text(`${entry.category}`, 20, y + 5);
-                                                y += 15;
-                                            });
+                                                pdf.text(`${entry.category}`, textX, y + 15);
+                                                y += entry.receipt_url ? 30 : 15;
+                                            }
 
                                             pdf.save(`willow-ledger-${monthYear.replace(' ', '-')}.pdf`);
                                         }}
