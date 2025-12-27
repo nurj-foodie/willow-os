@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, AlertCircle, Camera } from 'lucide-react';
+import { X, Plus, AlertCircle, Camera, Pencil, Trash2, Check } from 'lucide-react';
 import type { LedgerEntry } from '../../hooks/useLedger';
 import { ReceiptScanner } from './ReceiptScanner';
 
@@ -10,11 +10,13 @@ interface LedgerDrawerProps {
     entries: LedgerEntry[];
     trialDaysLeft: number | null;
     onAddEntry: (entry: any) => Promise<void>;
+    onUpdateEntry?: (id: string, updates: any) => Promise<void>;
+    onDeleteEntry?: (id: string) => Promise<void>;
     user: any;
 }
 
 export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
-    isOpen, onClose, entries, trialDaysLeft, onAddEntry, user
+    isOpen, onClose, entries, trialDaysLeft, onAddEntry, onUpdateEntry, onDeleteEntry, user
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [amount, setAmount] = useState('');
@@ -22,6 +24,10 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [description, setDescription] = useState('');
     const [showScanner, setShowScanner] = useState(false);
     const [lastSavedEntry, setLastSavedEntry] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editAmount, setEditAmount] = useState('');
+    const [editCategory, setEditCategory] = useState('');
+    const [editDescription, setEditDescription] = useState('');
 
     // Check for pending scanned data on mount (survives app reloads)
     React.useEffect(() => {
@@ -225,12 +231,91 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 <div className="space-y-4">
                                     <h4 className="text-xs font-bold text-charcoal/30 uppercase tracking-widest">Flow Log</h4>
                                     {entries.map(entry => (
-                                        <div key={entry.id} className="flex justify-between items-center p-4 rounded-xl border border-charcoal/5 group hover:border-clay/20 transition-all">
-                                            <div>
-                                                <p className="font-bold text-charcoal">{entry.description || entry.category}</p>
-                                                <p className="text-[10px] text-charcoal/40 uppercase font-bold">{entry.category}</p>
-                                            </div>
-                                            <p className="font-serif font-bold text-clay">RM {entry.amount.toFixed(2)}</p>
+                                        <div key={entry.id} className="p-4 rounded-xl border border-charcoal/5 group hover:border-clay/20 transition-all">
+                                            {editingId === entry.id ? (
+                                                // Edit mode
+                                                <div className="space-y-3">
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={editAmount}
+                                                        onChange={e => setEditAmount(e.target.value)}
+                                                        className="w-full bg-white px-3 py-2 rounded-lg border border-clay/20 text-sm"
+                                                        placeholder="Amount"
+                                                    />
+                                                    <select
+                                                        value={editCategory}
+                                                        onChange={e => setEditCategory(e.target.value)}
+                                                        className="w-full bg-white px-3 py-2 rounded-lg border border-clay/20 text-sm"
+                                                    >
+                                                        <option value="Food">🍲 Food</option>
+                                                        <option value="Transport">🚗 Transport</option>
+                                                        <option value="Wellness">🧘 Wellness</option>
+                                                        <option value="Misc">📦 Misc</option>
+                                                    </select>
+                                                    <input
+                                                        value={editDescription}
+                                                        onChange={e => setEditDescription(e.target.value)}
+                                                        className="w-full bg-white px-3 py-2 rounded-lg border border-clay/20 text-sm"
+                                                        placeholder="Description"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (onUpdateEntry) {
+                                                                    await onUpdateEntry(entry.id, {
+                                                                        amount: parseFloat(editAmount),
+                                                                        category: editCategory,
+                                                                        description: editDescription
+                                                                    });
+                                                                }
+                                                                setEditingId(null);
+                                                            }}
+                                                            className="flex-1 bg-matcha text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1"
+                                                        >
+                                                            <Check size={16} /> Save
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="px-4 py-2 border border-charcoal/20 rounded-lg text-sm"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // View mode
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <p className="font-bold text-charcoal">{entry.description || entry.category}</p>
+                                                        <p className="text-[10px] text-charcoal/40 uppercase font-bold">{entry.category}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-serif font-bold text-clay">RM {entry.amount.toFixed(2)}</p>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingId(entry.id);
+                                                                setEditAmount(entry.amount.toString());
+                                                                setEditCategory(entry.category);
+                                                                setEditDescription(entry.description || '');
+                                                            }}
+                                                            className="p-2 opacity-0 group-hover:opacity-100 hover:bg-charcoal/5 rounded-lg transition-all"
+                                                        >
+                                                            <Pencil size={14} className="text-charcoal/40" />
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (onDeleteEntry && confirm('Delete this entry?')) {
+                                                                    await onDeleteEntry(entry.id);
+                                                                }
+                                                            }}
+                                                            className="p-2 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded-lg transition-all"
+                                                        >
+                                                            <Trash2 size={14} className="text-red-400" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

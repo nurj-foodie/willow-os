@@ -82,5 +82,43 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
         }
     };
 
-    return { entries, loading, isTrialActive: true, trialDaysLeft: 999, startTrial, addEntry, hasStartedTrial: true };
+    const updateEntry = async (id: string, updates: Partial<LedgerEntry>) => {
+        console.log('[useLedger] Updating entry:', id, updates);
+
+        if (isSupabaseConfigured && user && user.aud !== 'demo') {
+            const { error } = await supabase
+                .from('ledger')
+                .update(updates)
+                .eq('id', id);
+
+            if (error) {
+                console.error('[useLedger] Error updating entry:', error);
+                throw error;
+            }
+            setEntries(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+        } else {
+            setEntries(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+        }
+    };
+
+    const deleteEntry = async (id: string) => {
+        console.log('[useLedger] Deleting entry:', id);
+
+        if (isSupabaseConfigured && user && user.aud !== 'demo') {
+            const { error } = await supabase
+                .from('ledger')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.error('[useLedger] Error deleting entry:', error);
+                throw error;
+            }
+            setEntries(prev => prev.filter(e => e.id !== id));
+        } else {
+            setEntries(prev => prev.filter(e => e.id !== id));
+        }
+    };
+
+    return { entries, loading, isTrialActive: true, trialDaysLeft: 999, startTrial, addEntry, updateEntry, deleteEntry, hasStartedTrial: true };
 };

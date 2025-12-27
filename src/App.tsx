@@ -43,7 +43,7 @@ function App() {
 
   const { mood, priorities, saving, updateMood, updatePriority, persistPriorities, loading: wellbeingLoading } = useWellbeing(user);
   const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
-  const { entries, trialDaysLeft, addEntry } = useLedger(user, profile, updateProfile);
+  const { entries, trialDaysLeft, addEntry, updateEntry, deleteEntry } = useLedger(user, profile, updateProfile);
 
   const [showRitual, setShowRitual] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -280,6 +280,8 @@ function App() {
           entries={entries}
           trialDaysLeft={trialDaysLeft}
           onAddEntry={addEntry}
+          onUpdateEntry={updateEntry}
+          onDeleteEntry={deleteEntry}
           user={user}
         />
 
