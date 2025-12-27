@@ -22,6 +22,11 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [description, setDescription] = useState('');
     const [showScanner, setShowScanner] = useState(false);
 
+    // Debug: Log form state changes
+    React.useEffect(() => {
+        console.log('[LedgerDrawer] State changed:', { showForm, showScanner, amount, category, description });
+    }, [showForm, showScanner, amount, category, description]);
+
     const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
         console.log('[LedgerDrawer] Received scanner data:', data);
 
