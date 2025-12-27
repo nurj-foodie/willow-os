@@ -42,12 +42,16 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
 
-        setAmount(data.amount?.toString() || '0');
-        setCategory(mappedCategory);
-        setDescription(data.merchant);
-        setShowScanner(false);
-        setShowForm(true);
-        console.log('[LedgerDrawer] Form state updated, showForm:', true);
+        // Batch all state updates together to prevent race conditions
+        React.startTransition(() => {
+            setAmount(data.amount?.toString() || '0');
+            setCategory(mappedCategory);
+            setDescription(data.merchant);
+            setShowScanner(false);
+            setShowForm(true);
+        });
+
+        console.log('[LedgerDrawer] Form state updated, showForm: true');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
