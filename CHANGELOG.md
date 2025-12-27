@@ -2,7 +2,22 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-27] - Receipt Scanner & Ledger Enhancements [13:50 UTC+8]
+
+### Added
+- **Auto-Save Receipts**: Scanned receipts now save instantly without requiring a form submission.
+- **Ledger Entry Edit/Delete**: Inline editing and deletion of ledger entries with always-visible buttons.
+- **Receipt Thumbnails**: Mini image previews in Flow Log; tap to view fullscreen.
+- **Duplicate Detection**: Warning dialog when scanning a receipt similar to existing entries.
+- **PDF Export with Images**: Download ledger as PDF with embedded receipt thumbnails.
+
+### Fixed
+- **Thumbnail Not Rendering**: Changed from `getPublicUrl()` to `createSignedUrl()` for private storage bucket.
+- **Duplicate Warning Timing**: Scanner now closes before showing confirm dialog.
+- **Mobile Edit/Delete Buttons**: Made buttons always visible (no hover on touch devices).
+
 ## [2025-12-26] - Reliability & Performance Fixes [07:30 UTC+8]
+
 
 ### Fixed
 - **Receipt Scanner Flow**: Added defensive parsing and sanitization for Gemini AI responses to prevent UI hangs.
