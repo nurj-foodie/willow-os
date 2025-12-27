@@ -81,12 +81,18 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
             console.log('Gemini Extraction Result:', data);
 
+            // Get the public URL for the uploaded receipt
+            const { data: { publicUrl } } = supabase.storage
+                .from('receipts')
+                .getPublicUrl(filePath);
+
             // Sanitization: Ensure data has expected keys and formats
             const sanitizedData = {
                 amount: typeof data.amount === 'number' ? data.amount : parseFloat(data.amount) || 0,
                 merchant: data.merchant || data.vendor || 'Unknown Merchant',
                 category: data.category || 'Other',
-                date: data.date || new Date().toISOString()
+                date: data.date || new Date().toISOString(),
+                receipt_url: publicUrl
             };
 
             setProgress(100);

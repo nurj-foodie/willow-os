@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, AlertCircle, Camera, Pencil, Trash2, Check } from 'lucide-react';
+import { X, Plus, AlertCircle, Camera, Pencil, Trash2, Check, Download } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import type { LedgerEntry } from '../../hooks/useLedger';
 import { ReceiptScanner } from './ReceiptScanner';
 
@@ -28,6 +29,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [editAmount, setEditAmount] = useState('');
     const [editCategory, setEditCategory] = useState('');
     const [editDescription, setEditDescription] = useState('');
+    const [viewingImage, setViewingImage] = useState<string | null>(null);
 
     // Check for pending scanned data on mount (survives app reloads)
     React.useEffect(() => {
@@ -55,7 +57,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     }, [showForm, showScanner, amount, category, description]);
 
     // Auto-save scanned receipt directly (no form needed)
-    const handleScannerSuccess = async (data: { amount: number; merchant: string; category: string; date: string }) => {
+    const handleScannerSuccess = async (data: { amount: number; merchant: string; category: string; date: string; receipt_url?: string }) => {
         console.log('[LedgerDrawer] Auto-saving scanned receipt:', data);
 
         // Map Gemini categories to Willow categories
@@ -70,17 +72,32 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
 
+        // Check for duplicate (same amount + merchant)
+        const isDuplicate = entries.some(entry =>
+            entry.amount === data.amount &&
+            entry.description?.toLowerCase() === data.merchant?.toLowerCase()
+        );
+
+        if (isDuplicate) {
+            const proceed = confirm(`⚠️ Possible duplicate detected!\n\nAmount: RM ${data.amount?.toFixed(2)} \nMerchant: ${data.merchant} \n\nThis looks similar to an existing entry.Save anyway ? `);
+            if (!proceed) {
+                setShowScanner(false);
+                return;
+            }
+        }
+
         try {
             // Save directly to database - no form needed!
             await onAddEntry({
                 amount: data.amount || 0,
                 category: mappedCategory,
                 description: data.merchant || 'Scanned Receipt',
-                currency: 'MYR'
+                currency: 'MYR',
+                receipt_url: data.receipt_url
             });
 
             console.log('[LedgerDrawer] Entry auto-saved successfully!');
-            setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant}`);
+            setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant} `);
             setShowScanner(false);
 
             // Clear success message after 3 seconds
@@ -126,7 +143,41 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-8">
                                 <h2 className="text-2xl font-serif font-bold text-charcoal">Willow Ledger</h2>
-                                <button onClick={onClose} className="p-2 rounded-full hover:bg-charcoal/5"><X /></button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const pdf = new jsPDF();
+                                            const monthYear = new Date().toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
+                                            const total = entries.reduce((sum, e) => sum + e.amount, 0);
+
+                                            // Header
+                                            pdf.setFontSize(20);
+                                            pdf.text('Willow Ledger', 20, 20);
+                                            pdf.setFontSize(12);
+                                            pdf.text(`${monthYear} Report`, 20, 30);
+                                            pdf.text(`Total: RM ${total.toFixed(2)}`, 20, 40);
+
+                                            // Entries
+                                            let y = 55;
+                                            entries.forEach((entry, i) => {
+                                                if (y > 270) { pdf.addPage(); y = 20; }
+                                                pdf.setFontSize(10);
+                                                pdf.text(`${i + 1}. ${entry.description || entry.category}`, 20, y);
+                                                pdf.text(`RM ${entry.amount.toFixed(2)}`, 160, y);
+                                                pdf.setFontSize(8);
+                                                pdf.text(`${entry.category}`, 20, y + 5);
+                                                y += 15;
+                                            });
+
+                                            pdf.save(`willow-ledger-${monthYear.replace(' ', '-')}.pdf`);
+                                        }}
+                                        className="p-2 rounded-full hover:bg-charcoal/5"
+                                        title="Export PDF"
+                                    >
+                                        <Download size={20} />
+                                    </button>
+                                    <button onClick={onClose} className="p-2 rounded-full hover:bg-charcoal/5"><X /></button>
+                                </div>
                             </div>
 
                             <div className="space-y-6">
@@ -285,8 +336,16 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                 </div>
                                             ) : (
                                                 // View mode
-                                                <div className="flex justify-between items-center">
-                                                    <div>
+                                                <div className="flex justify-between items-center gap-3">
+                                                    {entry.receipt_url && (
+                                                        <button
+                                                            onClick={() => setViewingImage(entry.receipt_url!)}
+                                                            className="w-12 h-12 rounded-lg bg-charcoal/5 overflow-hidden flex-shrink-0 hover:opacity-80"
+                                                        >
+                                                            <img src={entry.receipt_url} alt="Receipt" className="w-full h-full object-cover" />
+                                                        </button>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-charcoal">{entry.description || entry.category}</p>
                                                         <p className="text-[10px] text-charcoal/40 uppercase font-bold">{entry.category}</p>
                                                     </div>
@@ -319,6 +378,34 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Image Modal */}
+                                <AnimatePresence>
+                                    {viewingImage && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4"
+                                            onClick={() => setViewingImage(null)}
+                                        >
+                                            <motion.img
+                                                initial={{ scale: 0.9 }}
+                                                animate={{ scale: 1 }}
+                                                exit={{ scale: 0.9 }}
+                                                src={viewingImage}
+                                                alt="Receipt"
+                                                className="max-w-full max-h-full rounded-xl"
+                                            />
+                                            <button
+                                                className="absolute top-4 right-4 p-2 bg-white/20 rounded-full"
+                                                onClick={() => setViewingImage(null)}
+                                            >
+                                                <X size={24} className="text-white" />
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </motion.div>
