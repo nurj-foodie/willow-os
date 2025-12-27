@@ -21,6 +21,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [showScanner, setShowScanner] = useState(false);
+    const [lastSavedEntry, setLastSavedEntry] = useState<string | null>(null);
 
     // Check for pending scanned data on mount (survives app reloads)
     React.useEffect(() => {
@@ -47,8 +48,9 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         console.log('[LedgerDrawer] State changed:', { showForm, showScanner, amount, category, description });
     }, [showForm, showScanner, amount, category, description]);
 
-    const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
-        console.log('[LedgerDrawer] Received scanner data:', data);
+    // Auto-save scanned receipt directly (no form needed)
+    const handleScannerSuccess = async (data: { amount: number; merchant: string; category: string; date: string }) => {
+        console.log('[LedgerDrawer] Auto-saving scanned receipt:', data);
 
         // Map Gemini categories to Willow categories
         const categoryMap: Record<string, string> = {
@@ -61,24 +63,26 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         };
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
-        const amountStr = data.amount?.toString() || '0';
 
-        // Store in localStorage to survive app reloads
-        localStorage.setItem('willow_pending_receipt', JSON.stringify({
-            amount: amountStr,
-            category: mappedCategory,
-            description: data.merchant
-        }));
-        console.log('[LedgerDrawer] Saved pending receipt to localStorage');
+        try {
+            // Save directly to database - no form needed!
+            await onAddEntry({
+                amount: data.amount || 0,
+                category: mappedCategory,
+                description: data.merchant || 'Scanned Receipt',
+                currency: 'MYR'
+            });
 
-        // Also update state immediately in case app doesn't reload
-        setAmount(amountStr);
-        setCategory(mappedCategory);
-        setDescription(data.merchant);
-        setShowScanner(false);
-        setShowForm(true);
+            console.log('[LedgerDrawer] Entry auto-saved successfully!');
+            setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant}`);
+            setShowScanner(false);
 
-        console.log('[LedgerDrawer] Form state updated, showForm: true');
+            // Clear success message after 3 seconds
+            setTimeout(() => setLastSavedEntry(null), 3000);
+        } catch (error) {
+            console.error('[LedgerDrawer] Failed to auto-save entry:', error);
+            setShowScanner(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -148,11 +152,27 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                             </div>
                                             <div className="text-center">
                                                 <p className="font-bold text-charcoal/60">Scan Receipt</p>
-                                                <p className="text-[10px] font-bold text-charcoal/20 uppercase tracking-widest">Powered by AI</p>
+                                                <p className="text-[10px] font-bold text-charcoal/20 uppercase tracking-widest">Auto-Saves Instantly</p>
                                             </div>
                                         </motion.button>
                                     )}
                                 </AnimatePresence>
+
+                                {/* Success Message */}
+                                <AnimatePresence>
+                                    {lastSavedEntry && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="bg-matcha/20 text-matcha px-4 py-3 rounded-xl text-center"
+                                        >
+                                            <p className="font-bold">✓ Entry Saved!</p>
+                                            <p className="text-sm">{lastSavedEntry}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
 
                                 {/* Quick Summary */}
                                 <div className="grid grid-cols-1 gap-4">
