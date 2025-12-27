@@ -54,6 +54,8 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
     };
 
     const addEntry = async (entry: Omit<LedgerEntry, 'id' | 'created_at'>) => {
+        console.log('[useLedger] Adding entry:', entry);
+
         if (isSupabaseConfigured && user && user.aud !== 'demo') {
             const { data, error } = await supabase
                 .from('ledger')
@@ -61,9 +63,11 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
                 .select();
 
             if (error) {
-                console.error('Error adding ledger entry:', error);
+                console.error('[useLedger] Error adding ledger entry:', error);
                 throw error;
             }
+
+            console.log('[useLedger] Entry saved to Supabase:', data);
             if (data) setEntries(prev => [data[0], ...prev]);
             return data;
         } else {
@@ -72,6 +76,7 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
                 id: Math.random().toString(36).substr(2, 9),
                 created_at: new Date().toISOString()
             };
+            console.log('[useLedger] Entry saved to localStorage:', newEntry);
             setEntries(prev => [newEntry, ...prev]);
             return [newEntry];
         }
