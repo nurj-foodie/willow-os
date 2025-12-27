@@ -94,8 +94,9 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
             // Artificial delay to let user see the "Done" state
             setTimeout(() => {
+                console.log('[Receipt Scanner] Calling onProcessed with:', sanitizedData);
                 onProcessed(sanitizedData);
-                onClose();
+                // Don't close automatically - let parent handle the transition
             }, 1000);
 
         } catch (err: any) {

@@ -23,6 +23,8 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [showScanner, setShowScanner] = useState(false);
 
     const handleScannerSuccess = (data: { amount: number; merchant: string; category: string; date: string }) => {
+        console.log('[LedgerDrawer] Received scanner data:', data);
+
         // Map Gemini categories to Willow categories
         const categoryMap: Record<string, string> = {
             'Food & Drink': 'Food',
@@ -38,8 +40,9 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         setAmount(data.amount?.toString() || '0');
         setCategory(mappedCategory);
         setDescription(data.merchant);
-        setShowForm(true);
         setShowScanner(false);
+        setShowForm(true);
+        console.log('[LedgerDrawer] Form state updated, showForm:', true);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -116,16 +119,25 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 </AnimatePresence>
 
                                 {/* Quick Summary */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4">
                                     <div className="bg-sage/10 p-4 rounded-xl">
-                                        <span className="text-[10px] uppercase font-bold text-sage opacity-60">This Week</span>
-                                        <p className="text-xl font-serif font-bold text-sage">RM {entries.reduce((a, b) => a + b.amount, 0).toFixed(2)}</p>
-                                    </div>
-                                    <div className="bg-clay/10 p-4 rounded-xl flex items-center justify-center cursor-pointer hover:bg-clay/20 transition-colors"
-                                        onClick={() => setShowForm(!showForm)}>
-                                        <Plus size={24} className="text-clay" />
+                                        <span className="text-[10px] uppercase font-bold text-sage opacity-60">This Month</span>
+                                        <p className="text-2xl font-serif font-bold text-sage">RM {entries.reduce((a, b) => a + b.amount, 0).toFixed(2)}</p>
+                                        <div className="mt-2 flex gap-2 text-xs">
+                                            <span className="bg-sage/20 px-2 py-1 rounded">🍲 Food: RM{entries.filter(e => e.category === 'Food').reduce((a, b) => a + b.amount, 0).toFixed(2)}</span>
+                                            <span className="bg-sage/20 px-2 py-1 rounded">🚗 Trans: RM{entries.filter(e => e.category === 'Transport').reduce((a, b) => a + b.amount, 0).toFixed(2)}</span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                {/* Manual Entry Button */}
+                                <button
+                                    onClick={() => setShowForm(!showForm)}
+                                    className="w-full py-3 border border-clay/20 rounded-xl text-clay font-bold hover:bg-clay/10 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={18} />
+                                    Add Manual Entry
+                                </button>
 
                                 {showForm && (
                                     <form onSubmit={handleSubmit} className="space-y-4 bg-oat/30 p-4 rounded-xl border border-clay/10">
