@@ -75,8 +75,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDe
                     </span>
                 )}
 
-                {/* Edit & Delete buttons - appear on hover */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Edit & Delete buttons - subtle but always visible */}
+                <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                     {onEdit && (
                         <button
                             onClick={(e) => {
