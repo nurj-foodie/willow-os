@@ -5,12 +5,14 @@ import { Star, Calendar } from 'lucide-react';
 interface VibeHeaderProps {
     onMoodChange: (mood: number) => void;
     currentMood: number;
+    onCalendarClick: () => void;
     saving?: boolean;
 }
 
 export const VibeHeader: React.FC<VibeHeaderProps> = ({
     onMoodChange,
     currentMood,
+    onCalendarClick,
     saving
 }) => {
     const [hoverMood, setHoverMood] = useState<number | null>(null);
@@ -43,9 +45,17 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                 {/* Today's Date */}
                 <div className="flex-1">
                     <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-3 font-bold">Today's Focus</h3>
-                    <div className="flex items-center gap-3">
-                        <Calendar size={20} className="text-matcha" />
-                        <span className="font-serif text-xl text-charcoal">{dateStr}</span>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Calendar size={20} className="text-matcha" />
+                            <span className="font-serif text-xl text-charcoal">{dateStr}</span>
+                        </div>
+                        <button
+                            onClick={onCalendarClick}
+                            className="px-4 py-2 bg-matcha/10 hover:bg-matcha/20 text-charcoal rounded-full transition-colors text-sm font-medium"
+                        >
+                            View Calendar
+                        </button>
                     </div>
                 </div>
 

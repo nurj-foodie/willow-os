@@ -23,6 +23,7 @@ import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
 import { LogOut, Shield, ShieldOff, History, Wallet, Trash2 } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
+import { CalendarModal } from './components/wellness/CalendarModal';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
 import { RitualOverlay } from './components/analytics/RitualOverlay';
@@ -40,6 +41,7 @@ function App() {
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const { mood, priorities, saving, updateMood, loading: wellbeingLoading } = useWellbeing(user);
   const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
@@ -244,6 +246,7 @@ function App() {
             <VibeHeader
               currentMood={mood}
               onMoodChange={updateMood}
+              onCalendarClick={() => setShowCalendar(true)}
               saving={saving}
             />
             <SmartInput onAddTask={addTask} />
@@ -360,6 +363,9 @@ function App() {
             </div>
           ) : null}
         </DragOverlay>
+
+        {/* Calendar Modal */}
+        <CalendarModal isOpen={showCalendar} onClose={() => setShowCalendar(false)} />
       </div>
     </DndContext>
   );
