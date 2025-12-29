@@ -6,6 +6,7 @@ interface VibeHeaderProps {
     onMoodChange: (mood: number) => void;
     currentMood: number;
     onCalendarClick: () => void;
+    selectedDate: Date;
     saving?: boolean;
 }
 
@@ -13,6 +14,7 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
     onMoodChange,
     currentMood,
     onCalendarClick,
+    selectedDate,
     saving
 }) => {
     const [hoverMood, setHoverMood] = useState<number | null>(null);
@@ -25,9 +27,8 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
         { val: 5, color: 'hover:text-purple-400', label: 'Inspired' },
     ];
 
-    // Today's date - calculated, not stored in state
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('en-US', {
+    // Format selected date for display
+    const dateStr = selectedDate.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'short',
         day: 'numeric'

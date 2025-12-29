@@ -36,7 +36,7 @@ import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
-  const { tasks, loading: tasksLoading, user, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
+  const { tasks, loading: tasksLoading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -247,6 +247,7 @@ function App() {
               currentMood={mood}
               onMoodChange={updateMood}
               onCalendarClick={() => setShowCalendar(true)}
+              selectedDate={selectedDate}
               saving={saving}
             />
             <SmartInput onAddTask={addTask} />
@@ -365,7 +366,12 @@ function App() {
         </DragOverlay>
 
         {/* Calendar Modal */}
-        <CalendarModal isOpen={showCalendar} onClose={() => setShowCalendar(false)} />
+        <CalendarModal
+          isOpen={showCalendar}
+          onClose={() => setShowCalendar(false)}
+          tasks={tasks}
+          onDateSelect={setSelectedDate}
+        />
       </div>
     </DndContext>
   );

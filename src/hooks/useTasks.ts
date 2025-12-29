@@ -9,6 +9,11 @@ export function useTasks() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
+    });
 
     // Monitor auth state OR demo mode
     useEffect(() => {
@@ -44,17 +49,17 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
-                // Calculate today's date range (not stored as state!)
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const endOfToday = new Date();
-                endOfToday.setHours(23, 59, 59, 999);
+                // Use selectedDate for filtering
+                const startOfDay = new Date(selectedDate);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(selectedDate);
+                endOfDay.setHours(23, 59, 59, 999);
 
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
                     .eq('user_id', user.id)
-                    .or(`status.eq.parked,and(due_date.gte.${today.toISOString()},due_date.lte.${endOfToday.toISOString()})`)
+                    .or(`status.eq.parked,and(due_date.gte.${startOfDay.toISOString()},due_date.lte.${endOfDay.toISOString()})`)
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -73,17 +78,17 @@ export function useTasks() {
             if (saved) {
                 const allTasks: Task[] = JSON.parse(saved);
 
-                // Filter to today's tasks + parked tasks
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const endOfToday = new Date();
-                endOfToday.setHours(23, 59, 59, 999);
+                // Filter to selected date's tasks + parked tasks
+                const startOfDay = new Date(selectedDate);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(selectedDate);
+                endOfDay.setHours(23, 59, 59, 999);
 
                 const filtered = allTasks.filter(t => {
                     if (t.status === 'parked') return true;
                     if (!t.due_date) return false;
                     const dueDate = new Date(t.due_date);
-                    return dueDate >= today && dueDate <= endOfToday;
+                    return dueDate >= startOfDay && dueDate <= endOfDay;
                 });
 
                 setTasks(filtered);
@@ -114,7 +119,7 @@ export function useTasks() {
             }
             setLoading(false);
         }
-    }, [user]);
+    }, [user, selectedDate]);
 
     useEffect(() => {
         fetchTasks();
@@ -279,5 +284,5 @@ export function useTasks() {
         }
     };
 
-    return { tasks, loading, user, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount };
+    return { tasks, loading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount };
 }

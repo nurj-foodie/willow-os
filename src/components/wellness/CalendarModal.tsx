@@ -1,13 +1,16 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { Task } from '../../types';
 
 interface CalendarModalProps {
     isOpen: boolean;
     onClose: () => void;
+    tasks: Task[];
+    onDateSelect: (date: Date) => void;
 }
 
-export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
+export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, tasks, onDateSelect }) => {
     const [currentMonth, setCurrentMonth] = React.useState(new Date());
 
     // Generate calendar grid
@@ -44,6 +47,29 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
         if (!day) return false;
         const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
         return date.getTime() === today.getTime();
+    };
+
+    const getTaskCountForDate = (day: number | null) => {
+        if (!day) return 0;
+        const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        targetDate.setHours(0, 0, 0, 0);
+        const nextDay = new Date(targetDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        return tasks.filter(task => {
+            if (!task.due_date) return false;
+            const taskDate = new Date(task.due_date);
+            taskDate.setHours(0, 0, 0, 0);
+            return taskDate.getTime() === targetDate.getTime();
+        }).length;
+    };
+
+    const handleDateClick = (day: number | null) => {
+        if (!day) return;
+        const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        selectedDate.setHours(0, 0, 0, 0);
+        onDateSelect(selectedDate);
+        onClose();
     };
 
     const goToPreviousMonth = () => {
@@ -113,23 +139,35 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
 
                             {/* Calendar grid */}
                             <div className="grid grid-cols-7 gap-2">
-                                {days.map((day, idx) => (
-                                    <button
-                                        key={idx}
-                                        disabled={!day}
-                                        className={`
-                                            aspect-square rounded-lg flex items-center justify-center
-                                            transition-all text-sm font-medium
-                                            ${!day ? 'invisible' : ''}
-                                            ${isToday(day)
-                                                ? 'bg-matcha text-white shadow-md'
-                                                : 'bg-white/40 text-charcoal hover:bg-matcha/20'
-                                            }
-                                        `}
-                                    >
-                                        {day}
-                                    </button>
-                                ))}
+                                {days.map((day, idx) => {
+                                    const taskCount = getTaskCountForDate(day);
+                                    return (
+                                        <button
+                                            key={idx}
+                                            disabled={!day}
+                                            onClick={() => handleDateClick(day)}
+                                            className={`
+                                                aspect-square rounded-lg flex flex-col items-center justify-center
+                                                transition-all text-sm font-medium relative
+                                                ${!day ? 'invisible' : ''}
+                                                ${isToday(day)
+                                                    ? 'bg-matcha text-white shadow-md'
+                                                    : 'bg-white/40 text-charcoal hover:bg-matcha/20 cursor-pointer'
+                                                }
+                                            `}
+                                        >
+                                            {day}
+                                            {taskCount > 0 && (
+                                                <span className={`
+                                                    absolute bottom-1 text-[10px] font-bold
+                                                    ${isToday(day) ? 'text-white/70' : 'text-matcha'}
+                                                `}>
+                                                    {taskCount}
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </motion.div>
