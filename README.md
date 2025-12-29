@@ -7,10 +7,13 @@ Willow is a minimal, low-anxiety task manager that replaces rigid calendars with
 
 ## ✨ Core Features
 - **Liquid Stream:** Vertical drag-and-drop tasks with bouncy physics.
-- **Smart NLP Input:** Type naturally (e.g., "Gym at 5pm") and let Willow extract the time.
-- **Eisenhower Matrix:** Prioritize tasks with color-coded "dots" (Clay, Sage, Matcha, Lavender).
+- **Smart NLP Input:** Type naturally (e.g., "Gym tomorrow at 5pm") and let Willow extract the time and date.
+- **Interactive Calendar:** Monthly calendar view with task indicators and date-based filtering.
+- **Task Management:** Edit tasks inline, delete with confirmation, and smart date assignment.
+- **Eisenhower Matrix:** Prioritize tasks with color-coded themes (Clay, Sage, Matcha, Lavender).
 - **Personalized Rituals:** Time-aware greetings, atmospheric background shifts, and a "Hold to Enter" focus moment.
 - **Permanent Archive:** A "Wrap Up" ritual that moves completed tasks to a searchable history drawer.
+- **Receipt Scanner:** AI-powered receipt scanning with Gemini 2.0 Flash for instant ledger entries.
 - **Instant Demo Mode:** 🎭 Try the app immediately with zero-config localStorage persistence.
 
 ## 🛠️ Tech Stack
@@ -45,4 +48,9 @@ npm run dev
 - [x] Task Archive & History Drawer
 - [x] Instant Demo Mode for testers
 - [x] Gemini 2.0 Flash AI Integration
+- [x] Receipt Scanner & Ledger
+- [x] Calendar View & Task Management
 - [x] PWA Configuration & Launch
+- [ ] Push Notifications for upcoming tasks
+- [ ] Interactive Onboarding Tutorial
+- [ ] Daily Greeting System

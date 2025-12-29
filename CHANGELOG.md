@@ -2,6 +2,29 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-29] - Calendar Feature Implementation [23:00 UTC+8]
+
+### Added
+- **Interactive Calendar View**: Monthly calendar modal with task indicators and date selection
+- **Smart Date Assignment**: Natural language parsing for task dates ("tomorrow", "next week", "Dec 31")
+- **Task Count Indicators**: Subtle dots on calendar dates showing which days have tasks
+- **Date-Based Task Filtering**: Click any date to filter tasks to that specific day
+- **Task Edit Modal**: Full-featured editing modal for task title, due date, and priority
+- **Task Delete**: Delete tasks directly from edit modal with confirmation dialog
+- **Responsive Design**: Calendar and edit buttons optimized for both mobile and desktop
+- **Today's Focus Header**: Date display showing currently selected date
+
+### Changed
+- **Removed "Non-negotiables" Section**: Replaced with calendar-based task management
+- **Edit Button Only on Cards**: Moved delete button to edit modal for cleaner UI
+- **Task Card Styling**: Single edit button with responsive opacity for better UX
+- **Default Date Assignment**: Tasks without explicit dates default to currently selected date
+
+### Fixed
+- **State Management**: Implemented safe selectedDate state to avoid infinite reload loops
+- **Parking Lot Persistence**: Parked tasks remain visible across all date selections
+- **Mobile Button Visibility**: Edit buttons always visible on mobile (70% opacity), hover on desktop
+
 ## [2025-12-27] - Receipt Scanner & Ledger Enhancements [13:50 UTC+8]
 
 ### Added
