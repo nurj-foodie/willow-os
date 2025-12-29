@@ -155,9 +155,12 @@ export function useTasks() {
             title.toLowerCase().includes('gym') || title.toLowerCase().includes('yoga') ? '🧘' :
                 title.toLowerCase().includes('email') || title.toLowerCase().includes('finish') ? '📝' : undefined;
 
+        // Use selectedDate if no dueDate is provided
+        const finalDueDate = dueDate || selectedDate;
+
         const newTaskData: any = {
             title,
-            due_date: dueDate?.toISOString(),
+            due_date: finalDueDate?.toISOString(),
             position_rank: newRank,
             emoji,
             color_theme: (['matcha', 'clay', 'lavender', 'sage'][Math.floor(Math.random() * 4)]) as any,
