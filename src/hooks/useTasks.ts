@@ -44,9 +44,17 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
+                // Calculate today's date range (not stored as state!)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const endOfToday = new Date();
+                endOfToday.setHours(23, 59, 59, 999);
+
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
+                    .eq('user_id', user.id)
+                    .or(`status.eq.parked,and(due_date.gte.${today.toISOString()},due_date.lte.${endOfToday.toISOString()})`)
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -63,7 +71,22 @@ export function useTasks() {
             // Mock/Local storage mode
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
-                setTasks(JSON.parse(saved));
+                const allTasks: Task[] = JSON.parse(saved);
+
+                // Filter to today's tasks + parked tasks
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const endOfToday = new Date();
+                endOfToday.setHours(23, 59, 59, 999);
+
+                const filtered = allTasks.filter(t => {
+                    if (t.status === 'parked') return true;
+                    if (!t.due_date) return false;
+                    const dueDate = new Date(t.due_date);
+                    return dueDate >= today && dueDate <= endOfToday;
+                });
+
+                setTasks(filtered);
             } else {
                 const initial: Task[] = [
                     {

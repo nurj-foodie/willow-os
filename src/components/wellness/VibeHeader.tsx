@@ -1,22 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, Calendar } from 'lucide-react';
 
 interface VibeHeaderProps {
     onMoodChange: (mood: number) => void;
     currentMood: number;
-    priorities: string[];
-    onPriorityChange: (index: number, value: string) => void;
-    onPriorityBlur: () => void;
     saving?: boolean;
 }
 
 export const VibeHeader: React.FC<VibeHeaderProps> = ({
     onMoodChange,
     currentMood,
-    priorities,
-    onPriorityChange,
-    onPriorityBlur,
     saving
 }) => {
     const [hoverMood, setHoverMood] = useState<number | null>(null);
@@ -29,6 +23,14 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
         { val: 5, color: 'hover:text-purple-400', label: 'Inspired' },
     ];
 
+    // Today's date - calculated, not stored in state
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric'
+    });
+
     return (
         <section className="mb-8 p-6 bg-white/40 backdrop-blur-xl rounded-[2rem] border border-clay/10 shadow-sm overflow-hidden relative">
             {saving && (
@@ -38,25 +40,12 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                 </div>
             )}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                {/* Top 3 Priorities Section */}
+                {/* Today's Date */}
                 <div className="flex-1">
-                    <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-4 font-bold">Today's Non-Negotiables</h3>
-                    <div className="space-y-3">
-                        {[0, 1, 2].map((i) => (
-                            <div key={i} className="flex items-center gap-3 group">
-                                <div className="w-5 h-5 rounded-full border border-clay/20 flex-shrink-0 flex items-center justify-center text-[10px] text-charcoal/20 group-hover:border-matcha group-hover:text-matcha transition-colors">
-                                    {i + 1}
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder={`Priority ${i + 1}...`}
-                                    value={priorities[i] || ''}
-                                    onChange={(e) => onPriorityChange(i, e.target.value)}
-                                    onBlur={onPriorityBlur}
-                                    className="bg-transparent border-none outline-none font-serif text-lg text-charcoal/60 placeholder:text-charcoal/10 focus:text-charcoal transition-all w-full"
-                                />
-                            </div>
-                        ))}
+                    <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-3 font-bold">Today's Focus</h3>
+                    <div className="flex items-center gap-3">
+                        <Calendar size={20} className="text-matcha" />
+                        <span className="font-serif text-xl text-charcoal">{dateStr}</span>
                     </div>
                 </div>
 
@@ -76,8 +65,8 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                                 <Star
                                     size={18}
                                     className={`transition-all duration-300 ${(hoverMood || currentMood) >= m.val
-                                            ? 'fill-current text-matcha shadow-glow'
-                                            : 'text-charcoal/10'
+                                        ? 'fill-current text-matcha shadow-glow'
+                                        : 'text-charcoal/10'
                                         } ${m.color}`}
                                 />
                                 {currentMood === m.val && (

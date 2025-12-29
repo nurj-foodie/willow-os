@@ -41,7 +41,7 @@ function App() {
   const [showArchive, setShowArchive] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
 
-  const { mood, priorities, saving, updateMood, updatePriority, persistPriorities, loading: wellbeingLoading } = useWellbeing(user);
+  const { mood, priorities, saving, updateMood, loading: wellbeingLoading } = useWellbeing(user);
   const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
   const { entries, trialDaysLeft, addEntry, updateEntry, deleteEntry } = useLedger(user, profile, updateProfile);
 
@@ -244,9 +244,6 @@ function App() {
             <VibeHeader
               currentMood={mood}
               onMoodChange={updateMood}
-              priorities={priorities}
-              onPriorityChange={updatePriority}
-              onPriorityBlur={persistPriorities}
               saving={saving}
             />
             <SmartInput onAddTask={addTask} />
