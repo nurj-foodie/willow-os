@@ -141,6 +141,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, t
                             <div className="grid grid-cols-7 gap-2">
                                 {days.map((day, idx) => {
                                     const taskCount = getTaskCountForDate(day);
+                                    const hasTasks = taskCount > 0;
                                     return (
                                         <button
                                             key={idx}
@@ -157,13 +158,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, t
                                             `}
                                         >
                                             {day}
-                                            {taskCount > 0 && (
+                                            {hasTasks && (
                                                 <span className={`
-                                                    absolute bottom-1 text-[10px] font-bold
-                                                    ${isToday(day) ? 'text-white/70' : 'text-matcha'}
-                                                `}>
-                                                    {taskCount}
-                                                </span>
+                                                    absolute bottom-1 w-1 h-1 rounded-full
+                                                    ${isToday(day) ? 'bg-white/80' : 'bg-matcha'}
+                                                `} />
                                             )}
                                         </button>
                                     );
