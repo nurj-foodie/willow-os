@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { Task } from './types';
 import {
   DndContext,
   closestCenter,
@@ -24,6 +25,7 @@ import { useNotifications } from './hooks/useNotifications';
 import { LogOut, Shield, ShieldOff, History, Wallet, Trash2 } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { CalendarModal } from './components/wellness/CalendarModal';
+import { TaskEditModal } from './components/modals/TaskEditModal';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
 import { RitualOverlay } from './components/analytics/RitualOverlay';
@@ -42,6 +44,7 @@ function App() {
   const [showArchive, setShowArchive] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { mood, priorities, saving, updateMood, loading: wellbeingLoading } = useWellbeing(user);
   const { profile, loading: profileLoading, updateProfile, recordLogin } = useProfile(user);
@@ -128,6 +131,13 @@ function App() {
 
     if (active.id !== over.id) {
       reorderTasks(active.id as string, over.id as string);
+    }
+  }
+
+  function handleDeleteTask(id: string) {
+    const confirmed = window.confirm('Delete this task? This action cannot be undone.');
+    if (confirmed) {
+      updateTask(id, { status: 'archived' });
     }
   };
 
@@ -255,6 +265,8 @@ function App() {
               <LiquidStream
                 tasks={streamTasks}
                 onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
+                onEdit={setEditingTask}
+                onDelete={handleDeleteTask}
                 privacyMode={privacyMode}
               />
             </div>
@@ -371,6 +383,14 @@ function App() {
           onClose={() => setShowCalendar(false)}
           tasks={tasks}
           onDateSelect={setSelectedDate}
+        />
+
+        {/* Task Edit Modal */}
+        <TaskEditModal
+          task={editingTask}
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          onSave={updateTask}
         />
       </div>
     </DndContext>

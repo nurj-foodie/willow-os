@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, GripVertical } from 'lucide-react';
+import { Check, GripVertical, Edit2, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Task } from '../../types';
@@ -8,10 +8,12 @@ import type { Task } from '../../types';
 interface TaskCardProps {
     task: Task;
     onToggle?: (id: string) => void;
+    onEdit?: (task: Task) => void;
+    onDelete?: (id: string) => void;
     privacyMode?: boolean;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, privacyMode }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete, privacyMode }) => {
     const {
         attributes,
         listeners,
@@ -72,6 +74,34 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, privacyMode 
                         {new Date(task.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 )}
+
+                {/* Edit & Delete buttons - appear on hover */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onEdit && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(task);
+                            }}
+                            className="p-1.5 rounded-full hover:bg-white/50 text-charcoal/40 hover:text-charcoal transition-colors"
+                            title="Edit task"
+                        >
+                            <Edit2 size={14} />
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(task.id);
+                            }}
+                            className="p-1.5 rounded-full hover:bg-clay/30 text-charcoal/40 hover:text-clay transition-colors"
+                            title="Delete task"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                </div>
             </motion.div>
         </div>
     );
