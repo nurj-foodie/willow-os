@@ -78,13 +78,13 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
                             {/* Close button */}
                             <button
                                 onClick={onClose}
-                                className="absolute top-4 right-4 p-2 rounded-full hover:bg-clay/20 transition-colors"
+                                className="absolute top-6 right-6 p-2 rounded-full hover:bg-clay/20 transition-colors z-10"
                             >
                                 <X size={20} className="text-charcoal/60" />
                             </button>
 
                             {/* Header */}
-                            <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center justify-between mb-6 pr-8">
                                 <button
                                     onClick={goToPreviousMonth}
                                     className="p-2 rounded-full hover:bg-clay/20 transition-colors"
