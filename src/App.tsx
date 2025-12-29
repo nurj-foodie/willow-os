@@ -134,13 +134,6 @@ function App() {
     }
   }
 
-  function handleDeleteTask(id: string) {
-    const confirmed = window.confirm('Delete this task? This action cannot be undone.');
-    if (confirmed) {
-      updateTask(id, { status: 'archived' });
-    }
-  };
-
   if (loading) {
     return (
       <Layout>
@@ -266,7 +259,6 @@ function App() {
                 tasks={streamTasks}
                 onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
                 onEdit={setEditingTask}
-                onDelete={handleDeleteTask}
                 privacyMode={privacyMode}
               />
             </div>

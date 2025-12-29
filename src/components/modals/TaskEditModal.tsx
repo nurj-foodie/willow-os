@@ -114,8 +114,8 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                                             onClick={() => setPriority(p.id)}
                                             title={p.label}
                                             className={`flex-1 h-10 rounded-xl transition-all duration-300 font-sans text-sm ${priority === p.id
-                                                    ? `${p.color} ring-2 ring-offset-2 ring-charcoal/20 text-charcoal font-bold`
-                                                    : 'bg-charcoal/5 hover:bg-charcoal/10 text-charcoal/40'
+                                                ? `${p.color} ring-2 ring-offset-2 ring-charcoal/20 text-charcoal font-bold`
+                                                : 'bg-charcoal/5 hover:bg-charcoal/10 text-charcoal/40'
                                                 }`}
                                         >
                                             {p.label}
@@ -139,6 +139,19 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                                     Save Changes
                                 </button>
                             </div>
+
+                            {/* Delete button - separate and destructive */}
+                            <button
+                                onClick={() => {
+                                    if (task && window.confirm('Delete this task? This action cannot be undone.')) {
+                                        onSave(task.id, { status: 'archived' });
+                                        onClose();
+                                    }
+                                }}
+                                className="w-full mt-3 px-4 py-3 rounded-xl bg-clay/10 hover:bg-clay/20 text-clay font-medium transition-colors flex items-center justify-center gap-2"
+                            >
+                                <span>Delete Task</span>
+                            </button>
                         </div>
                     </motion.div>
                 </>

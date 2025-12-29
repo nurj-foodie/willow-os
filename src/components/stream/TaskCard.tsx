@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, GripVertical, Edit2, Trash2 } from 'lucide-react';
+import { Check, GripVertical, Edit2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Task } from '../../types';
@@ -9,11 +9,10 @@ interface TaskCardProps {
     task: Task;
     onToggle?: (id: string) => void;
     onEdit?: (task: Task) => void;
-    onDelete?: (id: string) => void;
     privacyMode?: boolean;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete, privacyMode }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, privacyMode }) => {
     const {
         attributes,
         listeners,
@@ -75,33 +74,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDe
                     </span>
                 )}
 
-                {/* Edit & Delete buttons - responsive for mobile and desktop */}
-                <div className="flex items-center gap-1 opacity-70 md:opacity-40 md:group-hover:opacity-100 transition-opacity">
-                    {onEdit && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onEdit(task);
-                            }}
-                            className="p-1.5 rounded-full hover:bg-white/50 text-charcoal/40 hover:text-charcoal transition-colors"
-                            title="Edit task"
-                        >
-                            <Edit2 size={14} />
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete(task.id);
-                            }}
-                            className="p-1.5 rounded-full hover:bg-clay/30 text-charcoal/40 hover:text-clay transition-colors"
-                            title="Delete task"
-                        >
-                            <Trash2 size={14} />
-                        </button>
-                    )}
-                </div>
+                {/* Edit button only - clean and simple */}
+                {onEdit && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(task);
+                        }}
+                        className="p-2 rounded-full hover:bg-white/50 text-charcoal/50 hover:text-charcoal transition-colors opacity-70 md:opacity-40 md:group-hover:opacity-100"
+                        title="Edit task"
+                    >
+                        <Edit2 size={16} />
+                    </button>
+                )}
             </motion.div>
         </div>
     );
