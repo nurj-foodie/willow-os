@@ -2,6 +2,21 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+## [2025-12-30] - UX Polish: Greetings & Calendar Improvements [23:00 UTC+8]
+
+### Added
+- **Dynamic Time-Based Greetings**: Supportive messages that change throughout the day (morning/afternoon/evening)
+  - Random selection from curated message pool for variety
+  - Maintains "bestie vibes" tone with emojis
+  - Examples: "Good Morning ☀️", "Afternoon Flow 🌤️", "Evening Reflection 🌙"
+
+### Fixed
+- **Calendar Task Indicators**: Dots now correctly appear on ALL dates with tasks
+  - Previously only showed dots for currently selected date
+  - Improved query to fetch all non-done tasks globally
+  - Added client-side filtering for performance
+  - Calendar can now show complete month view with all task indicators
+
 ## [2025-12-29] - Calendar Feature Implementation [23:00 UTC+8]
 
 ### Added

@@ -43,14 +43,14 @@ npm run dev
 - [x] Supabase Integration (Real-time DB)
 - [x] Auth (Google OAuth + Device-based OTP)
 - [x] Parking Lot & Sidebar logic
-- [x] Personalization (Rituals, Greetings, Atmospheric UI)
+- [x] Personalization (Rituals, Time-based Greetings, Atmospheric UI)
 - [x] Task Priorities (Eisenhower Matrix)
 - [x] Task Archive & History Drawer
 - [x] Instant Demo Mode for testers
 - [x] Gemini 2.0 Flash AI Integration
 - [x] Receipt Scanner & Ledger
-- [x] Calendar View & Task Management
+- [x] Calendar View with Task Indicators & Management
 - [x] PWA Configuration & Launch
+- [x] Dynamic Greeting System (Morning/Afternoon/Evening)
 - [ ] Push Notifications for upcoming tasks
 - [ ] Interactive Onboarding Tutorial
-- [ ] Daily Greeting System
