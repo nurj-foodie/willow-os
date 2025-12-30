@@ -34,6 +34,33 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
         day: 'numeric'
     });
 
+    // Dynamic greeting based on time of day
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) {
+            const morningGreetings = [
+                "Good Morning ☀️",
+                "Rise and Flow 🌿",
+                "Fresh Start Today ✨"
+            ];
+            return morningGreetings[Math.floor(Math.random() * morningGreetings.length)];
+        } else if (hour >= 12 && hour < 18) {
+            const afternoonGreetings = [
+                "Afternoon Flow 🌤️",
+                "Keep the Momentum 💫",
+                "Midday Check-in 🍃"
+            ];
+            return afternoonGreetings[Math.floor(Math.random() * afternoonGreetings.length)];
+        } else {
+            const eveningGreetings = [
+                "Evening Reflection 🌙",
+                "Winding Down 🌆",
+                "Almost There ⭐"
+            ];
+            return eveningGreetings[Math.floor(Math.random() * eveningGreetings.length)];
+        }
+    };
+
     return (
         <section className="mb-8 p-6 bg-white/40 backdrop-blur-xl rounded-[2rem] border border-clay/10 shadow-sm overflow-hidden relative">
             {saving && (
@@ -45,7 +72,7 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* Today's Date */}
                 <div className="flex-1">
-                    <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-3 font-bold">Today's Focus</h3>
+                    <h3 className="text-xs font-sans uppercase tracking-widest text-charcoal/30 mb-3 font-bold">{getGreeting()}</h3>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Calendar size={20} className="text-matcha" />
