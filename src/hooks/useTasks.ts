@@ -49,17 +49,12 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
-                // Use selectedDate for filtering
-                const startOfDay = new Date(selectedDate);
-                startOfDay.setHours(0, 0, 0, 0);
-                const endOfDay = new Date(selectedDate);
-                endOfDay.setHours(23, 59, 59, 999);
-
+                // Fetch ALL non-done tasks so calendar can show dots for all dates
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
                     .eq('user_id', user.id)
-                    .or(`status.eq.parked,and(due_date.gte.${startOfDay.toISOString()},due_date.lte.${endOfDay.toISOString()})`)
+                    .neq('status', 'done')
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -73,24 +68,12 @@ export function useTasks() {
             setTasks([]);
             setLoading(false);
         } else if (!isSupabaseConfigured) {
-            // Mock/Local storage mode
+            // Mock/Local storage mode - fetch all non-done tasks
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
                 const allTasks: Task[] = JSON.parse(saved);
-
-                // Filter to selected date's tasks + parked tasks
-                const startOfDay = new Date(selectedDate);
-                startOfDay.setHours(0, 0, 0, 0);
-                const endOfDay = new Date(selectedDate);
-                endOfDay.setHours(23, 59, 59, 999);
-
-                const filtered = allTasks.filter(t => {
-                    if (t.status === 'parked') return true;
-                    if (!t.due_date) return false;
-                    const dueDate = new Date(t.due_date);
-                    return dueDate >= startOfDay && dueDate <= endOfDay;
-                });
-
+                // Only filter out 'done' tasks, keep everything else for calendar
+                const filtered = allTasks.filter(t => t.status !== 'done');
                 setTasks(filtered);
             } else {
                 const initial: Task[] = [
@@ -287,5 +270,32 @@ export function useTasks() {
         }
     };
 
-    return { tasks, loading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount };
+    // Client-side filtering: filter tasks for selected date + parked
+    const filteredTasks = tasks.filter(t => {
+        if (t.status === 'parked') return true;
+        if (!t.due_date) return false;
+
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const dueDate = new Date(t.due_date);
+        return dueDate >= startOfDay && dueDate <= endOfDay;
+    });
+
+    return {
+        tasks: filteredTasks,  // For the stream (filtered by selectedDate)
+        allTasks: tasks,       // For calendar (all tasks to show dots)
+        loading,
+        user,
+        selectedDate,
+        setSelectedDate,
+        addTask,
+        updateTask,
+        updateTasks,
+        reorderTasks,
+        logout,
+        deleteAccount
+    };
 }

@@ -38,7 +38,7 @@ import { OnboardingTour } from './components/onboarding/OnboardingTour';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
-  const { tasks, loading: tasksLoading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
+  const { tasks, allTasks, loading: tasksLoading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -373,7 +373,7 @@ function App() {
         <CalendarModal
           isOpen={showCalendar}
           onClose={() => setShowCalendar(false)}
-          tasks={tasks}
+          tasks={allTasks}
           onDateSelect={setSelectedDate}
         />
 
