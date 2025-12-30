@@ -102,7 +102,7 @@ export function useTasks() {
             }
             setLoading(false);
         }
-    }, [user, selectedDate]);
+    }, [user]);
 
     useEffect(() => {
         fetchTasks();
