@@ -181,14 +181,38 @@ function App() {
       <div className={`flex flex-col md:flex-row min-h-screen bg-gradient-to-br ${bgGradient} relative overflow-x-hidden`}>
 
         <AnimatePresence>
-          {showRitual && (
-            <RitualOverlay
-              userName={profile?.display_name || null}
-              onComplete={handleRitualComplete}
-              yesterdayPriorities={priorities}
-              isNewUser={!profile?.display_name}
-            />
-          )}
+          {showRitual && (() => {
+            // Calculate today's tasks for the day summary
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const todayTasks = allTasks.filter(t => {
+              if (!t.due_date || t.status === 'done' || t.status === 'archived') return false;
+              const dueDate = new Date(t.due_date);
+              return dueDate >= today && dueDate < tomorrow;
+            });
+
+            const overdueTasks = allTasks.filter(t => {
+              if (!t.due_date || t.status === 'done' || t.status === 'archived') return false;
+              const dueDate = new Date(t.due_date);
+              dueDate.setHours(0, 0, 0, 0);
+              return dueDate < today;
+            });
+
+            return (
+              <RitualOverlay
+                userName={profile?.display_name || null}
+                onComplete={handleRitualComplete}
+                yesterdayPriorities={priorities}
+                isNewUser={!profile?.display_name}
+                todayTaskCount={todayTasks.length}
+                overdueTaskCount={overdueTasks.length}
+                overdueTasks={overdueTasks.map(t => ({ title: t.title, emoji: t.emoji }))}
+              />
+            );
+          })()}
           {showOnboarding && (
             <OnboardingTour onComplete={() => setShowOnboarding(false)} />
           )}
@@ -344,11 +368,41 @@ function App() {
         </AnimatePresence>
 
         <ResetRitual
-          hasTasks={tasks.some(t => t.status === 'done')}
-          onReset={() => {
+          doneTasks={tasks.filter(t => t.status === 'done')}
+          incompleteTasks={tasks.filter(t => {
+            // Incomplete = today's tasks that are still 'todo' (not done, not parked)
+            if (t.status !== 'todo' || !t.due_date) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dueDate = new Date(t.due_date);
+            return dueDate >= today && dueDate < tomorrow;
+          })}
+          onReset={(rolloverIncomplete) => {
             const doneIds = tasks.filter(t => t.status === 'done').map(t => t.id);
             if (doneIds.length > 0) {
               updateTasks(doneIds, { status: 'archived' });
+            }
+
+            // Rollover incomplete tasks to tomorrow
+            if (rolloverIncomplete) {
+              const incompleteIds = tasks.filter(t => {
+                if (t.status !== 'todo' || !t.due_date) return false;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const dueDate = new Date(t.due_date);
+                return dueDate >= today && dueDate < tomorrow;
+              }).map(t => t.id);
+
+              if (incompleteIds.length > 0) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(9, 0, 0, 0); // Set to 9am tomorrow
+                updateTasks(incompleteIds, { due_date: tomorrow.toISOString() });
+              }
             }
           }}
         />

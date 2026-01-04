@@ -7,13 +7,19 @@ interface RitualOverlayProps {
     onComplete: (name: string) => void;
     yesterdayPriorities?: string[];
     isNewUser?: boolean;
+    todayTaskCount?: number;
+    overdueTaskCount?: number;
+    overdueTasks?: { title: string; emoji?: string }[];
 }
 
 export const RitualOverlay: React.FC<RitualOverlayProps> = ({
     userName,
     onComplete,
     yesterdayPriorities = [],
-    isNewUser = false
+    isNewUser = false,
+    todayTaskCount = 0,
+    overdueTaskCount = 0,
+    overdueTasks = []
 }) => {
     const [step, setStep] = useState(isNewUser ? 'naming' : 'greeting');
     const [nameInput, setNameInput] = useState(userName || '');
@@ -128,6 +134,37 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                                     </div>
                                 </div>
                             )}
+
+                            {/* Day Summary - Today's Context */}
+                            <div className="p-6 rounded-2xl bg-matcha/10 border border-matcha/20 space-y-3">
+                                <p className="text-[10px] uppercase tracking-widest text-matcha font-bold">Today's Flow</p>
+                                <div className="space-y-2">
+                                    <p className="font-serif text-charcoal/80 text-lg">
+                                        {todayTaskCount === 0
+                                            ? "A clear slate today. What will you plant?"
+                                            : `You have ${todayTaskCount} task${todayTaskCount === 1 ? '' : 's'} scheduled.`
+                                        }
+                                    </p>
+                                    {overdueTaskCount > 0 && (
+                                        <div className="mt-3 p-3 rounded-xl bg-clay/10 border border-clay/20">
+                                            <p className="text-[10px] uppercase tracking-widest text-clay font-bold mb-2">
+                                                ⏳ {overdueTaskCount} task{overdueTaskCount === 1 ? '' : 's'} rolling over
+                                            </p>
+                                            <div className="space-y-1">
+                                                {overdueTasks.slice(0, 3).map((task, i) => (
+                                                    <p key={i} className="font-sans text-sm text-charcoal/60">
+                                                        {task.emoji && <span className="mr-1">{task.emoji}</span>}
+                                                        {task.title}
+                                                    </p>
+                                                ))}
+                                                {overdueTasks.length > 3 && (
+                                                    <p className="text-xs text-charcoal/40 italic">...and {overdueTasks.length - 3} more</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
                             <p className="text-charcoal/40 font-serif italic text-lg leading-relaxed">
                                 Use this moment to ground yourself.<br />

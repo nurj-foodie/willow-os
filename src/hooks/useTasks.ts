@@ -49,12 +49,12 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
-                // Fetch ALL non-done tasks so calendar can show dots for all dates
+                // Fetch ALL tasks except archived - done tasks stay visible until "Wrap the Day"
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
                     .eq('user_id', user.id)
-                    .neq('status', 'done')
+                    .neq('status', 'archived')
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -72,8 +72,8 @@ export function useTasks() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
                 const allTasks: Task[] = JSON.parse(saved);
-                // Only filter out 'done' tasks, keep everything else for calendar
-                const filtered = allTasks.filter(t => t.status !== 'done');
+                // Only filter out 'archived' tasks, keep 'done' visible until Wrap the Day
+                const filtered = allTasks.filter(t => t.status !== 'archived');
                 setTasks(filtered);
             } else {
                 const initial: Task[] = [
@@ -133,6 +133,8 @@ export function useTasks() {
     }, [tasks, loading]);
 
     async function addTask(title: string, dueDate: Date | null, priority: number = 4) {
+        console.log('[useTasks] addTask called:', { title, dueDate: dueDate?.toISOString(), priority, selectedDate: selectedDate?.toISOString() });
+
         const newRank = tasks.length > 0 ? tasks[0].position_rank - 1000 : 1000;
         const emoji = title.toLowerCase().includes('coffee') ? '☕' :
             title.toLowerCase().includes('gym') || title.toLowerCase().includes('yoga') ? '🧘' :
@@ -140,6 +142,7 @@ export function useTasks() {
 
         // Use selectedDate if no dueDate is provided
         const finalDueDate = dueDate || selectedDate;
+        console.log('[useTasks] Final due date:', finalDueDate?.toISOString());
 
         const newTaskData: any = {
             title,
@@ -155,16 +158,23 @@ export function useTasks() {
             newTaskData.user_id = user.id;
         }
 
+        console.log('[useTasks] Task data to insert:', newTaskData);
+
         if (isSupabaseConfigured && user) {
             const { data, error } = await supabase
                 .from('tasks')
                 .insert([newTaskData])
                 .select();
 
-            if (error) console.error('Error adding task:', error);
+            if (error) {
+                console.error('[useTasks] Error adding task:', error);
+            } else {
+                console.log('[useTasks] Task added successfully:', data);
+            }
             return data;
         } else if (!isSupabaseConfigured) {
             const id = Math.random().toString(36).substr(2, 9);
+            console.log('[useTasks] Demo mode - adding task with id:', id);
             setTasks(prev => [{ ...newTaskData, id } as Task, ...prev]);
             return [{ ...newTaskData, id }];
         }

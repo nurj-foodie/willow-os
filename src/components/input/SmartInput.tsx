@@ -35,6 +35,15 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
             title = value.replace(dateText, '').trim();
         }
 
+        // Debug logging for Android issue
+        console.log('[SmartInput] Submitting task:', {
+            title: title || value,
+            parsedDate: parsedDate?.toISOString(),
+            dateText,
+            priority,
+            originalValue: value
+        });
+
         onAddTask(title || value, parsedDate, priority);
         setValue('');
         setParsedDate(null);

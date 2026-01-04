@@ -24,9 +24,15 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
             return;
         }
 
-        console.log('[Receipt Scanner] Starting upload process...');
+        // Immediately show loading state - important for Android where state updates
+        // can be delayed if heavy async work starts too quickly
+        console.log('[Receipt Scanner] Setting uploading state...');
         setStatus('uploading');
         setProgress(10);
+
+        // Small delay to ensure React re-renders the loading animation before async work
+        await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 50)));
+        console.log('[Receipt Scanner] Starting upload process...');
 
         try {
             const fileExt = file.name.split('.').pop();

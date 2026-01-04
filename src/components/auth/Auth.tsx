@@ -12,8 +12,9 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [demoMode, setDemoMode] = useState(false);
-    const [needsDeviceVerification, setNeedsDeviceVerification] = useState(false);
-    const [pendingEmail, setPendingEmail] = useState('');
+    // DISABLED FOR BETA: OTP device verification (always false, kept for future re-enable)
+    const [needsDeviceVerification, _setNeedsDeviceVerification] = useState(false);
+    const pendingEmail = ''; // Placeholder for DeviceVerification component
 
     // Check if this is a new device after successful OAuth
     useEffect(() => {
@@ -21,22 +22,25 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
             const { data: { session } } = await supabase.auth.getSession();
 
             if (session?.user) {
-                // Check if device is recognized
+                // Auto-trust device after successful Google OAuth
+                // OTP verification disabled for beta - will re-enable for production
                 const deviceId = localStorage.getItem('willow_device_id');
 
                 if (!deviceId) {
-                    // New device - need OTP verification
-                    setNeedsDeviceVerification(true);
-                    setPendingEmail(session.user.email || '');
+                    // Generate and save device ID automatically (skip OTP for now)
+                    const newDeviceId = crypto.randomUUID();
+                    localStorage.setItem('willow_device_id', newDeviceId);
+                    console.log('[Auth] Auto-trusted new device:', newDeviceId);
 
-                    // Send OTP
-                    await supabase.auth.signInWithOtp({
-                        email: session.user.email!,
-                        options: { shouldCreateUser: false }
-                    });
-                } else {
-                    // Device recognized - user will be logged in automatically by App.tsx
+                    // DISABLED FOR BETA: OTP device verification
+                    // setNeedsDeviceVerification(true);
+                    // setPendingEmail(session.user.email || '');
+                    // await supabase.auth.signInWithOtp({
+                    //     email: session.user.email!,
+                    //     options: { shouldCreateUser: false }
+                    // });
                 }
+                // Device is now recognized - user will be logged in automatically by App.tsx
             }
         };
 
@@ -90,7 +94,7 @@ export const Auth: React.FC<AuthProps> = ({ onOpenLegal }) => {
                     email={pendingEmail}
                     onVerified={handleDeviceVerified}
                     onBack={() => {
-                        setNeedsDeviceVerification(false);
+                        _setNeedsDeviceVerification(false);
                         supabase.auth.signOut();
                     }}
                 />
