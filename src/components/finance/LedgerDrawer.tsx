@@ -215,30 +215,26 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 )}
 
                                 {/* Receipt Scanner Entry */}
-                                <AnimatePresence mode="wait">
-                                    {showScanner ? (
-                                        <ReceiptScanner
-                                            userId={user?.id || ''}
-                                            onProcessed={handleScannerSuccess}
-                                            onClose={() => setShowScanner(false)}
-                                        />
-                                    ) : (
-                                        <motion.button
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            onClick={() => setShowScanner(true)}
-                                            className="w-full py-8 border-2 border-dashed border-charcoal/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-matcha/5 hover:border-matcha/30 transition-all group"
-                                        >
-                                            <div className="w-12 h-12 rounded-2xl bg-matcha/20 flex items-center justify-center text-matcha group-hover:scale-110 transition-transform">
-                                                <Camera size={24} />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="font-bold text-charcoal/60">Scan Receipt</p>
-                                                <p className="text-[10px] font-bold text-charcoal/20 uppercase tracking-widest">Auto-Saves Instantly</p>
-                                            </div>
-                                        </motion.button>
-                                    )}
-                                </AnimatePresence>
+                                {showScanner ? (
+                                    <ReceiptScanner
+                                        userId={user?.id || ''}
+                                        onProcessed={handleScannerSuccess}
+                                        onClose={() => setShowScanner(false)}
+                                    />
+                                ) : (
+                                    <button
+                                        onClick={() => setShowScanner(true)}
+                                        className="w-full py-8 border-2 border-dashed border-charcoal/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-matcha/5 hover:border-matcha/30 transition-all group"
+                                    >
+                                        <div className="w-12 h-12 rounded-2xl bg-matcha/20 flex items-center justify-center text-matcha group-hover:scale-110 transition-transform">
+                                            <Camera size={24} />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="font-bold text-charcoal/60">Scan Receipt</p>
+                                            <p className="text-[10px] font-bold text-charcoal/20 uppercase tracking-widest">Auto-Saves Instantly</p>
+                                        </div>
+                                    </button>
+                                )}
 
                                 {/* Success Message */}
                                 <AnimatePresence>
