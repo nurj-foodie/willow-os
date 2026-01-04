@@ -1,162 +1,181 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { Camera, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface ReceiptScannerProps {
-    onProcessed: (data: { amount: number; merchant: string; category: string; date: string }) => void;
+    onProcessed: (data: { amount: number; merchant: string; category: string; date: string; receipt_url?: string }) => void;
     onClose: () => void;
     userId: string;
 }
 
+type ScannerStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
+
 export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, userId }) => {
-    const [status, setStatus] = useState<'idle' | 'uploading' | 'processing' | 'done' | 'error'>('idle');
-    const [progress, setProgress] = useState(0);
+    const [status, setStatus] = useState<ScannerStatus>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const isProcessingRef = useRef(false); // Prevent close during upload
+    const processedDataRef = useRef<any>(null);
 
-    // Safe close that respects processing state
-    const handleClose = useCallback(() => {
-        if (isProcessingRef.current) {
-            console.log('[Receipt Scanner] Close blocked - upload in progress');
-            return;
-        }
-        onClose();
-    }, [onClose]);
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+        if (!file) return;
 
-        console.log('[Receipt Scanner] File selected:', file ? `${file.name} (${file.size} bytes)` : 'No file');
+        console.log('[Scanner] File selected:', file.name, file.size, 'bytes');
 
-        if (!file) {
-            console.warn('[Receipt Scanner] No file in input, aborting');
-            return;
-        }
-
-        // Immediately show loading state - important for Android where state updates
-        // can be delayed if heavy async work starts too quickly
-        console.log('[Receipt Scanner] Setting uploading state...');
-        isProcessingRef.current = true; // Lock to prevent premature close
+        // Start upload - set status BEFORE any async work
         setStatus('uploading');
-        setProgress(10);
-
-        // Force React to commit the state change before continuing
-        // This is crucial for Android Chrome where the rendering can be delayed
-        await new Promise<void>(resolve => {
-            // First requestAnimationFrame to queue up the state commit
-            requestAnimationFrame(() => {
-                // Second requestAnimationFrame to ensure the paint happened
-                requestAnimationFrame(() => {
-                    // Additional timeout as safety margin for slower Android devices
-                    setTimeout(resolve, 100);
-                });
-            });
-        });
-        console.log('[Receipt Scanner] Animation should be visible, starting upload...');
 
         try {
+            // Upload to storage
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const filePath = `${userId}/${fileName}`;
 
-            // 1. Upload to Supabase Storage
-            console.log('[Receipt Scanner] Uploading to Storage:', filePath);
+            console.log('[Scanner] Uploading to:', filePath);
             const { error: uploadError } = await supabase.storage
                 .from('receipts')
                 .upload(filePath, file);
 
-            if (uploadError) {
-                console.error('[Receipt Scanner] Storage upload failed:', uploadError);
-                throw new Error(`Upload failed: ${uploadError.message}`);
-            }
-            console.log('[Receipt Scanner] Upload successful');
-            setProgress(50);
+            if (uploadError) throw uploadError;
+            console.log('[Scanner] Upload complete');
+
+            // Now processing with AI
             setStatus('processing');
 
-            // 2. Invoke Edge Function for AI extraction
-            console.log('[Receipt Scanner] Calling Edge Function for AI extraction...');
-            const { data, error: functionError } = await supabase.functions.invoke('process-receipt', {
+            console.log('[Scanner] Calling AI...');
+            const { data, error: fnError } = await supabase.functions.invoke('process-receipt', {
                 body: { filePath }
             });
 
-            if (functionError) {
-                console.error('[Receipt Scanner] Edge Function error:', functionError);
+            if (fnError) throw fnError;
+            console.log('[Scanner] AI result:', data);
 
-                // Extract error details from the response body
-                let errorDetails = 'Unknown error';
-                try {
-                    // The FunctionsHttpError has a context.Response object
-                    if (functionError.context && typeof functionError.context.json === 'function') {
-                        const errorBody = await functionError.context.json();
-                        console.error('[Receipt Scanner] Error response body:', errorBody);
-                        errorDetails = errorBody.error || errorBody.message || JSON.stringify(errorBody);
-                    } else if (data && typeof data === 'object') {
-                        console.error('[Receipt Scanner] Error in data:', data);
-                        if ('error' in data) {
-                            errorDetails = data.error;
-                        }
-                    }
-                } catch (parseError) {
-                    console.error('[Receipt Scanner] Failed to parse error:', parseError);
-                    errorDetails = functionError.message || 'Edge Function failed';
-                }
-
-                console.error('[Receipt Scanner] Final error details:', errorDetails);
-                throw new Error(`AI processing failed: ${errorDetails}`);
-            }
-
-            console.log('Gemini Extraction Result:', data);
-
-            // Get a signed URL for the uploaded receipt (private bucket)
-            const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+            // Get signed URL
+            const { data: urlData } = await supabase.storage
                 .from('receipts')
-                .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
+                .createSignedUrl(filePath, 60 * 60 * 24 * 365);
 
-            const receiptUrl = signedUrlError ? null : signedUrlData?.signedUrl;
-            console.log('[Receipt Scanner] Signed URL:', receiptUrl);
-
-            // Sanitization: Ensure data has expected keys and formats
-            const sanitizedData = {
+            // Store result
+            processedDataRef.current = {
                 amount: typeof data.amount === 'number' ? data.amount : parseFloat(data.amount) || 0,
-                merchant: data.merchant || data.vendor || 'Unknown Merchant',
+                merchant: data.merchant || data.vendor || 'Unknown',
                 category: data.category || 'Other',
                 date: data.date || new Date().toISOString(),
-                receipt_url: receiptUrl
+                receipt_url: urlData?.signedUrl || null
             };
 
-            setProgress(100);
+            // Show success
             setStatus('done');
-
-            // Artificial delay to let user see the "Done" state
-            setTimeout(() => {
-                console.log('[Receipt Scanner] Calling onProcessed with:', sanitizedData);
-                onProcessed(sanitizedData);
-
-                // Unlock and close after animation
-                isProcessingRef.current = false;
-                setTimeout(() => {
-                    console.log('[Receipt Scanner] Closing scanner');
-                    onClose();
-                }, 100);
-            }, 1500); // Extended to 1.5s so user sees the done state
+            console.log('[Scanner] Success, showing done state');
 
         } catch (err: any) {
-            console.error('[Receipt Scanner] Complete error:', err);
-            console.error('[Receipt Scanner] Error details:', {
-                message: err?.message,
-                name: err?.name,
-                stack: err?.stack
-            });
+            console.error('[Scanner] Error:', err);
+            setErrorMessage(err.message || 'Upload failed');
             setStatus('error');
-            isProcessingRef.current = false; // Unlock on error
         } finally {
-            // Reset file input for mobile compatibility
+            // Reset file input
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
         }
     };
+
+    const handleDone = () => {
+        if (processedDataRef.current) {
+            console.log('[Scanner] Calling onProcessed');
+            onProcessed(processedDataRef.current);
+        }
+        onClose();
+    };
+
+    const handleRetry = () => {
+        setStatus('idle');
+        setErrorMessage('');
+    };
+
+    // Render based on status
+    const renderContent = () => {
+        switch (status) {
+            case 'idle':
+                return (
+                    <div className="flex flex-col items-center gap-4">
+                        <p className="text-sm text-white/50 italic">Snap a clear photo of your receipt</p>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-2 px-6 py-3 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
+                        >
+                            <Upload size={18} />
+                            Choose Photo
+                        </button>
+                    </div>
+                );
+
+            case 'uploading':
+                return (
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 size={48} className="text-matcha animate-spin" />
+                        <p className="text-lg font-bold text-matcha">Uploading...</p>
+                        <p className="text-sm text-white/50">Please wait</p>
+                    </div>
+                );
+
+            case 'processing':
+                return (
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 size={48} className="text-matcha animate-spin" />
+                        <p className="text-lg font-bold text-matcha">Gemini is reading...</p>
+                        <p className="text-sm text-white/50">Extracting receipt data</p>
+                    </div>
+                );
+
+            case 'done':
+                return (
+                    <div className="flex flex-col items-center gap-4">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 200 }}
+                        >
+                            <CheckCircle2 size={64} className="text-matcha" />
+                        </motion.div>
+                        <p className="text-lg font-bold text-matcha">Scan Complete!</p>
+                        {processedDataRef.current && (
+                            <div className="text-center text-sm text-white/70">
+                                <p>RM {processedDataRef.current.amount?.toFixed(2)}</p>
+                                <p>{processedDataRef.current.merchant}</p>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleDone}
+                            className="mt-4 px-8 py-3 bg-matcha text-charcoal rounded-2xl font-bold hover:scale-105 transition-transform"
+                        >
+                            Done
+                        </button>
+                    </div>
+                );
+
+            case 'error':
+                return (
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+                            <X size={32} className="text-red-400" />
+                        </div>
+                        <p className="text-lg font-bold text-red-400">Upload Failed</p>
+                        <p className="text-sm text-white/50 text-center max-w-xs">{errorMessage}</p>
+                        <button
+                            onClick={handleRetry}
+                            className="mt-4 px-6 py-3 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                );
+        }
+    };
+
+    // Only show close button when idle or error
+    const canClose = status === 'idle' || status === 'error';
 
     return (
         <motion.div
@@ -170,88 +189,15 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     <Camera size={24} className="text-matcha" />
                     Receipt Scanner
                 </h3>
-                <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <X size={20} />
-                </button>
+                {canClose && (
+                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <X size={20} />
+                    </button>
+                )}
             </div>
 
-            <div className="relative aspect-video rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-8 text-center overflow-hidden">
-                <AnimatePresence mode="wait">
-                    {status === 'idle' && (
-                        <motion.div
-                            key="idle"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="space-y-4"
-                        >
-                            <p className="text-sm text-white/50 italic">Snap a clear photo of your receipt</p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="flex items-center gap-2 px-6 py-3 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
-                                >
-                                    <Upload size={18} />
-                                    Choose Photo
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {(status === 'uploading' || status === 'processing') && (
-                        <motion.div
-                            key="working"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex flex-col items-center gap-4"
-                        >
-                            <Loader2 size={40} className="text-matcha animate-spin" />
-                            <div className="space-y-1">
-                                <p className="text-sm font-bold uppercase tracking-widest text-matcha">
-                                    {status === 'uploading' ? 'Uploading...' : 'Gemini is reading...'}
-                                </p>
-                                <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-matcha"
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${progress}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {status === 'done' && (
-                        <motion.div
-                            key="done"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="flex flex-col items-center gap-2 text-matcha"
-                        >
-                            <CheckCircle2 size={48} />
-                            <p className="font-bold">Sync Complete</p>
-                        </motion.div>
-                    )}
-
-                    {status === 'error' && (
-                        <motion.div
-                            key="error"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="space-y-4 text-orange-400"
-                        >
-                            <p className="font-bold">Upload Failed</p>
-                            <p className="text-xs text-white/60">Check console for details</p>
-                            <button
-                                onClick={() => setStatus('idle')}
-                                className="text-sm underline hover:text-orange-300"
-                            >
-                                Try again
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+            <div className="relative aspect-video rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-8 text-center overflow-hidden min-h-[200px]">
+                {renderContent()}
             </div>
 
             <input
@@ -259,7 +205,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 accept="image/*"
                 capture="environment"
                 ref={fileInputRef}
-                onChange={handleFileUpload}
+                onChange={handleFileSelect}
                 className="hidden"
             />
 
