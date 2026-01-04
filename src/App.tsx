@@ -35,6 +35,7 @@ import { useLedger } from './hooks/useLedger';
 
 import { Footer } from './components/layout/Footer';
 import { OnboardingTour } from './components/onboarding/OnboardingTour';
+import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
@@ -318,6 +319,8 @@ function App() {
         />
 
         <Footer onOpenLegal={setShowLegal} />
+
+        <PWAInstallPrompt />
 
         {/* Legal Modal Overlay */}
         <AnimatePresence>
