@@ -30,9 +30,19 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
         setStatus('uploading');
         setProgress(10);
 
-        // Small delay to ensure React re-renders the loading animation before async work
-        await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 50)));
-        console.log('[Receipt Scanner] Starting upload process...');
+        // Force React to commit the state change before continuing
+        // This is crucial for Android Chrome where the rendering can be delayed
+        await new Promise<void>(resolve => {
+            // First requestAnimationFrame to queue up the state commit
+            requestAnimationFrame(() => {
+                // Second requestAnimationFrame to ensure the paint happened
+                requestAnimationFrame(() => {
+                    // Additional timeout as safety margin for slower Android devices
+                    setTimeout(resolve, 100);
+                });
+            });
+        });
+        console.log('[Receipt Scanner] Animation should be visible, starting upload...');
 
         try {
             const fileExt = file.name.split('.').pop();
