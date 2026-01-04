@@ -117,14 +117,15 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ step, onNext, 
             {/* The Tooltip */}
             <motion.div
                 key={step}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: 10, x: '-50%' }}
+                animate={{ opacity: 1, y: 0, x: '-50%' }}
+                exit={{ opacity: 0, y: -10, x: '-50%' }}
                 transition={{ duration: 0.3 }}
                 className="absolute pointer-events-auto"
                 style={{
-                    top: currentStep.side === 'top' ? targetRect.top - 140 : targetRect.bottom + 20,
-                    left: targetRect.left + (targetRect.width / 2) - 150, // Center relative to target
+                    top: currentStep.side === 'top' ? undefined : targetRect.bottom + 24,
+                    bottom: currentStep.side === 'top' ? window.innerHeight - targetRect.top + 24 : undefined,
+                    left: targetRect.left + (targetRect.width / 2),
                 }}
             >
                 <div className="w-[300px] bg-white p-6 rounded-2xl shadow-xl border border-white/20 relative">
