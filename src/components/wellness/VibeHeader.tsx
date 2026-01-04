@@ -79,6 +79,7 @@ export const VibeHeader: React.FC<VibeHeaderProps> = ({
                             <span className="font-serif text-xl text-charcoal">{dateStr}</span>
                         </div>
                         <button
+                            id="calendar-trigger"
                             onClick={onCalendarClick}
                             className="px-4 py-2 bg-matcha/10 hover:bg-matcha/20 text-charcoal rounded-full transition-colors text-sm font-medium"
                         >

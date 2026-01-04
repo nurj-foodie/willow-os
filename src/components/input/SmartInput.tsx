@@ -60,6 +60,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
     return (
         <form
+            id="smart-input-container"
             onSubmit={handleSubmit}
             className="relative w-full max-w-2xl mt-8 mb-4 px-2"
         >

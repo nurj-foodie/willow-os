@@ -34,7 +34,7 @@ import { LedgerDrawer } from './components/finance/LedgerDrawer';
 import { useLedger } from './hooks/useLedger';
 
 import { Footer } from './components/layout/Footer';
-import { OnboardingTour } from './components/onboarding/OnboardingTour';
+import { TutorialOverlay } from './components/onboarding/TutorialOverlay';
 import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 
 function App() {
@@ -54,6 +54,7 @@ function App() {
 
   const [showRitual, setShowRitual] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0); // 0: Input, 1: Calendar, 2: Ledger, 3-6: Tour
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
 
   // Ritual trigger logic
@@ -84,6 +85,42 @@ function App() {
       setShowOnboarding(true);
     }
   };
+
+  // --- Tutorial Handlers ---
+  const handleTutorialNext = () => setTutorialStep(prev => prev + 1);
+
+  const handleAppAddTask = async (title: string, date: Date | null, priority: number) => {
+    await addTask(title, date, priority);
+    // Advance tutorial if on step 0 (Input)
+    if (showOnboarding && tutorialStep === 0) {
+      setTutorialStep(1);
+    }
+  };
+
+  const handleAppCalendarClick = () => {
+    setShowCalendar(true);
+    // Advance tutorial if on step 1 (Calendar)
+    if (showOnboarding && tutorialStep === 1) {
+      setTutorialStep(2);
+    }
+  };
+
+  const handleAppLedgerOpen = () => {
+    setShowLedger(true);
+    // Advance tutorial if on step 2 (Ledger)
+    if (showOnboarding && tutorialStep === 2) {
+      setTutorialStep(3);
+    }
+  };
+
+  const handleAppArchiveOpen = () => {
+    setShowArchive(true);
+    // Advance tutorial if on step 3 (Archive)
+    if (showOnboarding && tutorialStep === 3) {
+      setTutorialStep(4);
+    }
+  };
+
 
   // Only show loading state when user is logged in
   const loading = user && (tasksLoading || wellbeingLoading || profileLoading);
@@ -216,7 +253,11 @@ function App() {
             );
           })()}
           {showOnboarding && (
-            <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+            <TutorialOverlay
+              step={tutorialStep}
+              onNext={handleTutorialNext}
+              onSkip={() => setShowOnboarding(false)}
+            />
           )}
         </AnimatePresence>
 
@@ -229,40 +270,51 @@ function App() {
               {user && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowArchive(true)}
+                    id="archive-trigger"
+                    onClick={handleAppArchiveOpen}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
                     title="View Archive"
                   >
                     <History size={20} />
                   </button>
                   <button
-                    onClick={() => setShowLedger(true)}
+                    id="ledger-trigger"
+                    onClick={handleAppLedgerOpen}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
                     title="Willow Ledger"
                   >
                     <Wallet size={20} />
                   </button>
                   <button
-                    onClick={() => setPrivacyMode(!privacyMode)}
+                    id="privacy-trigger"
+                    onClick={() => {
+                      setPrivacyMode(!privacyMode);
+                      if (showOnboarding && tutorialStep === 4) setTutorialStep(5);
+                    }}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
                     title={privacyMode ? "Disable Privacy Mode" : "Enable Privacy Mode"}
                   >
                     {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
                   </button>
-                  <button
-                    onClick={logout}
-                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                    title="Logout"
-                  >
-                    <LogOut size={20} />
-                  </button>
-                  <button
-                    onClick={deleteAccount}
-                    className="text-clay/30 hover:text-clay transition-colors p-2 rounded-full hover:bg-clay/10"
-                    title="Delete Account & Data"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  <div id="account-actions" className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (showOnboarding && tutorialStep === 5) setTutorialStep(6);
+                        logout();
+                      }}
+                      className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                      title="Logout"
+                    >
+                      <LogOut size={20} />
+                    </button>
+                    <button
+                      onClick={deleteAccount}
+                      className="text-clay/30 hover:text-clay transition-colors p-2 rounded-full hover:bg-clay/10"
+                      title="Delete Account & Data"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
               )}
               <div className="w-10 h-10 rounded-full bg-clay/30 flex items-center justify-center text-xl">
@@ -275,11 +327,11 @@ function App() {
             <VibeHeader
               currentMood={mood}
               onMoodChange={updateMood}
-              onCalendarClick={() => setShowCalendar(true)}
+              onCalendarClick={handleAppCalendarClick}
               selectedDate={selectedDate}
               saving={saving}
             />
-            <SmartInput onAddTask={addTask} />
+            <SmartInput onAddTask={handleAppAddTask} />
             <div className="mt-8">
               <LiquidStream
                 tasks={streamTasks}
@@ -291,7 +343,7 @@ function App() {
           </main>
         </div>
 
-        <aside className="w-full md:w-80 border-t md:border-t-0 md:border-l border-clay/10 h-[400px] md:h-screen sticky bottom-0 md:top-0 bg-oat/50 backdrop-blur-sm">
+        <aside id="parking-lot-section" className="w-full md:w-80 border-t md:border-t-0 md:border-l border-clay/10 h-[400px] md:h-screen sticky bottom-0 md:top-0 bg-oat/50 backdrop-blur-sm">
           <ParkingLot
             tasks={parkedTasks}
             onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'parked' })}
