@@ -380,10 +380,8 @@ function App() {
             return dueDate >= today && dueDate < tomorrow;
           })}
           onReset={(rolloverIncomplete) => {
-            const doneIds = tasks.filter(t => t.status === 'done').map(t => t.id);
-            if (doneIds.length > 0) {
-              updateTasks(doneIds, { status: 'archived' });
-            }
+            // Done tasks stay as 'done' - they won't appear tomorrow due to date filtering
+            // No need to change status (and 'archived' is not a valid DB status anyway)
 
             // Rollover incomplete tasks to tomorrow
             if (rolloverIncomplete) {

@@ -49,12 +49,12 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
-                // Fetch ALL tasks except archived - done tasks stay visible until "Wrap the Day"
+                // Fetch ALL tasks - done tasks will be shown until "Wrap the Day"
+                // No status filter since we need done tasks visible in the stream
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
                     .eq('user_id', user.id)
-                    .neq('status', 'archived')
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -68,13 +68,12 @@ export function useTasks() {
             setTasks([]);
             setLoading(false);
         } else if (!isSupabaseConfigured) {
-            // Mock/Local storage mode - fetch all non-done tasks
+            // Mock/Local storage mode - fetch all tasks
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
                 const allTasks: Task[] = JSON.parse(saved);
-                // Only filter out 'archived' tasks, keep 'done' visible until Wrap the Day
-                const filtered = allTasks.filter(t => t.status !== 'archived');
-                setTasks(filtered);
+                // Keep all tasks - done tasks visible until Wrap the Day
+                setTasks(allTasks);
             } else {
                 const initial: Task[] = [
                     {
