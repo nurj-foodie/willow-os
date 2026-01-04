@@ -58,7 +58,60 @@ export function useTasks() {
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
-                if (data) setTasks(data as Task[]);
+
+                // If user has NO tasks, seed with educational content
+                if (data && data.length === 0) {
+                    const onboardingTasks = [
+                        {
+                            user_id: user.id,
+                            title: 'Example: Buy Matcha 🍵',
+                            due_date: new Date().toISOString(),
+                            status: 'todo',
+                            priority: 4,
+                            emoji: '🛒',
+                            position_rank: 1000
+                        },
+                        {
+                            user_id: user.id,
+                            title: 'Dinner at 7pm (Try editing me!)',
+                            due_date: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
+                            status: 'todo',
+                            priority: 4,
+                            emoji: '🍽️',
+                            position_rank: 2000
+                        },
+                        {
+                            user_id: user.id,
+                            title: 'Check the Parking Lot ↖️ (Someday list)',
+                            due_date: null,
+                            status: 'parked',
+                            priority: 4,
+                            emoji: '🅿️',
+                            position_rank: 3000
+                        },
+                        {
+                            user_id: user.id,
+                            title: 'Scan a receipt ↗️ (Try the Ledger)',
+                            due_date: new Date().toISOString(),
+                            status: 'todo',
+                            priority: 2, // Important
+                            emoji: '🧾',
+                            position_rank: 4000
+                        }
+                    ];
+
+                    await supabase.from('tasks').insert(onboardingTasks);
+                    // Re-fetch to get IDs
+                    const { data: newData } = await supabase
+                        .from('tasks')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('position_rank', { ascending: true });
+
+                    if (newData) setTasks(newData as Task[]);
+                } else if (data) {
+                    setTasks(data as Task[]);
+                }
             } catch (err) {
                 console.error('Error fetching tasks:', err);
             } finally {

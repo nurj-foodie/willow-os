@@ -85,7 +85,7 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                         <span className="flex items-center gap-1"><Clock size={12} /> {timeStr}</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-serif text-charcoal leading-tight">
-                        {step === 'naming' ? "Welcome to the still." : `Good ${isMorning ? 'morning' : isAfternoon ? 'afternoon' : 'evening'}, ${userName}.`}
+                        {step === 'naming' ? "flow... one moment." : `Good ${isMorning ? 'morning' : isAfternoon ? 'afternoon' : 'evening'}, ${userName}.`}
                     </h1>
                 </motion.div>
 
@@ -98,24 +98,21 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                             exit={{ opacity: 0 }}
                             className="space-y-6"
                         >
-                            <p className="text-charcoal/40 font-serif italic text-lg">Your stream is waiting. What should we call you?</p>
+                            <label className="block text-charcoal/40 text-sm tracking-widest uppercase">How may I call you?</label>
                             <input
-                                type="text"
                                 autoFocus
+                                type="text"
                                 value={nameInput}
                                 onChange={(e) => setNameInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && nameInput && setStep('greeting')}
-                                placeholder="E.g. Explorer, Weaver, Willow..."
-                                className="w-full bg-transparent border-b-2 border-matcha/20 focus:border-matcha outline-none text-2xl font-serif py-2 text-center text-charcoal transition-all placeholder:text-charcoal/10"
-                            />
-                            {nameInput && (
-                                <button
-                                    onClick={() => setStep('greeting')}
-                                    className="text-matcha text-sm font-sans uppercase tracking-widest font-bold hover:tracking-[0.3em] transition-all"
-                                >
-                                    Begin Phase
-                                </button>
-                            )}
+                                onKeyDown={(e) => e.key === 'Enter' && nameInput && onComplete(nameInput)}
+                                className="w-full bg-transparent border-b-2 border-charcoal/10 text-center text-3xl font-serif text-charcoal focus:outline-none focus:border-matcha/50 pb-2 transition-colors placeholder:text-charcoal/10"
+                                placeholder="Your name..."
+                            />    <button
+                                onClick={() => setStep('greeting')}
+                                className="text-matcha text-sm font-sans uppercase tracking-widest font-bold hover:tracking-[0.3em] transition-all"
+                            >
+                                Begin Phase
+                            </button>
                         </motion.div>
                     ) : (
                         <motion.div

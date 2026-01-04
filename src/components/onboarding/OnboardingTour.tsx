@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, Sparkles, Layout, MousePointer2, RefreshCw } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Sparkles, Layout } from 'lucide-react';
 
 interface OnboardingTourProps {
     onComplete: () => void;
@@ -8,52 +8,34 @@ interface OnboardingTourProps {
 
 const STEPS = [
     {
-        title: "Welcome to your Flow.",
-        description: "Willow is a minimal space for mindful productivity. Let's show you how to roam.",
-        icon: <Sparkles className="text-amber-400" size={32} />,
-        color: "bg-amber-50"
+        title: "Willow OS",
+        description: "Your minimal interactive Todo List & Personal Finance Tracker. A space to clear your mind.",
+        icon: <div className="text-4xl">🌿</div>,
+        color: "bg-white"
     },
     {
-        title: "The Liquid Stream",
-        description: "Tasks aren't rigid. Drag them up to prioritize, or drop them in the 'Parking Lot' when you need space.",
-        icon: <Layout className="text-sage" size={32} />,
+        title: "The Stream",
+        description: "Your interactive task list. Drag items up/down to prioritize. Swipe or click to complete.",
+        icon: <Layout className="text-charcoal" size={32} />,
         color: "bg-sage/10"
     },
     {
         title: "Speak Naturally",
-        description: "Just type 'Coffee with Sarah at 5pm'. Willow understands time and extracts it for you.",
-        icon: <MousePointer2 className="text-clay" size={32} />,
-        color: "bg-clay/10"
-    },
-    {
-        title: "The Priority Matrix",
-        description: "Add '!' for Urgent or '!!' for Crucial. Willow uses colors to help you focus: Rose for Urgent, Amber for Important, Sage for Tasks.",
-        icon: <div className="flex gap-1"><div className="w-4 h-4 rounded-full bg-rose-400" /><div className="w-4 h-4 rounded-full bg-amber-400" /><div className="w-4 h-4 rounded-full bg-sage" /></div>,
+        description: "Willow understands time. Type 'Dinner at 7pm' or 'Meeting tomorrow' and we'll handle the scheduling.",
+        icon: <Sparkles className="text-amber-400" size={32} />,
         color: "bg-amber-50"
     },
     {
-        title: "The Parking Lot (Top-Left)",
-        description: "Got tasks without a date? Drop them in the Parking Lot. It's your 'Someday' list, accessible from the top-left sidebar.",
+        title: "Parking Lot (Top-Left)",
+        description: "Pull up the sidebar to park tasks for 'someday'. Keep your main stream clear for today.",
         icon: <div className="p-2 bg-charcoal/5 rounded-lg"><Layout size={24} className="text-charcoal/40" /></div>,
         color: "bg-clay/5"
     },
     {
-        title: "Receipt Scanner (Top-Right)",
-        description: "Manage your vibe and your budget. Tap the receipt icon at the top-right to scan and log expenses with AI.",
+        title: "Expenses & Receipts (Top-Right)",
+        description: "Track your budget. Open the Ledger to log expenses or scan receipts with AI.",
         icon: <div className="p-2 bg-matcha/20 rounded-lg">🎞️</div>,
         color: "bg-matcha/10"
-    },
-    {
-        title: "Wrap Today (Top-Right)",
-        description: "When you're done, tap 'Wrap Today'. It clears your completed tasks into a satisfying history archive.",
-        icon: <RefreshCw className="text-matcha" size={32} />,
-        color: "bg-matcha/10"
-    },
-    {
-        title: "Ready to Roam?",
-        description: "Flow, don't force. Your space is ready.",
-        icon: <Sparkles className="text-amber-400" size={32} />,
-        color: "bg-amber-50"
     }
 ];
 
