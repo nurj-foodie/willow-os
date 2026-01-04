@@ -22,7 +22,7 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { LogOut, Shield, ShieldOff, History, Wallet, Trash2 } from 'lucide-react';
+import { LogOut, Shield, ShieldOff, History, Wallet, Trash2, HelpCircle } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { CalendarModal } from './components/wellness/CalendarModal';
 import { TaskEditModal } from './components/modals/TaskEditModal';
@@ -56,6 +56,16 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0); // 0: Input, 1: Calendar, 2: Ledger, 3-6: Tour
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+
+  // Auto-trigger tutorial if we detect the "Seeded" state (Task 1 exists)
+  useEffect(() => {
+    if (!tasksLoading && tasks.length > 0) {
+      const hasSeedTask = tasks.some(t => t.title.includes('Example: Buy Matcha'));
+      if (hasSeedTask && !showOnboarding && !localStorage.getItem('willow_tutorial_completed')) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [tasks, tasksLoading]);
 
   // Ritual trigger logic
   useEffect(() => {
@@ -256,7 +266,10 @@ function App() {
             <TutorialOverlay
               step={tutorialStep}
               onNext={handleTutorialNext}
-              onSkip={() => setShowOnboarding(false)}
+              onSkip={() => {
+                setShowOnboarding(false);
+                localStorage.setItem('willow_tutorial_completed', 'true');
+              }}
             />
           )}
         </AnimatePresence>
@@ -297,6 +310,16 @@ function App() {
                     {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
                   </button>
                   <div id="account-actions" className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setTutorialStep(0);
+                        setShowOnboarding(true);
+                      }}
+                      className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
+                      title="Restart Tutorial"
+                    >
+                      <HelpCircle size={20} />
+                    </button>
                     <button
                       onClick={() => {
                         if (showOnboarding && tutorialStep === 5) setTutorialStep(6);

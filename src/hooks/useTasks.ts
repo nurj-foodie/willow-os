@@ -343,6 +343,15 @@ export function useTasks() {
             const { error: tasksError } = await supabase.from('tasks').delete().eq('user_id', user.id);
             if (tasksError) throw tasksError;
 
+            const { error: wellbeingError } = await supabase.from('wellbeing').delete().eq('user_id', user.id);
+            if (wellbeingError && wellbeingError.code !== 'PGRST116') console.warn(wellbeingError);
+
+            const { error: ledgerError } = await supabase.from('ledger').delete().eq('user_id', user.id);
+            if (ledgerError && ledgerError.code !== 'PGRST116') console.warn(ledgerError);
+
+            const { error: profileError } = await supabase.from('profiles').delete().eq('id', user.id);
+            if (profileError && profileError.code !== 'PGRST116') console.warn(profileError);
+
             // Log out after deletion
             await logout();
             window.location.reload();
