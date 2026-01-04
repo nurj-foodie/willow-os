@@ -101,9 +101,9 @@ function App() {
 
   const handleAppAddTask = async (title: string, date: Date | null, priority: number) => {
     await addTask(title, date, priority);
-    // Advance tutorial if on step 0 (Input)
+    // Advance tutorial if on step 0 (Input) - with delay for animation
     if (showOnboarding && tutorialStep === 0) {
-      setTutorialStep(1);
+      setTimeout(() => setTutorialStep(1), 1500);
     }
   };
 
@@ -134,6 +134,9 @@ function App() {
 
   // Only show loading state when user is logged in
   const loading = user && (tasksLoading || wellbeingLoading || profileLoading);
+
+  // Hide tutorial when any major modal/drawer is open so user can focus
+  const isTutorialVisible = showOnboarding && !showCalendar && !showLedger && !showArchive;
 
   useNotifications(tasks);
 
@@ -262,7 +265,7 @@ function App() {
               />
             );
           })()}
-          {showOnboarding && (
+          {isTutorialVisible && (
             <TutorialOverlay
               step={tutorialStep}
               onNext={handleTutorialNext}
