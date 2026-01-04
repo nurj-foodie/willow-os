@@ -145,6 +145,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, t
                                     return (
                                         <button
                                             key={idx}
+                                            id={isToday(day) ? "tutorial-target-date" : undefined}
                                             disabled={!day}
                                             onClick={() => handleDateClick(day)}
                                             className={`

@@ -21,6 +21,12 @@ const STEPS = [
         side: 'bottom'
     },
     {
+        targetId: 'tutorial-target-date',
+        text: "👇 Here is your date.",
+        subtext: "Tap the day to close the calendar.",
+        side: 'top' // Top of the cell (so it doesn't block the date itself)
+    },
+    {
         targetId: 'ledger-trigger',
         text: "💸 Track your budget here.",
         subtext: "Log expenses or scan receipts with AI.",

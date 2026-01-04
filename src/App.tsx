@@ -109,25 +109,33 @@ function App() {
 
   const handleAppCalendarClick = () => {
     setShowCalendar(true);
-    // Advance tutorial if on step 1 (Calendar)
+    // Advance tutorial if on step 1 (Calendar Trigger) -> Step 2 (Inside Calendar)
     if (showOnboarding && tutorialStep === 1) {
       setTutorialStep(2);
     }
   };
 
-  const handleAppLedgerOpen = () => {
-    setShowLedger(true);
-    // Advance tutorial if on step 2 (Ledger)
+  const handleAppDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    // Advance tutorial if on step 2 (Inside Calendar) -> Step 3 (Ledger Trigger)
     if (showOnboarding && tutorialStep === 2) {
       setTutorialStep(3);
     }
   };
 
-  const handleAppArchiveOpen = () => {
-    setShowArchive(true);
-    // Advance tutorial if on step 3 (Archive)
+  const handleAppLedgerOpen = () => {
+    setShowLedger(true);
+    // Advance tutorial if on step 3 (Ledger Trigger) -> Step 4 (Archive)
     if (showOnboarding && tutorialStep === 3) {
       setTutorialStep(4);
+    }
+  };
+
+  const handleAppArchiveOpen = () => {
+    setShowArchive(true);
+    // Advance tutorial if on step 4 (Archive) -> Step 5 (Privacy)
+    if (showOnboarding && tutorialStep === 4) {
+      setTutorialStep(5);
     }
   };
 
@@ -135,8 +143,9 @@ function App() {
   // Only show loading state when user is logged in
   const loading = user && (tasksLoading || wellbeingLoading || profileLoading);
 
-  // Hide tutorial when any major modal/drawer is open so user can focus
-  const isTutorialVisible = showOnboarding && !showCalendar && !showLedger && !showArchive;
+  // Hide tutorial when majors modals are open, EXCEPT when we are explicitly IN the "Inside Calendar" step (Step 2)
+  const isTutorialVisible = showOnboarding &&
+    ((!showCalendar && !showLedger && !showArchive) || (showCalendar && tutorialStep === 2));
 
   useNotifications(tasks);
 
@@ -505,15 +514,14 @@ function App() {
           ) : null}
         </DragOverlay>
 
-        {/* Calendar Modal */}
-        <CalendarModal
-          isOpen={showCalendar}
-          onClose={() => setShowCalendar(false)}
-          tasks={allTasks}
-          onDateSelect={setSelectedDate}
-        />
-
-        {/* Task Edit Modal */}
+        {showCalendar && (
+          <CalendarModal
+            isOpen={showCalendar}
+            onClose={() => setShowCalendar(false)}
+            tasks={allTasks} // Pass all tasks, including done/archived
+            onDateSelect={handleAppDateSelect}
+          />
+        )}{/* Task Edit Modal */}
         <TaskEditModal
           task={editingTask}
           isOpen={!!editingTask}
