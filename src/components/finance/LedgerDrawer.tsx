@@ -153,46 +153,138 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                     <button
                                         onClick={async () => {
                                             const pdf = new jsPDF();
-                                            const monthYear = new Date().toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
+                                            const now = new Date();
+                                            const monthYear = now.toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
                                             const total = entries.reduce((sum, e) => sum + e.amount, 0);
+                                            const isOngoingMonth = now.getMonth() === new Date().getMonth() && now.getFullYear() === new Date().getFullYear();
 
-                                            // Header
-                                            pdf.setFontSize(20);
-                                            pdf.text('Willow Ledger', 20, 20);
+                                            // === PAGE 1: Summary ===
+
+                                            // Header with Willow branding
+                                            pdf.setFontSize(24);
+                                            pdf.setTextColor(60, 60, 60);
+                                            pdf.text('🌿 Willow Ledger', 20, 25);
+
+                                            pdf.setFontSize(14);
+                                            pdf.setTextColor(100, 100, 100);
+                                            pdf.text(`${monthYear} Expense Report`, 20, 35);
+
+                                            if (isOngoingMonth) {
+                                                pdf.setFontSize(9);
+                                                pdf.setTextColor(150, 150, 150);
+                                                pdf.text('(Progress Report - Month in Progress)', 20, 42);
+                                            }
+
+                                            // Total summary box
+                                            pdf.setFillColor(241, 245, 239); // Light matcha
+                                            pdf.rect(20, 50, 170, 20, 'F');
                                             pdf.setFontSize(12);
-                                            pdf.text(`${monthYear} Report`, 20, 30);
-                                            pdf.text(`Total: RM ${total.toFixed(2)}`, 20, 40);
+                                            pdf.setTextColor(60, 60, 60);
+                                            pdf.text('Total Expenses:', 25, 62);
+                                            pdf.setFontSize(16);
+                                            pdf.setTextColor(80, 130, 80); // Matcha green
+                                            pdf.text(`RM ${total.toFixed(2)}`, 140, 62);
 
-                                            // Entries with images
-                                            let y = 55;
-                                            for (let i = 0; i < entries.length; i++) {
-                                                const entry = entries[i];
-                                                if (y > 250) { pdf.addPage(); y = 20; }
+                                            // Category breakdown
+                                            const categoryTotals: Record<string, { total: number; count: number }> = {};
+                                            entries.forEach(e => {
+                                                const cat = e.category || 'Misc';
+                                                if (!categoryTotals[cat]) categoryTotals[cat] = { total: 0, count: 0 };
+                                                categoryTotals[cat].total += e.amount;
+                                                categoryTotals[cat].count++;
+                                            });
 
-                                                // Try to add receipt image
-                                                if (entry.receipt_url) {
-                                                    try {
-                                                        const response = await fetch(entry.receipt_url);
-                                                        const blob = await response.blob();
-                                                        const base64 = await new Promise<string>((resolve) => {
-                                                            const reader = new FileReader();
-                                                            reader.onloadend = () => resolve(reader.result as string);
-                                                            reader.readAsDataURL(blob);
-                                                        });
-                                                        pdf.addImage(base64, 'JPEG', 20, y, 25, 25);
-                                                    } catch (e) {
-                                                        console.log('Could not load image:', e);
-                                                    }
+                                            pdf.setFontSize(12);
+                                            pdf.setTextColor(60, 60, 60);
+                                            pdf.text('Category Breakdown', 20, 85);
+
+                                            let catY = 95;
+                                            pdf.setFontSize(10);
+                                            Object.entries(categoryTotals)
+                                                .sort((a, b) => b[1].total - a[1].total)
+                                                .forEach(([cat, data]) => {
+                                                    const percentage = ((data.total / total) * 100).toFixed(1);
+                                                    pdf.setTextColor(80, 80, 80);
+                                                    pdf.text(`${cat}`, 25, catY);
+                                                    pdf.text(`${data.count} item${data.count > 1 ? 's' : ''}`, 80, catY);
+                                                    pdf.text(`RM ${data.total.toFixed(2)}`, 120, catY);
+                                                    pdf.setTextColor(150, 150, 150);
+                                                    pdf.text(`(${percentage}%)`, 165, catY);
+                                                    catY += 8;
+                                                });
+
+                                            // === PAGE 2+: Detailed entries ===
+                                            pdf.addPage();
+                                            pdf.setFontSize(14);
+                                            pdf.setTextColor(60, 60, 60);
+                                            pdf.text('Transaction Details', 20, 20);
+
+                                            pdf.setFontSize(8);
+                                            pdf.setTextColor(150, 150, 150);
+                                            pdf.text('Date', 20, 30);
+                                            pdf.text('Description', 50, 30);
+                                            pdf.text('Category', 120, 30);
+                                            pdf.text('Amount', 165, 30);
+
+                                            // Separator line
+                                            pdf.setDrawColor(200, 200, 200);
+                                            pdf.line(20, 33, 190, 33);
+
+                                            let y = 42;
+                                            let runningTotal = 0;
+
+                                            // Sort entries by date
+                                            const sortedEntries = [...entries].sort((a, b) =>
+                                                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                                            );
+
+                                            for (let i = 0; i < sortedEntries.length; i++) {
+                                                const entry = sortedEntries[i];
+                                                if (y > 270) {
+                                                    pdf.addPage();
+                                                    y = 20;
                                                 }
 
-                                                const textX = entry.receipt_url ? 50 : 20;
-                                                pdf.setFontSize(10);
-                                                pdf.text(`${i + 1}. ${entry.description || entry.category}`, textX, y + 8);
-                                                pdf.text(`RM ${entry.amount.toFixed(2)}`, 160, y + 8);
-                                                pdf.setFontSize(8);
-                                                pdf.text(`${entry.category}`, textX, y + 15);
-                                                y += entry.receipt_url ? 30 : 15;
+                                                runningTotal += entry.amount;
+                                                const entryDate = new Date(entry.created_at).toLocaleDateString('en-MY', {
+                                                    day: '2-digit',
+                                                    month: 'short'
+                                                });
+
+                                                // Alternate row background
+                                                if (i % 2 === 0) {
+                                                    pdf.setFillColor(250, 250, 250);
+                                                    pdf.rect(20, y - 5, 170, 10, 'F');
+                                                }
+
+                                                pdf.setFontSize(9);
+                                                pdf.setTextColor(100, 100, 100);
+                                                pdf.text(entryDate, 20, y);
+
+                                                pdf.setTextColor(60, 60, 60);
+                                                const desc = (entry.description || 'No description').substring(0, 30);
+                                                pdf.text(desc, 50, y);
+
+                                                pdf.setTextColor(100, 100, 100);
+                                                pdf.text(entry.category || 'Misc', 120, y);
+
+                                                pdf.setTextColor(60, 60, 60);
+                                                pdf.text(`RM ${entry.amount.toFixed(2)}`, 165, y);
+
+                                                y += 10;
                                             }
+
+                                            // Final total at bottom
+                                            pdf.setDrawColor(200, 200, 200);
+                                            pdf.line(20, y + 2, 190, y + 2);
+                                            pdf.setFontSize(10);
+                                            pdf.setTextColor(80, 130, 80);
+                                            pdf.text(`Running Total: RM ${runningTotal.toFixed(2)}`, 130, y + 12);
+
+                                            // Footer
+                                            pdf.setFontSize(8);
+                                            pdf.setTextColor(180, 180, 180);
+                                            pdf.text(`Generated by Willow • ${now.toLocaleDateString()}`, 20, 285);
 
                                             pdf.save(`willow-ledger-${monthYear.replace(' ', '-')}.pdf`);
                                         }}
