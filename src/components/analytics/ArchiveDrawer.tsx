@@ -10,7 +10,7 @@ interface ArchiveDrawerProps {
 }
 
 export const ArchiveDrawer: React.FC<ArchiveDrawerProps> = ({ isOpen, onClose, tasks }) => {
-    const archivedTasks = tasks.filter(t => t.status === 'archived');
+    const archivedTasks = tasks.filter(t => t.status === 'done');
 
     // Group tasks by date
     const groups = archivedTasks.reduce((acc, task) => {

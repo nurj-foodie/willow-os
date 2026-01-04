@@ -302,7 +302,7 @@ function App() {
         <ArchiveDrawer
           isOpen={showArchive}
           onClose={() => setShowArchive(false)}
-          tasks={tasks}
+          tasks={allTasks}
         />
 
         <LedgerDrawer
