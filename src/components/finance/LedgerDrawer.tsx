@@ -14,16 +14,19 @@ interface LedgerDrawerProps {
     onUpdateEntry?: (id: string, updates: any) => Promise<void>;
     onDeleteEntry?: (id: string) => Promise<void>;
     user: any;
+    showScanner: boolean;
+    setShowScanner: (show: boolean) => void;
 }
 
 export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
-    isOpen, onClose, entries, trialDaysLeft, onAddEntry, onUpdateEntry, onDeleteEntry, user
+    isOpen, onClose, entries, trialDaysLeft, onAddEntry, onUpdateEntry, onDeleteEntry, user,
+    showScanner, setShowScanner
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
-    const [showScanner, setShowScanner] = useState(false);
+    // showScanner now comes from props (lifted to App.tsx)
     const [lastSavedEntry, setLastSavedEntry] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editAmount, setEditAmount] = useState('');

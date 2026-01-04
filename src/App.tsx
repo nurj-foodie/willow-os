@@ -44,6 +44,7 @@ function App() {
   const [showArchive, setShowArchive] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showReceiptScanner, setShowReceiptScanner] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { mood, priorities, saving, updateMood, loading: wellbeingLoading } = useWellbeing(user);
@@ -312,6 +313,8 @@ function App() {
           onUpdateEntry={updateEntry}
           onDeleteEntry={deleteEntry}
           user={user}
+          showScanner={showReceiptScanner}
+          setShowScanner={setShowReceiptScanner}
         />
 
         <Footer onOpenLegal={setShowLegal} />
