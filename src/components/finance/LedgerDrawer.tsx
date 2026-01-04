@@ -72,8 +72,8 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
 
         const mappedCategory = categoryMap[data.category] || data.category || 'Misc';
 
-        // Close scanner first to prevent modal overlap issues
-        setShowScanner(false);
+        // NOTE: Don't close scanner here - ReceiptScanner handles its own
+        // close timing after showing the "done" animation for 1 second
 
         // Check for duplicate (same amount + merchant)
         const isDuplicate = entries.some(entry =>
