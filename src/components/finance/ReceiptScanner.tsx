@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Camera, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +13,16 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
     const [status, setStatus] = useState<'idle' | 'uploading' | 'processing' | 'done' | 'error'>('idle');
     const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const isProcessingRef = useRef(false); // Prevent close during upload
+
+    // Safe close that respects processing state
+    const handleClose = useCallback(() => {
+        if (isProcessingRef.current) {
+            console.log('[Receipt Scanner] Close blocked - upload in progress');
+            return;
+        }
+        onClose();
+    }, [onClose]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -27,6 +37,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
         // Immediately show loading state - important for Android where state updates
         // can be delayed if heavy async work starts too quickly
         console.log('[Receipt Scanner] Setting uploading state...');
+        isProcessingRef.current = true; // Lock to prevent premature close
         setStatus('uploading');
         setProgress(10);
 
@@ -122,12 +133,13 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 console.log('[Receipt Scanner] Calling onProcessed with:', sanitizedData);
                 onProcessed(sanitizedData);
 
-                // Close after a brief delay to let parent update state
+                // Unlock and close after animation
+                isProcessingRef.current = false;
                 setTimeout(() => {
                     console.log('[Receipt Scanner] Closing scanner');
                     onClose();
                 }, 100);
-            }, 1000);
+            }, 1500); // Extended to 1.5s so user sees the done state
 
         } catch (err: any) {
             console.error('[Receipt Scanner] Complete error:', err);
@@ -137,6 +149,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 stack: err?.stack
             });
             setStatus('error');
+            isProcessingRef.current = false; // Unlock on error
         } finally {
             // Reset file input for mobile compatibility
             if (fileInputRef.current) {
@@ -157,7 +170,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     <Camera size={24} className="text-matcha" />
                     Receipt Scanner
                 </h3>
-                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                     <X size={20} />
                 </button>
             </div>
