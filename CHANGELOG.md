@@ -2,6 +2,36 @@
 
 All notable changes to the Willow project will be documented in this file.
 
+
+## [2026-01-11] - Web Push Notifications & Deployment [16:00 UTC+8]
+
+### Added
+- **Web Push Notifications**: Complete implementation of background push notifications using VAPID and Supabase Edge Functions.
+- **Service Worker**: Migrated PWA to `injectManifest` strategy with custom `sw.ts` for handling push events.
+- **Push Scheduler**: Edge Function to poll for due tasks every minute and send alerts.
+- **UI**: Added Notification toggle (Bell icon) in the app header and `usePushNotifications` hook.
+
+## [2026-01-04] - Interactive Tutorial & Ground Testing Fixes [22:45 UTC+8]
+
+### Added
+- **Interactive Spotlight Tutorial:** deeply integrated "show, don't tell" guide for new users.
+  - **"Baby Steps" Flow:** Highlights UI elements (Input, Calendar, Ledger) sequentially, requiring user interaction to advance.
+  - **Smart Positioning:** Tooltips anchor intelligently to avoid blocking input areas.
+  - **Auto-Rescue:** Detects users with "seeded" tasks who missed onboarding and launches the tour automatically.
+  - **Restart Capability:** Added manual Help button to restart the tutorial anytime.
+- **Enhanced Ledger Export:** PDF now includes professional headers, category breakdowns, and payment dates.
+- **PWA Install Prompt:** Guidance for iOS users to add the app to their home screen.
+- **Willow Leaf Icons:** Updated app branding with new logo assets.
+
+### Changed
+- **Account Deletion:** Now performs a "Deep Clean", wiping not just tasks but also Profile, Ledger, and Wellbeing data for a true hard reset.
+- **Wrap the Day:** Improved summary modal logic to show completed vs incomplete counts and handle auto-rollover cleanly.
+- **Authentication:** Temporarily disabled strict device verification for smoother beta testing.
+
+### Fixed
+- **Android Scanner Animation:** Replaced Framer Motion with CSS animations to fix rendering issues on some Android webviews.
+- **Task Visibility:** Completed tasks now remain visible (strikethrough) until the end-of-day wrap-up, fixing the "disappearing task" confusion.
+- **Input Tooltip Overlap:** Refined tutorial positioning to ensure the input bar is never obscured.
 ## [2025-12-30] - UX Polish: Greetings & Calendar Improvements [23:00 UTC+8]
 
 ### Added

@@ -22,7 +22,8 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { LogOut, Shield, ShieldOff, History, Wallet, Trash2, HelpCircle } from 'lucide-react';
+import { usePushNotifications } from './hooks/usePushNotifications';
+import { Trash2, LogOut, History, Wallet, Shield, ShieldOff, HelpCircle, Bell, BellOff, Loader2 } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { CalendarModal } from './components/wellness/CalendarModal';
 import { TaskEditModal } from './components/modals/TaskEditModal';
@@ -46,6 +47,8 @@ function App() {
   const [showLedger, setShowLedger] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showReceiptScanner, setShowReceiptScanner] = useState(false);
+  const { isSubscribed, loading: pushLoading, subscribeToPush, unsubscribeFromPush, isSupported: isPushSupported } = usePushNotifications(user);
+
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { mood, priorities, saving, updateMood, loading: wellbeingLoading } = useWellbeing(user);
@@ -322,6 +325,22 @@ function App() {
                     {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
                   </button>
                   <div id="account-actions" className="flex items-center gap-2">
+                    {isPushSupported && (
+                      <button
+                        onClick={isSubscribed ? unsubscribeFromPush : subscribeToPush}
+                        disabled={pushLoading}
+                        className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10 relative"
+                        title={isSubscribed ? "Disable Notifications" : "Enable Notifications"}
+                      >
+                        {pushLoading ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : isSubscribed ? (
+                          <Bell size={20} className="text-matcha fill-matcha" />
+                        ) : (
+                          <BellOff size={20} />
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setTutorialStep(0);

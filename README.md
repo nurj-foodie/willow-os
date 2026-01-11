@@ -52,5 +52,6 @@ npm run dev
 - [x] Calendar View with Task Indicators & Management
 - [x] PWA Configuration & Launch
 - [x] Dynamic Greeting System (Morning/Afternoon/Evening)
-- [ ] Push Notifications for upcoming tasks
-- [ ] Interactive Onboarding Tutorial
+- [x] Push Notifications (Web Push)
+- [x] Interactive Onboarding Tutorial
+- [ ] Voice Tasks (Future)

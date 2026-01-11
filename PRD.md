@@ -1,7 +1,7 @@
 # Willow - Product Requirements Document (PRD)
 
-**Version:** 0.2 (Alpha)  
-**Date:** December 26, 2025 (Updated)  
+**Version:** 0.3 (Beta Candidate)  
+**Date:** January 4, 2026 (Updated)  
 **Target Audience:** Gen Z / Modern Professional ("Sofia")  
 **Platform:** Web PWA (Mobile & Desktop)
 
@@ -56,6 +56,13 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Requirement:** Instant access for reviewers/testers without registration.
 - **Logic:** Toggles between Cloud-sync and Local-only mode.
 - **Visuals:** 🎭 branded "Guest" experience that still includes full Onboarding and Rituals.
+### G. Interactive Onboarding ("Spotlight")
+- **Requirement:** "Show, don't tell" interactive tutorial for new users.
+- **Logic:**
+  - **Dimmed Overlay:** Focuses attention on one element at a time.
+  - **Interactive Steps:** Requires user action (e.g., "Add Task") to proceed.
+  - **Features Covered:** Smart Input, Calendar, Ledger, Archive, Privacy.
+  - **Robustness:** Auto-triggers for new users, manual restart option.
 
 ## 4. Design Guidelines ("The Vibe")
 - **Palette:** 
