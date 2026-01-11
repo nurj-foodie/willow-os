@@ -57,7 +57,8 @@ Deno.serve(async (req) => {
 
             const payload = JSON.stringify({
                 title: `🌿 Willow: ${task.title}`,
-                body: `Due at ${new Date(task.due_date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`,
+                body: 'Time to flow', // Fallback
+                due_date: task.due_date, // Send raw ISO string
                 url: '/'
             })
 

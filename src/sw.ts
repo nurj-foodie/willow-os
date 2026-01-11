@@ -17,10 +17,24 @@ self.addEventListener('push', (event) => {
     try {
         const data = event.data.json()
         const title = data.title || 'Willow'
+
+        let body = data.body || 'New update from Willow'
+
+        // Format time locally if due_date is present
+        if (data.due_date) {
+            try {
+                const date = new Date(data.due_date)
+                const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                body = `Due at ${timeStr}`
+            } catch (e) {
+                console.error('Date formatting error:', e)
+            }
+        }
+
         const options: NotificationOptions = {
-            body: data.body || 'New update from Willow',
+            body: body,
             icon: '/pwa-192x192.png',
-            badge: '/pwa-192x192.png', // Android small icon usually needs transparency, but using same for now
+            badge: '/pwa-192x192.png',
             data: data.url || '/',
         }
 
