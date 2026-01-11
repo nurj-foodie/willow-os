@@ -107,6 +107,9 @@ export function usePushNotifications(user: User | null) {
             setIsSubscribed(true);
             console.log('Push subscription saved to DB endpoint:', subscription.endpoint);
 
+            // Educational Prompt
+            alert("Notifications Active! 🔔\n\nTo hear them:\n1. Unmute your phone 🔕 -> 🔔\n2. Check Settings > Notifications > Willow > Allow Sound");
+
         } catch (error) {
             console.error('Failed to subscribe to push:', error);
             const msg = error instanceof Error ? error.message : 'Unknown error';

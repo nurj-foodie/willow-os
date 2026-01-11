@@ -36,6 +36,9 @@ self.addEventListener('push', (event) => {
             icon: '/pwa-192x192.png',
             badge: '/pwa-192x192.png',
             data: data.url || '/',
+            vibrate: [200, 100, 200], // Vibration pattern
+            tag: 'willow-task', // Grouping tag
+            renotify: true, // Force notification/sound even if tag exists
         }
 
         event.waitUntil(
