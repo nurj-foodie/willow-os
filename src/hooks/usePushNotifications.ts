@@ -13,7 +13,10 @@ export function usePushNotifications(user: User | null) {
     const isPushSupported = 'serviceWorker' in navigator && 'PushManager' in window;
 
     // Helper to convert VAPID key
-    const urlBase64ToUint8Array = (base64String: string) => {
+    const urlBase64ToUint8Array = (base64String: string | undefined) => {
+        if (!base64String) {
+            throw new Error('VAPID_PUBLIC_KEY is missing via VITE_VAPID_PUBLIC_KEY env var.');
+        }
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)
             .replace(/\-/g, '+')
@@ -66,9 +69,19 @@ export function usePushNotifications(user: User | null) {
             }
 
             // 3. Subscribe to PushManager
+            let publicKey = VAPID_PUBLIC_KEY;
+
+            // Fallback: Fetch from Edge Function if not in env
+            if (!publicKey) {
+                console.log('VAPID key missing in env, fetching from server...');
+                const { data, error } = await supabase.functions.invoke('get-vapid-key');
+                if (error || !data?.publicKey) throw new Error('Could not retrieve VAPID key');
+                publicKey = data.publicKey;
+            }
+
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                applicationServerKey: urlBase64ToUint8Array(publicKey)
             });
 
             // 4. Save to Database
