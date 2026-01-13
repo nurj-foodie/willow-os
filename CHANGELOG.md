@@ -3,6 +3,19 @@
 All notable changes to the Willow project will be documented in this file.
 
 
+## [2026-01-13] - Header Polish & Profile Command Center [11:15 UTC+8]
+
+### Added
+- **Profile Modal ("Command Center"):** Premium glassmorphism modal triggered by User Avatar.
+  - **Inline Name Editing:** Users can update their `display_name` directly within the modal.
+  - **Centralized Controls:** Push Notifications and Privacy Mode toggles now live here.
+  - **Quick Access:** Archive, Tutorial Restart, and Ledger accessible from a unified grid.
+- **Header Refactor:** De-cluttered the main app header, removing "Icon Soup" in favor of a minimal [Date + Wallet + Avatar] layout.
+
+### Changed
+- **Renotify Logic:** Web Push notifications now utilize `renotify: true` and a dedicated `vibrate` pattern for better visibility.
+- **Timezone Handling:** Service Worker now handles checking local time for notification delivery, fixing server-client timezone mismatches.
+
 ## [2026-01-11] - Web Push Notifications & Deployment [16:00 UTC+8]
 
 ### Added

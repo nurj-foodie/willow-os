@@ -14,6 +14,7 @@ Willow is a minimal, low-anxiety task manager that replaces rigid calendars with
 - **Personalized Rituals:** Time-aware greetings, atmospheric background shifts, and a "Hold to Enter" focus moment.
 - **Permanent Archive:** A "Wrap Up" ritual that moves completed tasks to a searchable history drawer.
 - **Receipt Scanner:** AI-powered receipt scanning with Gemini 2.0 Flash for instant ledger entries.
+- **Profile Command Center:** A unified glassmorphism modal for settings, notifications, and identity management.
 - **Instant Demo Mode:** 🎭 Try the app immediately with zero-config localStorage persistence.
 
 ## 🛠️ Tech Stack
@@ -54,4 +55,5 @@ npm run dev
 - [x] Dynamic Greeting System (Morning/Afternoon/Evening)
 - [x] Push Notifications (Web Push)
 - [x] Interactive Onboarding Tutorial
+- [x] Header Polish & Profile Command Center 🧹
 - [ ] Voice Tasks (Future)

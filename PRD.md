@@ -1,7 +1,7 @@
 # Willow - Product Requirements Document (PRD)
 
-**Version:** 0.3 (Beta Candidate)  
-**Date:** January 4, 2026 (Updated)  
+**Version:** 0.5 (Profile & Push Update)  
+**Date:** January 13, 2026 (Updated)  
 **Target Audience:** Gen Z / Modern Professional ("Sofia")  
 **Platform:** Web PWA (Mobile & Desktop)
 
@@ -63,6 +63,20 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
   - **Interactive Steps:** Requires user action (e.g., "Add Task") to proceed.
   - **Features Covered:** Smart Input, Calendar, Ledger, Archive, Privacy.
   - **Robustness:** Auto-triggers for new users, manual restart option.
+
+### H. Web Push Notifications
+- **Requirement:** Background alerts for due tasks.
+- **Logic:**
+  - **VAPID Security:** Authenticated communication between Server and Browser.
+  - **Local Timezone:** Service Worker calculates display time locally to ensure accuracy.
+  - **Smart Scheduling:** Edge Function runs every minute to find tasks starting in the next 10 minutes.
+
+### I. Profile Command Center (Header Refactor)
+- **Requirement:** Clean, decluttered UI with a centralized settings home.
+- **Logic:**
+  - **Avatar Trigger:** Clicking user avatar opens the glass modal.
+  - **Unified Actions:** Notifications, Privacy, Archive, and Account Actions all live here.
+  - **Inline Editing:** Update Display Name directly in the modal.
 
 ## 4. Design Guidelines ("The Vibe")
 - **Palette:** 
