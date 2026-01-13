@@ -31,7 +31,7 @@ self.addEventListener('push', (event) => {
             }
         }
 
-        const options: NotificationOptions = {
+        const options: NotificationOptions & { vibrate?: number[], renotify?: boolean } = {
             body: body,
             icon: '/pwa-192x192.png',
             badge: '/pwa-192x192.png',

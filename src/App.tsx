@@ -22,11 +22,11 @@ import { TaskCard } from './components/stream/TaskCard';
 import { Auth } from './components/auth/Auth';
 import { useTasks } from './hooks/useTasks';
 import { useNotifications } from './hooks/useNotifications';
-import { usePushNotifications } from './hooks/usePushNotifications';
-import { Trash2, LogOut, History, Wallet, Shield, ShieldOff, HelpCircle, Bell, BellOff, Loader2 } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { VibeHeader } from './components/wellness/VibeHeader';
 import { CalendarModal } from './components/wellness/CalendarModal';
 import { TaskEditModal } from './components/modals/TaskEditModal';
+import { ProfileModal } from './components/modals/ProfileModal';
 import { useWellbeing } from './hooks/useWellbeing';
 import { useProfile } from './hooks/useProfile';
 import { RitualOverlay } from './components/analytics/RitualOverlay';
@@ -47,7 +47,7 @@ function App() {
   const [showLedger, setShowLedger] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showReceiptScanner, setShowReceiptScanner] = useState(false);
-  const { isSubscribed, loading: pushLoading, subscribeToPush, unsubscribeFromPush, isSupported: isPushSupported } = usePushNotifications(user);
+  const [showProfile, setShowProfile] = useState(false);
 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -131,14 +131,6 @@ function App() {
     // Advance tutorial if on step 3 (Ledger Trigger) -> Step 4 (Archive)
     if (showOnboarding && tutorialStep === 3) {
       setTutorialStep(4);
-    }
-  };
-
-  const handleAppArchiveOpen = () => {
-    setShowArchive(true);
-    // Advance tutorial if on step 4 (Archive) -> Step 5 (Privacy)
-    if (showOnboarding && tutorialStep === 4) {
-      setTutorialStep(5);
     }
   };
 
@@ -298,14 +290,6 @@ function App() {
               {user && (
                 <div className="flex items-center gap-2">
                   <button
-                    id="archive-trigger"
-                    onClick={handleAppArchiveOpen}
-                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                    title="View Archive"
-                  >
-                    <History size={20} />
-                  </button>
-                  <button
                     id="ledger-trigger"
                     onClick={handleAppLedgerOpen}
                     className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
@@ -314,66 +298,14 @@ function App() {
                     <Wallet size={20} />
                   </button>
                   <button
-                    id="privacy-trigger"
-                    onClick={() => {
-                      setPrivacyMode(!privacyMode);
-                      if (showOnboarding && tutorialStep === 4) setTutorialStep(5);
-                    }}
-                    className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                    title={privacyMode ? "Disable Privacy Mode" : "Enable Privacy Mode"}
+                    onClick={() => setShowProfile(true)}
+                    className="w-10 h-10 rounded-full bg-oat border-2 border-white shadow-sm flex items-center justify-center text-lg font-serif text-charcoal hover:scale-105 transition-transform"
+                    title="Open Profile & Settings"
                   >
-                    {privacyMode ? <Shield size={20} /> : <ShieldOff size={20} />}
+                    {profile?.display_name ? profile.display_name[0].toUpperCase() : user?.email?.[0].toUpperCase() || '?'}
                   </button>
-                  <div id="account-actions" className="flex items-center gap-2">
-                    {isPushSupported && (
-                      <button
-                        onClick={isSubscribed ? unsubscribeFromPush : subscribeToPush}
-                        disabled={pushLoading}
-                        className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10 relative"
-                        title={isSubscribed ? "Disable Notifications" : "Enable Notifications"}
-                      >
-                        {pushLoading ? (
-                          <Loader2 size={20} className="animate-spin" />
-                        ) : isSubscribed ? (
-                          <Bell size={20} className="text-matcha fill-matcha" />
-                        ) : (
-                          <BellOff size={20} />
-                        )}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        setTutorialStep(0);
-                        setShowOnboarding(true);
-                      }}
-                      className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                      title="Restart Tutorial"
-                    >
-                      <HelpCircle size={20} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (showOnboarding && tutorialStep === 5) setTutorialStep(6);
-                        logout();
-                      }}
-                      className="text-charcoal/30 hover:text-charcoal transition-colors p-2 rounded-full hover:bg-clay/10"
-                      title="Logout"
-                    >
-                      <LogOut size={20} />
-                    </button>
-                    <button
-                      onClick={deleteAccount}
-                      className="text-clay/30 hover:text-clay transition-colors p-2 rounded-full hover:bg-clay/10"
-                      title="Delete Account & Data"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
                 </div>
               )}
-              <div className="w-10 h-10 rounded-full bg-clay/30 flex items-center justify-center text-xl">
-                ✨
-              </div>
             </div>
           </header>
 
@@ -540,7 +472,31 @@ function App() {
             tasks={allTasks} // Pass all tasks, including done/archived
             onDateSelect={handleAppDateSelect}
           />
-        )}{/* Task Edit Modal */}
+        )}
+        <ProfileModal
+          isOpen={showProfile}
+          onClose={() => setShowProfile(false)}
+          user={user}
+          profile={profile}
+          updateProfile={updateProfile}
+          onLogout={() => {
+            if (showOnboarding && tutorialStep === 5) setTutorialStep(6);
+            logout();
+          }}
+          onDeleteAccount={deleteAccount}
+          onOpenArchive={() => setShowArchive(true)}
+          onRestartTutorial={() => {
+            setTutorialStep(0);
+            setShowOnboarding(true);
+          }}
+          privacyMode={privacyMode}
+          setPrivacyMode={(mode) => {
+            setPrivacyMode(mode);
+            if (showOnboarding && tutorialStep === 4) setTutorialStep(5);
+          }}
+        />
+
+        {/* Task Edit Modal */}
         <TaskEditModal
           task={editingTask}
           isOpen={!!editingTask}
