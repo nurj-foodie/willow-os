@@ -20,7 +20,7 @@ interface LedgerDrawerProps {
 }
 
 export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
-    isOpen, onClose, entries, trialDaysLeft, onAddEntry, onUpdateEntry, onDeleteEntry, user,
+    isOpen, onClose, entries, onAddEntry, onUpdateEntry, onDeleteEntry, user,
     showScanner, setShowScanner
 }) => {
     const [showForm, setShowForm] = useState(false);
