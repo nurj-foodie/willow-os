@@ -313,7 +313,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-neutral-900 z-50 shadow-2xl overflow-y-auto"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white/80 backdrop-blur-xl z-50 shadow-2xl overflow-y-auto"
                     >
                         <div className="p-6">
                             {/* Header */}

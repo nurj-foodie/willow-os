@@ -103,7 +103,7 @@ export const ProfileModal = ({
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md bg-white dark:bg-neutral-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-md bg-white/80 dark:bg-neutral-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
                         <div className="relative p-6 pt-12 pb-8 flex flex-col items-center border-b border-clay/10 bg-gradient-to-b from-oat/50 to-transparent">
