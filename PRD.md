@@ -1,9 +1,10 @@
 # Willow - Product Requirements Document (PRD)
 
-**Version:** 0.5 (Profile & Push Update)  
-**Date:** January 13, 2026 (Updated)  
+**Version:** 0.6 (Paper Trail, Dark Mode & Onboarding Polish)  
+**Date:** January 14, 2026 (Updated)  
 **Target Audience:** Gen Z / Modern Professional ("Sofia")  
 **Platform:** Web PWA (Mobile & Desktop)
+
 
 ---
 

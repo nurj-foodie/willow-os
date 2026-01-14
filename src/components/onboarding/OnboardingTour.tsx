@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, Sparkles, Layout } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Sparkles, Waves, FileText, Car, PenLine } from 'lucide-react';
 
 interface OnboardingTourProps {
     onComplete: () => void;
@@ -8,33 +8,33 @@ interface OnboardingTourProps {
 
 const STEPS = [
     {
-        title: "Willow OS",
-        description: "Your minimal interactive Todo List & Personal Finance Tracker. A space to clear your mind.",
+        title: "Welcome to Willow",
+        description: "Your space to breathe. Not another productivity app — a place to let your thoughts flow.",
         icon: <div className="text-4xl">🌿</div>,
         color: "bg-white"
     },
     {
-        title: "The Stream",
-        description: "Your interactive task list. Drag items up/down to prioritize. Swipe or click to complete.",
-        icon: <Layout className="text-charcoal" size={32} />,
+        title: "The Stream 🌊",
+        description: "Your tasks, floating softly. Drag to prioritize. Tap to complete. No rigid grids, just gentle flow.",
+        icon: <Waves className="text-sage" size={32} />,
         color: "bg-sage/10"
     },
     {
-        title: "Speak Naturally",
-        description: "Willow understands time. Type 'Dinner at 7pm' or 'Meeting tomorrow' and we'll handle the scheduling.",
-        icon: <Sparkles className="text-amber-400" size={32} />,
+        title: "Just Type It ✨",
+        description: "Say 'dinner at 7pm' or 'meet babe tomorrow'. I'll catch the time — you keep the thought.",
+        icon: <PenLine className="text-amber-500" size={32} />,
         color: "bg-amber-50"
     },
     {
-        title: "Parking Lot (Top-Left)",
-        description: "Pull up the sidebar to park tasks for 'someday'. Keep your main stream clear for today.",
-        icon: <div className="p-2 bg-charcoal/5 rounded-lg"><Layout size={24} className="text-charcoal/40" /></div>,
-        color: "bg-clay/5"
+        title: "The Parking Lot 🚙",
+        description: "Some thoughts aren't for today. Park them here. Your mind stays clear, your someday stays safe.",
+        icon: <Car className="text-charcoal/40" size={28} />,
+        color: "bg-clay/10"
     },
     {
-        title: "Expenses & Receipts (Top-Right)",
-        description: "Track your budget. Open the Ledger to log expenses or scan receipts with AI.",
-        icon: <div className="p-2 bg-matcha/20 rounded-lg">🎞️</div>,
+        title: "Paper Trail 🧾",
+        description: "Scan that crumpled receipt. Or just type it. Track spending without the spreadsheet stress.",
+        icon: <div className="relative"><FileText className="text-matcha" size={28} /><Sparkles size={14} className="absolute -top-1 -right-1 text-matcha" /></div>,
         color: "bg-matcha/10"
     }
 ];
@@ -70,21 +70,21 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                className="relative w-full max-w-sm bg-white dark:bg-neutral-900 rounded-[2rem] shadow-2xl overflow-hidden"
             >
                 {/* Progress bar */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-charcoal/5 flex">
                     {STEPS.map((_, i) => (
                         <div
                             key={i}
-                            className={`h-full transition-all duration-500 ${i <= currentStep ? 'bg-charcoal' : 'bg-transparent'}`}
+                            className={`h-full transition-all duration-500 ${i <= currentStep ? 'bg-matcha' : 'bg-transparent'}`}
                             style={{ width: `${100 / STEPS.length}%` }}
                         />
                     ))}
                 </div>
 
-                <div className={`p-8 pt-12 transition-colors duration-500 ${STEPS[currentStep].color}`}>
-                    <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6">
+                <div className={`p-8 pt-12 transition-colors duration-500 ${STEPS[currentStep].color} dark:bg-transparent`}>
+                    <div className="w-16 h-16 rounded-2xl bg-white dark:bg-neutral-800 shadow-sm flex items-center justify-center mb-6">
                         {STEPS[currentStep].icon}
                     </div>
 
@@ -96,7 +96,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
                     </p>
                 </div>
 
-                <div className="p-6 bg-white flex items-center justify-between">
+                <div className="p-6 bg-white dark:bg-neutral-900 flex items-center justify-between">
                     <button
                         onClick={handleBack}
                         className={`text-charcoal/30 hover:text-charcoal transition-colors flex items-center gap-1 text-sm font-bold uppercase tracking-widest ${currentStep === 0 ? 'invisible' : 'visible'}`}
@@ -116,7 +116,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
                             onClick={handleNext}
                             className="bg-charcoal text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-matcha hover:text-charcoal transition-all active:scale-95 font-bold text-sm"
                         >
-                            {currentStep === STEPS.length - 1 ? "Let's Roam" : "Next"}
+                            {currentStep === STEPS.length - 1 ? "Let's Flow" : "Next"}
                             <ChevronRight size={18} />
                         </button>
                     </div>

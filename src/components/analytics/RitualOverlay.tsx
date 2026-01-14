@@ -85,7 +85,7 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                         <span className="flex items-center gap-1"><Clock size={12} /> {timeStr}</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-serif text-charcoal leading-tight">
-                        {step === 'naming' ? "flow... one moment." : `Good ${isMorning ? 'morning' : isAfternoon ? 'afternoon' : 'evening'}, ${userName}.`}
+                        {step === 'naming' ? "hey, you made it ✨" : `Good ${isMorning ? 'morning' : isAfternoon ? 'afternoon' : 'evening'}, ${userName}. ☀️`}
                     </h1>
                 </motion.div>
 
@@ -98,7 +98,7 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                             exit={{ opacity: 0 }}
                             className="space-y-6"
                         >
-                            <label className="block text-charcoal/40 text-sm tracking-widest uppercase">How may I call you?</label>
+                            <label className="block text-charcoal/40 text-sm tracking-widest uppercase">what should I call you, lovely?</label>
                             <input
                                 autoFocus
                                 type="text"
@@ -107,11 +107,11 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                                 onKeyDown={(e) => e.key === 'Enter' && nameInput && onComplete(nameInput)}
                                 className="w-full bg-transparent border-b-2 border-charcoal/10 text-center text-3xl font-serif text-charcoal focus:outline-none focus:border-matcha/50 pb-2 transition-colors placeholder:text-charcoal/10"
                                 placeholder="Your name..."
-                            />    <button
+                            />                            <button
                                 onClick={() => setStep('greeting')}
                                 className="text-matcha text-sm font-sans uppercase tracking-widest font-bold hover:tracking-[0.3em] transition-all"
                             >
-                                Begin Phase
+                                let's begin ✨
                             </button>
                         </motion.div>
                     ) : (
@@ -138,8 +138,8 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                                 <div className="space-y-2">
                                     <p className="font-serif text-charcoal/80 text-lg">
                                         {todayTaskCount === 0
-                                            ? "A clear slate today. What will you plant?"
-                                            : `You have ${todayTaskCount} task${todayTaskCount === 1 ? '' : 's'} scheduled.`
+                                            ? "A blank page today. What's calling you?"
+                                            : `You have ${todayTaskCount} thing${todayTaskCount === 1 ? '' : 's'} on your plate.`
                                         }
                                     </p>
                                     {overdueTaskCount > 0 && (
@@ -164,8 +164,8 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                             </div>
 
                             <p className="text-charcoal/40 font-serif italic text-lg leading-relaxed">
-                                Use this moment to ground yourself.<br />
-                                Your focus is finite, but your potential is fluid.
+                                Take a breath. Today is yours to shape.<br />
+                                Start small. You've got this.
                             </p>
 
                             <div className="pt-12 flex flex-col items-center gap-6">
@@ -185,7 +185,7 @@ export const RitualOverlay: React.FC<RitualOverlayProps> = ({
                                     <Sparkles className={`transition-all duration-500 ${isPressing ? 'scale-125 text-matcha' : 'text-charcoal/20 group-hover:text-matcha/40'}`} size={32} />
                                 </button>
                                 <span className="text-[10px] uppercase tracking-[0.3em] text-charcoal/30 font-bold animate-pulse">
-                                    Hold to enter stream
+                                    hold to flow in ✨
                                 </span>
                             </div>
                         </motion.div>

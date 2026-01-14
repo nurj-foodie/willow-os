@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,12 +8,12 @@ export default {
     theme: {
         extend: {
             colors: {
-                oat: "#FDFCF8",
-                charcoal: "#2D2D2D",
-                matcha: "#D1E2C4",
-                clay: "#E8D5C4",
-                lavender: "#E1D5E8",
-                sage: "#B2C5B2",
+                oat: "var(--color-oat)",
+                charcoal: "var(--color-charcoal)",
+                matcha: "var(--color-matcha)",
+                clay: "var(--color-clay)",
+                lavender: "var(--color-lavender)",
+                sage: "var(--color-sage)",
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],

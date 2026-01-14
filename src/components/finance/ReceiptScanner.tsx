@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, X, CheckCircle2 } from 'lucide-react';
+import { FileText, Upload, X, CheckCircle2, Sparkles, Image, FileUp } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ReceiptScannerProps {
@@ -20,10 +20,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
         const file = e.target.files?.[0];
         if (!file) return;
 
-        console.log('[Scanner] File selected:', file.name, file.size, 'bytes');
-        console.log('[Scanner] Setting status to uploading...');
-
-        // Set status synchronously before any async work
+        console.log('[Scanner] File selected:', file.name, file.size, 'bytes', file.type);
         setStatus('uploading');
 
         try {
@@ -88,7 +85,6 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
         setErrorMessage('');
     };
 
-    // Only show close button when idle or error
     const canClose = status === 'idle' || status === 'error';
 
     return (
@@ -98,8 +94,11 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
         >
             <div className="flex justify-between items-center">
                 <h3 className="text-xl font-serif font-bold flex items-center gap-2">
-                    <Camera size={24} className="text-matcha" />
-                    Receipt Scanner
+                    <div className="relative">
+                        <FileText size={24} className="text-matcha" />
+                        <Sparkles size={12} className="absolute -top-1 -right-1 text-matcha" />
+                    </div>
+                    Digitize the Clutter
                 </h3>
                 {canClose && (
                     <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -115,18 +114,54 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 {/* IDLE STATE */}
                 {status === 'idle' && (
                     <div className="flex flex-col items-center gap-4">
-                        <p className="text-sm text-white/50 italic">Snap a clear photo of your receipt</p>
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 px-6 py-3 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
-                        >
-                            <Upload size={18} />
-                            Choose Photo
-                        </button>
+                        <p className="text-sm text-white/60 italic">Safe here, gone from your purse.</p>
+
+                        {/* Upload Options */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.accept = 'image/*';
+                                        fileInputRef.current.capture = 'environment';
+                                        fileInputRef.current.click();
+                                    }
+                                }}
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
+                            >
+                                <Upload size={20} />
+                                <span>Camera</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.accept = 'image/*';
+                                        fileInputRef.current.removeAttribute('capture');
+                                        fileInputRef.current.click();
+                                    }
+                                }}
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all"
+                            >
+                                <Image size={20} />
+                                <span>Gallery</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.accept = 'image/*,application/pdf';
+                                        fileInputRef.current.removeAttribute('capture');
+                                        fileInputRef.current.click();
+                                    }
+                                }}
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all"
+                            >
+                                <FileUp size={20} />
+                                <span>PDF</span>
+                            </button>
+                        </div>
                     </div>
                 )}
 
-                {/* UPLOADING STATE - using pure CSS animation */}
+                {/* UPLOADING STATE */}
                 {status === 'uploading' && (
                     <div className="flex flex-col items-center gap-4">
                         <div
@@ -138,7 +173,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     </div>
                 )}
 
-                {/* PROCESSING STATE - using pure CSS animation */}
+                {/* PROCESSING STATE */}
                 {status === 'processing' && (
                     <div className="flex flex-col items-center gap-4">
                         <div
@@ -154,7 +189,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 {status === 'done' && (
                     <div className="flex flex-col items-center gap-4">
                         <CheckCircle2 size={64} className="text-matcha" />
-                        <p className="text-lg font-bold text-matcha">Scan Complete!</p>
+                        <p className="text-lg font-bold text-matcha">Digitized!</p>
                         {processedDataRef.current && (
                             <div className="text-center text-sm text-white/70">
                                 <p className="font-bold">RM {processedDataRef.current.amount?.toFixed(2)}</p>
@@ -190,8 +225,6 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
             <input
                 type="file"
-                accept="image/*"
-                capture="environment"
                 ref={fileInputRef}
                 onChange={handleFileSelect}
                 className="hidden"
@@ -201,7 +234,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 Receipts are processed securely by Google AI.
             </p>
 
-            {/* CSS for spinner animation - inline style to ensure Chrome Android gets it */}
+            {/* CSS for spinner animation */}
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }

@@ -13,7 +13,9 @@ import {
     Loader2,
     Wallet,
     Edit2,
-    Check
+    Check,
+    Moon,
+    Sun
 } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
@@ -34,6 +36,10 @@ interface ProfileModalProps {
     // Privacy State
     privacyMode: boolean;
     setPrivacyMode: (mode: boolean) => void;
+
+    // Theme State
+    isDark: boolean;
+    toggleTheme: () => void;
 }
 
 export const ProfileModal = ({
@@ -47,7 +53,9 @@ export const ProfileModal = ({
     onOpenArchive,
     onRestartTutorial,
     privacyMode,
-    setPrivacyMode
+    setPrivacyMode,
+    isDark,
+    toggleTheme
 }: ProfileModalProps) => {
     const { isSubscribed, loading: pushLoading, subscribeToPush, unsubscribeFromPush, isSupported: isPushSupported } = usePushNotifications(user);
 
@@ -95,7 +103,7 @@ export const ProfileModal = ({
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md bg-white/80 backdrop-blur-xl border border-white/40 rounded-[2rem] shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-md bg-white/80 dark:bg-neutral-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
                         <div className="relative p-6 pt-12 pb-8 flex flex-col items-center border-b border-clay/10 bg-gradient-to-b from-oat/50 to-transparent">
@@ -233,7 +241,7 @@ export const ProfileModal = ({
                             {/* Tutorial */}
                             <button
                                 onClick={() => { onClose(); onRestartTutorial(); }}
-                                className="p-4 rounded-2xl border border-clay/10 bg-white/40 hover:bg-white/60 transition-all text-left flex flex-col gap-2 group"
+                                className="p-4 rounded-2xl border border-clay/10 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 transition-all text-left flex flex-col gap-2 group"
                             >
                                 <div className="p-2 rounded-lg bg-charcoal/5 text-charcoal/40 group-hover:bg-charcoal/10 group-hover:text-charcoal/60 transition-colors w-fit">
                                     <HelpCircle size={18} />
@@ -241,6 +249,32 @@ export const ProfileModal = ({
                                 <div>
                                     <span className="block font-bold text-sm text-charcoal">Tutorial</span>
                                     <span className="text-[10px] text-charcoal/50 font-medium">Restart</span>
+                                </div>
+                            </button>
+
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className={`p-4 rounded-2xl border transition-all text-left flex flex-col gap-2 col-span-2 ${isDark
+                                    ? 'bg-charcoal/20 border-charcoal/30 hover:bg-charcoal/30'
+                                    : 'bg-white/40 border-clay/10 hover:bg-white/60'
+                                    }`}
+                            >
+                                <div className="flex justify-between items-center w-full">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${isDark ? 'bg-lavender/20 text-lavender' : 'bg-charcoal/5 text-charcoal/40'}`}>
+                                            {isDark ? <Moon size={18} /> : <Sun size={18} />}
+                                        </div>
+                                        <div>
+                                            <span className="block font-bold text-sm text-charcoal">Appearance</span>
+                                            <span className="text-[10px] text-charcoal/50 font-medium">
+                                                {isDark ? 'Dark Mode' : 'Light Mode'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-lavender' : 'bg-charcoal/20'}`}>
+                                        <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </div>
                                 </div>
                             </button>
 

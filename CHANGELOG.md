@@ -3,6 +3,30 @@
 All notable changes to the Willow project will be documented in this file.
 
 
+## [2026-01-14] - Paper Trail, Dark Mode & Onboarding Polish [12:50 UTC+8]
+
+### Added
+- **Paper Trail (Receipt Dump):** Complete rebrand of the Ledger feature.
+  - Monthly navigation with chevrons and receipt count.
+  - "Current Trail" summary modal with category breakdown.
+  - Digital receipt upload: Camera, Gallery, and PDF options.
+  - Manual entry now supports photo attachment.
+  - New micro-copy: "Digitize the Clutter", "Safe here, gone from your purse."
+  - Empty state: "No paper left behind. Purse: Clean. Mind: Clear."
+- **Dark Mode:** System-wide theme toggle with serene nighttime aesthetics.
+  - Soft midnight palette (#121318) with halation glow effects.
+  - `useTheme` hook with localStorage persistence and system preference detection.
+  - Toggle in ProfileModal with Moon/Sun icons and smooth switch animation.
+- **Gen Z Onboarding Polish:** Complete copy rewrite for "Sofia" persona.
+  - Welcome: "hey, you made it ✨"
+  - Name prompt: "what should I call you, lovely?"
+  - Tutorial: "Let's plant something 🌱", "Money moves 💸", "Your wins 🏆"
+  - Enter: "hold to flow in ✨"
+
+### Changed
+- **Tutorial Spotlight:** Removed animate-pulse to prevent epilepsy triggers (accessibility fix).
+- **PDF Export:** Now exports as `paper-trail-month-year.pdf`.
+
 ## [2026-01-13] - Header Polish & Profile Command Center [11:15 UTC+8]
 
 ### Added

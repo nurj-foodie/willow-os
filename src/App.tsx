@@ -37,6 +37,7 @@ import { useLedger } from './hooks/useLedger';
 import { Footer } from './components/layout/Footer';
 import { TutorialOverlay } from './components/onboarding/TutorialOverlay';
 import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
+import { useTheme } from './hooks/useTheme';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
@@ -59,6 +60,8 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0); // 0: Input, 1: Calendar, 2: Ledger, 3-6: Tour
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+
+  const { isDark, toggleTheme } = useTheme();
 
   // Auto-trigger tutorial if we detect the "Seeded" state (Task 1 exists)
   useEffect(() => {
@@ -221,11 +224,13 @@ function App() {
   const hour = new Date().getHours();
   const isMorning = hour >= 5 && hour < 12;
   const isAfternoon = hour >= 12 && hour < 18;
-  const bgGradient = isMorning
-    ? 'from-amber-50/30 via-oat to-oat'
-    : isAfternoon
-      ? 'from-blue-50/20 via-oat to-oat'
-      : 'from-slate-100/30 via-oat to-oat';
+  const bgGradient = isDark
+    ? 'from-[#121318] via-[#1a1b21] to-[#121318]'
+    : isMorning
+      ? 'from-amber-50/30 via-oat to-oat'
+      : isAfternoon
+        ? 'from-blue-50/20 via-oat to-oat'
+        : 'from-slate-100/30 via-oat to-oat';
 
   return (
     <DndContext
@@ -494,6 +499,8 @@ function App() {
             setPrivacyMode(mode);
             if (showOnboarding && tutorialStep === 4) setTutorialStep(5);
           }}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
         />
 
         {/* Task Edit Modal */}
