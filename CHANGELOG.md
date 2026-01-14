@@ -24,9 +24,13 @@ All notable changes to the Willow project will be documented in this file.
   - Enter: "hold to flow in ✨"
 
 ### Fixed
-- **Theme Consistency:**
-  - `ProfileModal`: Fixed dark appearance in Light Mode (transparency bug).
-  - `LedgerDrawer`: Added missing Dark Mode styles (backgrounds, inputs).
+- **Theme Consistency (Major Fix):**
+  - Fixed `dark` class not being applied to HTML element (added inline script to `index.html`)
+  - Restored serene midnight aesthetic for Dark Mode (halation glows, soft backgrounds)
+  - Unified all modals (ProfileModal, LedgerDrawer) to match the serene Dark Mode vibe
+  - Light Mode remains clean and untouched
+- **ProfileModal**: Fixed dark appearance in Light Mode (transparency bug).
+- **LedgerDrawer**: Added missing Dark Mode styles (backgrounds, inputs).
 
 ### Changed
 - **Tutorial Spotlight:** Removed animate-pulse to prevent epilepsy triggers (accessibility fix).
