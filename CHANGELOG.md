@@ -23,6 +23,11 @@ All notable changes to the Willow project will be documented in this file.
   - Tutorial: "Let's plant something 🌱", "Money moves 💸", "Your wins 🏆"
   - Enter: "hold to flow in ✨"
 
+### Fixed
+- **Theme Consistency:**
+  - `ProfileModal`: Fixed dark appearance in Light Mode (transparency bug).
+  - `LedgerDrawer`: Added missing Dark Mode styles (backgrounds, inputs).
+
 ### Changed
 - **Tutorial Spotlight:** Removed animate-pulse to prevent epilepsy triggers (accessibility fix).
 - **PDF Export:** Now exports as `paper-trail-month-year.pdf`.
