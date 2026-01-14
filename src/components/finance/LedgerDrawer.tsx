@@ -313,41 +313,41 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl overflow-y-auto"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-neutral-900 z-50 shadow-2xl overflow-y-auto"
                     >
                         <div className="p-6">
                             {/* Header */}
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-serif font-bold text-charcoal">Paper Trail</h2>
+                                <h2 className="text-2xl font-serif font-bold text-charcoal dark:text-neutral-100">Paper Trail</h2>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={handleExportPDF}
-                                        className="p-2 rounded-full hover:bg-charcoal/5"
+                                        className="p-2 rounded-full hover:bg-charcoal/5 dark:hover:bg-white/10 text-charcoal dark:text-neutral-400"
                                         title="Export PDF"
                                     >
                                         <Download size={20} />
                                     </button>
-                                    <button onClick={onClose} className="p-2 rounded-full hover:bg-charcoal/5"><X /></button>
+                                    <button onClick={onClose} className="p-2 rounded-full hover:bg-charcoal/5 dark:hover:bg-white/10 text-charcoal dark:text-neutral-400"><X /></button>
                                 </div>
                             </div>
 
                             {/* Month Navigation */}
-                            <div className="flex items-center justify-between mb-6 bg-oat/50 rounded-2xl px-4 py-3">
+                            <div className="flex items-center justify-between mb-6 bg-oat/50 dark:bg-neutral-800 rounded-2xl px-4 py-3">
                                 <button
                                     onClick={() => navigateMonth(-1)}
-                                    className="p-2 hover:bg-charcoal/5 rounded-full transition-colors"
+                                    className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-full transition-colors"
                                 >
-                                    <ChevronLeft size={20} className="text-charcoal/60" />
+                                    <ChevronLeft size={20} className="text-charcoal/60 dark:text-neutral-400" />
                                 </button>
                                 <div className="text-center">
-                                    <p className="font-bold text-charcoal">{monthLabel}</p>
-                                    <p className="text-xs text-charcoal/40">{monthStats.count} receipt{monthStats.count !== 1 ? 's' : ''}</p>
+                                    <p className="font-bold text-charcoal dark:text-neutral-200">{monthLabel}</p>
+                                    <p className="text-xs text-charcoal/40 dark:text-neutral-500">{monthStats.count} receipt{monthStats.count !== 1 ? 's' : ''}</p>
                                 </div>
                                 <button
                                     onClick={() => navigateMonth(1)}
-                                    className="p-2 hover:bg-charcoal/5 rounded-full transition-colors"
+                                    className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-full transition-colors"
                                 >
-                                    <ChevronRight size={20} className="text-charcoal/60" />
+                                    <ChevronRight size={20} className="text-charcoal/60 dark:text-neutral-400" />
                                 </button>
                             </div>
 
@@ -376,15 +376,15 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 ) : (
                                     <button
                                         onClick={() => setShowScanner(true)}
-                                        className="w-full py-8 border-2 border-dashed border-charcoal/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-matcha/5 hover:border-matcha/30 transition-all group"
+                                        className="w-full py-8 border-2 border-dashed border-charcoal/10 dark:border-white/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-matcha/5 dark:hover:bg-matcha/5 hover:border-matcha/30 dark:hover:border-matcha/30 transition-all group from-transparent"
                                     >
-                                        <div className="w-14 h-14 rounded-2xl bg-matcha/20 flex items-center justify-center text-matcha group-hover:scale-110 transition-transform relative">
+                                        <div className="w-14 h-14 rounded-2xl bg-matcha/20 dark:bg-matcha/10 flex items-center justify-center text-matcha group-hover:scale-110 transition-transform relative">
                                             <FileText size={24} />
                                             <Sparkles size={14} className="absolute -top-1 -right-1 text-matcha" />
                                         </div>
                                         <div className="text-center">
-                                            <p className="font-bold text-charcoal/70">Digitize the Clutter</p>
-                                            <p className="text-xs text-charcoal/40 italic mt-1">Safe here, gone from your purse.</p>
+                                            <p className="font-bold text-charcoal/70 dark:text-neutral-400">Digitize the Clutter</p>
+                                            <p className="text-xs text-charcoal/40 dark:text-neutral-600 italic mt-1">Safe here, gone from your purse.</p>
                                         </div>
                                     </button>
                                 )}
@@ -414,15 +414,15 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 </button>
 
                                 {showForm && (
-                                    <form onSubmit={handleSubmit} className="space-y-4 bg-oat/30 p-4 rounded-xl border border-clay/10">
+                                    <form onSubmit={handleSubmit} className="space-y-4 bg-oat/30 dark:bg-neutral-800/50 p-4 rounded-xl border border-clay/10 dark:border-white/5">
                                         <input
                                             required type="number" step="0.01" placeholder="Amount (RM)"
                                             value={amount} onChange={e => setAmount(e.target.value)}
-                                            className="w-full bg-white px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay"
+                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white placeholder:text-charcoal/30 dark:placeholder:text-neutral-500"
                                         />
                                         <select
                                             required value={category} onChange={e => setCategory(e.target.value)}
-                                            className="w-full bg-white px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay"
+                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white"
                                         >
                                             <option value="">Category</option>
                                             <option value="Food">🍲 Food</option>
@@ -433,7 +433,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                         <input
                                             placeholder="Description (Optional)"
                                             value={description} onChange={e => setDescription(e.target.value)}
-                                            className="w-full bg-white px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay"
+                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white placeholder:text-charcoal/30 dark:placeholder:text-neutral-500"
                                         />
 
                                         {/* Photo Upload */}
@@ -461,7 +461,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                 manualPhotoRef.current.click();
                                                             }
                                                         }}
-                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white rounded-lg text-charcoal/60 hover:bg-charcoal/5 transition-colors"
+                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-neutral-900 rounded-lg text-charcoal/60 dark:text-neutral-400 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
                                                     >
                                                         <Camera size={18} />
                                                         <span className="text-sm font-medium">Camera</span>
@@ -475,7 +475,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                 manualPhotoRef.current.click();
                                                             }
                                                         }}
-                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white rounded-lg text-charcoal/60 hover:bg-charcoal/5 transition-colors"
+                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-neutral-900 rounded-lg text-charcoal/60 dark:text-neutral-400 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
                                                     >
                                                         <Image size={18} />
                                                         <span className="text-sm font-medium">Gallery</span>
@@ -513,7 +513,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                     )}
 
                                     {filteredEntries.map(entry => (
-                                        <div key={entry.id} className="p-4 rounded-xl border border-charcoal/5 group hover:border-clay/20 transition-all">
+                                        <div key={entry.id} className="p-4 rounded-xl border border-charcoal/5 dark:border-white/5 group hover:border-clay/20 transition-all bg-white/50 dark:bg-white/5">
                                             {editingId === entry.id ? (
                                                 <div className="space-y-3">
                                                     <input
@@ -569,21 +569,21 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                     {entry.receipt_url && (
                                                         <button
                                                             onClick={() => setViewingImage(entry.receipt_url!)}
-                                                            className="w-14 h-14 rounded-lg bg-charcoal/5 overflow-hidden flex-shrink-0 hover:opacity-80"
+                                                            className="w-14 h-14 rounded-lg bg-charcoal/5 dark:bg-white/5 overflow-hidden flex-shrink-0 hover:opacity-80"
                                                         >
                                                             <img src={entry.receipt_url} alt="Receipt" className="w-full h-full object-cover" />
                                                         </button>
                                                     )}
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-bold text-charcoal">{entry.description || entry.category}</p>
-                                                        <div className="flex items-center gap-2 text-[10px] text-charcoal/40">
+                                                        <p className="font-bold text-charcoal dark:text-neutral-200">{entry.description || entry.category}</p>
+                                                        <div className="flex items-center gap-2 text-[10px] text-charcoal/40 dark:text-neutral-400">
                                                             <span className="uppercase font-bold">{entry.category}</span>
                                                             <span>•</span>
                                                             <span>{new Date(entry.created_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })}</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <p className="font-serif font-bold text-clay">RM {entry.amount.toFixed(2)}</p>
+                                                        <p className="font-serif font-bold text-clay dark:text-clay-light">RM {entry.amount.toFixed(2)}</p>
                                                         <button
                                                             onClick={() => {
                                                                 setEditingId(entry.id);
@@ -591,9 +591,9 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                 setEditCategory(entry.category);
                                                                 setEditDescription(entry.description || '');
                                                             }}
-                                                            className="p-2 hover:bg-charcoal/5 rounded-lg transition-all"
+                                                            className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-all"
                                                         >
-                                                            <Pencil size={14} className="text-charcoal/40" />
+                                                            <Pencil size={14} className="text-charcoal/40 dark:text-neutral-400" />
                                                         </button>
                                                         <button
                                                             onClick={async () => {
@@ -601,7 +601,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                                     await onDeleteEntry(entry.id);
                                                                 }
                                                             }}
-                                                            className="p-2 hover:bg-red-50 rounded-lg transition-all"
+                                                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                                         >
                                                             <Trash2 size={14} className="text-red-400" />
                                                         </button>
