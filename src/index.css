@@ -89,7 +89,19 @@
   @apply bg-matcha;
 }
 
-/* Dark mode form elements - now handled via Tailwind dark: variants in components */
+/* Dark mode form elements - softer, warmer */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: rgba(30, 32, 40, 0.8) !important;
+  color: #E8E6E3 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(232, 230, 227, 0.35) !important;
+}
 
 /* Halation glow effects for dark mode */
 .dark .halation-glow {
@@ -103,5 +115,17 @@
   text-shadow: 0 0 40px rgba(232, 230, 227, 0.1);
 }
 
-/* NOTE: Removed aggressive bg-white/40 override that was causing light mode issues */
-/* Dark mode styling is now handled purely through Tailwind's dark: variants */
+/* Softer borders in dark mode */
+.dark [class*="border-clay"] {
+  border-color: rgba(139, 123, 107, 0.2) !important;
+}
+
+/* Card/surface halation in dark mode - serene midnight aesthetic */
+.dark .bg-white\/80,
+.dark .bg-white\/40,
+.dark .bg-oat\/50,
+.dark .bg-oat\/30 {
+  background: rgba(25, 27, 35, 0.7) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3),
+    0 0 60px rgba(122, 159, 112, 0.05);
+}
