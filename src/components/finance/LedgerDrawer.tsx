@@ -127,8 +127,9 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
 
             setLastSavedEntry(`RM ${data.amount?.toFixed(2)} - ${data.merchant}`);
             setTimeout(() => setLastSavedEntry(null), 3000);
-        } catch (error) {
+        } catch (error: any) {
             console.error('[PaperTrail] Failed to save:', error);
+            alert(`Failed to save receipt: ${error?.message || 'Unknown error'}. Please try manual entry.`);
         }
     };
 
@@ -170,14 +171,22 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
             setUploadingPhoto(false);
         }
 
-        await onAddEntry({
-            amount: parseFloat(amount),
-            category,
-            description,
-            currency: 'MYR',
-            receipt_url,
-            created_at: new Date(receiptDate).toISOString()
-        });
+        try {
+            await onAddEntry({
+                amount: parseFloat(amount),
+                category,
+                description,
+                currency: 'MYR',
+                receipt_url,
+                created_at: new Date(receiptDate).toISOString()
+            });
+            setLastSavedEntry(`RM ${parseFloat(amount).toFixed(2)} - ${description || category}`);
+            setTimeout(() => setLastSavedEntry(null), 3000);
+        } catch (error: any) {
+            console.error('[ManualEntry] Failed to save:', error);
+            alert(`Failed to save entry: ${error?.message || 'Unknown error'}`);
+            return; // Don't clear form on error
+        }
         setAmount('');
         setCategory('');
         setDescription('');
