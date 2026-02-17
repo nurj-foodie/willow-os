@@ -211,6 +211,20 @@ function App() {
 
   // Show Auth screen if Supabase is configured but no user is logged in
   if (!user && import.meta.env.VITE_SUPABASE_URL) {
+    // If we're in the middle of an OAuth callback, show a signing-in state
+    const isAuthCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token');
+    if (isAuthCallback) {
+      return (
+        <Layout>
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="text-3xl animate-bounce">🌿</div>
+              <div className="text-charcoal/60 dark:text-white/60 font-serif italic animate-pulse">Signing you in...</div>
+            </div>
+          </div>
+        </Layout>
+      );
+    }
     return (
       <Layout>
         <Auth onOpenLegal={setShowLegal} />
