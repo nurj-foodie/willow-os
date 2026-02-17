@@ -23,6 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             </div>
             <div className="text-[10px] font-medium text-charcoal/40 font-serif italic text-center">
                 Willow OS — Flow, don't force. 🌿
+                <span className="block text-[8px] opacity-50 mt-1">v17b</span>
             </div>
         </footer>
     );

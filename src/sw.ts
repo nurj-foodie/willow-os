@@ -1,11 +1,25 @@
 /// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { clientsClaim } from 'workbox-core'
+import { registerRoute } from 'workbox-routing'
+import { NetworkFirst } from 'workbox-strategies'
 
 declare let self: ServiceWorkerGlobalScope
 
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
+
+// CRITICAL: Never cache API calls - always use network
+registerRoute(
+    ({ url }) =>
+        url.hostname.includes('supabase') ||
+        url.hostname.includes('googleapis.com') ||
+        url.pathname.startsWith('/rest/') ||
+        url.pathname.startsWith('/auth/') ||
+        url.pathname.startsWith('/storage/') ||
+        url.pathname.startsWith('/functions/'),
+    new NetworkFirst({ networkTimeoutSeconds: 10 })
+)
 
 self.skipWaiting()
 clientsClaim()
