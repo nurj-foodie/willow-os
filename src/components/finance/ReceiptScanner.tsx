@@ -5,12 +5,13 @@ import { supabase } from '../../lib/supabase';
 interface ReceiptScannerProps {
     onProcessed: (data: { amount: number; merchant: string; category: string; date: string; receipt_url?: string }) => void;
     onClose: () => void;
+    onManualEntry?: () => void;
     userId: string;
 }
 
 type ScannerStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 
-export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, userId }) => {
+export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, onManualEntry, userId }) => {
     const [status, setStatus] = useState<ScannerStatus>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -213,12 +214,25 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                         </div>
                         <p className="text-lg font-bold text-red-400">Upload Failed</p>
                         <p className="text-sm text-white/50 text-center max-w-xs">{errorMessage}</p>
-                        <button
-                            onClick={handleRetry}
-                            className="mt-2 px-6 py-3 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 transition-colors"
-                        >
-                            Try Again
-                        </button>
+                        <div className="flex gap-3 mt-2">
+                            <button
+                                onClick={handleRetry}
+                                className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 transition-colors"
+                            >
+                                Try Again
+                            </button>
+                            {onManualEntry && (
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        onManualEntry();
+                                    }}
+                                    className="px-6 py-3 bg-clay text-white rounded-2xl font-bold hover:scale-105 transition-transform"
+                                >
+                                    Enter Manually
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

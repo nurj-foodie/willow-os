@@ -42,8 +42,8 @@ serve(async (req) => {
         }
         const base64Image = btoa(binaryString)
 
-        // 3. Send to Gemini 2.0 Flash (upgraded from 1.5 - obsolete)
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`
+        // 3. Send to Gemini 2.0 Flash (stable)
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
 
         const response = await fetch(geminiUrl, {
             method: 'POST',

@@ -184,107 +184,206 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
         setShowForm(false);
     };
 
-    const handleExportPDF = () => {
-        const pdf = new jsPDF();
-        const total = monthStats.total;
+    const [exportingPDF, setExportingPDF] = useState(false);
 
-        // Header
-        pdf.setFontSize(24);
-        pdf.setTextColor(60, 60, 60);
-        pdf.text('🧾 Paper Trail', 20, 25);
-
-        pdf.setFontSize(14);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text(`${monthLabel} Expense Report`, 20, 35);
-
-        // Total box
-        pdf.setFillColor(241, 245, 239);
-        pdf.rect(20, 50, 170, 20, 'F');
-        pdf.setFontSize(12);
-        pdf.setTextColor(60, 60, 60);
-        pdf.text('Total Expenses:', 25, 62);
-        pdf.setFontSize(16);
-        pdf.setTextColor(80, 130, 80);
-        pdf.text(`RM ${total.toFixed(2)}`, 140, 62);
-
-        // Category breakdown
-        pdf.setFontSize(12);
-        pdf.setTextColor(60, 60, 60);
-        pdf.text('Category Breakdown', 20, 85);
-
-        let catY = 95;
-        pdf.setFontSize(10);
-        Object.entries(monthStats.byCategory)
-            .sort((a, b) => b[1].total - a[1].total)
-            .forEach(([cat, data]) => {
-                const percentage = total > 0 ? ((data.total / total) * 100).toFixed(1) : '0';
-                pdf.setTextColor(80, 80, 80);
-                pdf.text(`${cat}`, 25, catY);
-                pdf.text(`${data.count} receipt${data.count > 1 ? 's' : ''}`, 80, catY);
-                pdf.text(`RM ${data.total.toFixed(2)}`, 120, catY);
-                pdf.setTextColor(150, 150, 150);
-                pdf.text(`(${percentage}%)`, 165, catY);
-                catY += 8;
+    const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(blob);
             });
+        } catch {
+            return null;
+        }
+    };
 
-        // Page 2: Details
-        pdf.addPage();
-        pdf.setFontSize(14);
-        pdf.setTextColor(60, 60, 60);
-        pdf.text('Receipt Details', 20, 20);
+    const handleExportPDF = async () => {
+        setExportingPDF(true);
+        try {
+            const pdf = new jsPDF();
+            const total = monthStats.total;
+            const pageWidth = pdf.internal.pageSize.getWidth();
 
-        pdf.setFontSize(8);
-        pdf.setTextColor(150, 150, 150);
-        pdf.text('Date', 20, 30);
-        pdf.text('Description', 50, 30);
-        pdf.text('Category', 120, 30);
-        pdf.text('Amount', 165, 30);
+            // ── Page 1: Summary ──
+            // Header
+            pdf.setFontSize(24);
+            pdf.setTextColor(60, 60, 60);
+            pdf.text('Paper Trail', 20, 25);
 
-        pdf.setDrawColor(200, 200, 200);
-        pdf.line(20, 33, 190, 33);
+            pdf.setFontSize(10);
+            pdf.setTextColor(150, 150, 150);
+            pdf.text(`Generated ${new Date().toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}`, 20, 33);
 
-        let y = 42;
-        const sortedEntries = [...filteredEntries].sort((a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
+            pdf.setFontSize(16);
+            pdf.setTextColor(80, 80, 80);
+            pdf.text(`${monthLabel} — Expense Report`, 20, 45);
 
-        for (let i = 0; i < sortedEntries.length; i++) {
-            const entry = sortedEntries[i];
-            if (y > 270) {
-                pdf.addPage();
-                y = 20;
-            }
-
-            const entryDate = new Date(entry.created_at).toLocaleDateString('en-MY', {
-                day: '2-digit',
-                month: 'short'
-            });
-
-            if (i % 2 === 0) {
-                pdf.setFillColor(250, 250, 250);
-                pdf.rect(20, y - 5, 170, 10, 'F');
-            }
+            // Total box
+            pdf.setFillColor(241, 245, 239);
+            pdf.roundedRect(20, 52, pageWidth - 40, 22, 3, 3, 'F');
+            pdf.setFontSize(11);
+            pdf.setTextColor(80, 80, 80);
+            pdf.text('Total Expenses', 25, 64);
+            pdf.setFontSize(18);
+            pdf.setTextColor(80, 130, 80);
+            pdf.text(`RM ${total.toFixed(2)}`, pageWidth - 25, 64, { align: 'right' });
 
             pdf.setFontSize(9);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text(entryDate, 20, y);
-            pdf.setTextColor(60, 60, 60);
-            pdf.text((entry.description || 'No description').substring(0, 30), 50, y);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text(entry.category || 'Misc', 120, y);
-            pdf.setTextColor(60, 60, 60);
-            pdf.text(`RM ${entry.amount.toFixed(2)}`, 165, y);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text(`${monthStats.count} receipt${monthStats.count !== 1 ? 's' : ''} this month`, 25, 70);
 
+            // Category breakdown with visual bars
+            pdf.setFontSize(13);
+            pdf.setTextColor(60, 60, 60);
+            pdf.text('Category Breakdown', 20, 90);
+
+            let catY = 100;
+            const barMaxWidth = 60;
+            const sortedCategories = Object.entries(monthStats.byCategory)
+                .sort((a, b) => b[1].total - a[1].total);
+
+            sortedCategories.forEach(([cat, data]) => {
+                const percentage = total > 0 ? (data.total / total) * 100 : 0;
+                const barWidth = total > 0 ? (data.total / total) * barMaxWidth : 0;
+
+                // Category icon & name
+                pdf.setFontSize(10);
+                pdf.setTextColor(60, 60, 60);
+                pdf.text(`${getCategoryIcon(cat)} ${cat}`, 25, catY);
+
+                // Count
+                pdf.setFontSize(9);
+                pdf.setTextColor(130, 130, 130);
+                pdf.text(`${data.count} receipt${data.count > 1 ? 's' : ''}`, 70, catY);
+
+                // Bar background
+                pdf.setFillColor(235, 235, 235);
+                pdf.roundedRect(100, catY - 4, barMaxWidth, 5, 1, 1, 'F');
+
+                // Bar fill
+                if (barWidth > 0) {
+                    pdf.setFillColor(120, 180, 120);
+                    pdf.roundedRect(100, catY - 4, Math.max(barWidth, 2), 5, 1, 1, 'F');
+                }
+
+                // Amount & percentage
+                pdf.setFontSize(10);
+                pdf.setTextColor(60, 60, 60);
+                pdf.text(`RM ${data.total.toFixed(2)}`, 165, catY);
+
+                pdf.setFontSize(8);
+                pdf.setTextColor(150, 150, 150);
+                pdf.text(`${percentage.toFixed(1)}%`, pageWidth - 25, catY, { align: 'right' });
+
+                catY += 12;
+            });
+
+            // ── Page 2+: Receipt Details with Images ──
+            pdf.addPage();
+
+            pdf.setFontSize(16);
+            pdf.setTextColor(60, 60, 60);
+            pdf.text('Receipt Details', 20, 20);
+
+            // Table header
+            let y = 32;
+            pdf.setFillColor(245, 245, 245);
+            pdf.rect(20, y - 5, pageWidth - 40, 8, 'F');
+            pdf.setFontSize(8);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text('DATE', 22, y);
+            pdf.text('DESCRIPTION', 50, y);
+            pdf.text('CATEGORY', 110, y);
+            pdf.text('AMOUNT', 145, y);
+            pdf.text('RECEIPT', 170, y);
             y += 10;
+
+            const sortedEntries = [...filteredEntries].sort((a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+
+            // Pre-fetch all receipt images in parallel
+            const imagePromises = sortedEntries.map(entry =>
+                entry.receipt_url ? fetchImageAsBase64(entry.receipt_url) : Promise.resolve(null)
+            );
+            const images = await Promise.all(imagePromises);
+
+            const rowHeight = 22; // height per row when image is present
+            const rowHeightNoImg = 10;
+
+            for (let i = 0; i < sortedEntries.length; i++) {
+                const entry = sortedEntries[i];
+                const hasImage = !!images[i];
+                const currentRowHeight = hasImage ? rowHeight : rowHeightNoImg;
+
+                // Page break check
+                if (y + currentRowHeight > 275) {
+                    pdf.addPage();
+                    y = 20;
+                }
+
+                // Alternating row background
+                if (i % 2 === 0) {
+                    pdf.setFillColor(252, 252, 250);
+                    pdf.rect(20, y - 5, pageWidth - 40, currentRowHeight, 'F');
+                }
+
+                const entryDate = new Date(entry.created_at).toLocaleDateString('en-MY', {
+                    day: '2-digit',
+                    month: 'short'
+                });
+
+                const textY = hasImage ? y + 6 : y;
+
+                pdf.setFontSize(9);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(entryDate, 22, textY);
+
+                pdf.setTextColor(50, 50, 50);
+                pdf.text((entry.description || 'No description').substring(0, 28), 50, textY);
+
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(entry.category || 'Misc', 110, textY);
+
+                pdf.setFontSize(10);
+                pdf.setTextColor(50, 50, 50);
+                pdf.text(`RM ${entry.amount.toFixed(2)}`, 145, textY);
+
+                // Embed receipt thumbnail
+                if (hasImage && images[i]) {
+                    try {
+                        pdf.addImage(images[i]!, 'JPEG', 170, y - 4, 18, 18);
+                    } catch {
+                        pdf.setFontSize(7);
+                        pdf.setTextColor(180, 180, 180);
+                        pdf.text('(img err)', 170, textY);
+                    }
+                }
+
+                y += currentRowHeight + 2;
+            }
+
+            // Footer
+            const pageCount = pdf.getNumberOfPages();
+            for (let p = 1; p <= pageCount; p++) {
+                pdf.setPage(p);
+                pdf.setFontSize(7);
+                pdf.setTextColor(180, 180, 180);
+                pdf.text(`Willow • Paper Trail • Page ${p}/${pageCount}`, pageWidth / 2, 290, { align: 'center' });
+            }
+
+            const filename = `paper-trail-${monthLabel.toLowerCase().replace(' ', '-')}.pdf`;
+            pdf.save(filename);
+        } catch (err) {
+            console.error('[PaperTrail] PDF export error:', err);
+        } finally {
+            setExportingPDF(false);
         }
-
-        // Footer
-        pdf.setFontSize(8);
-        pdf.setTextColor(180, 180, 180);
-        pdf.text(`Generated by Willow • ${new Date().toLocaleDateString()}`, 20, 285);
-
-        const filename = `paper-trail-${monthLabel.toLowerCase().replace(' ', '-')}.pdf`;
-        pdf.save(filename);
     };
 
     const getCategoryIcon = (cat: string) => {
@@ -322,10 +421,15 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 <div className="flex gap-2">
                                     <button
                                         onClick={handleExportPDF}
-                                        className="p-2 rounded-full hover:bg-charcoal/5 dark:hover:bg-white/10 text-charcoal dark:text-neutral-400"
-                                        title="Export PDF"
+                                        disabled={exportingPDF}
+                                        className="p-2 rounded-full hover:bg-charcoal/5 dark:hover:bg-white/10 text-charcoal dark:text-neutral-400 disabled:opacity-50"
+                                        title={exportingPDF ? 'Generating PDF...' : 'Export PDF'}
                                     >
-                                        <Download size={20} />
+                                        {exportingPDF ? (
+                                            <div className="w-5 h-5 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin" />
+                                        ) : (
+                                            <Download size={20} />
+                                        )}
                                     </button>
                                     <button onClick={onClose} className="p-2 rounded-full hover:bg-charcoal/5 dark:hover:bg-white/10 text-charcoal dark:text-neutral-400"><X /></button>
                                 </div>
@@ -372,6 +476,10 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                         userId={user?.id || ''}
                                         onProcessed={handleScannerSuccess}
                                         onClose={() => setShowScanner(false)}
+                                        onManualEntry={() => {
+                                            setShowScanner(false);
+                                            setShowForm(true);
+                                        }}
                                     />
                                 ) : (
                                     <button
