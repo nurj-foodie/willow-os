@@ -53,13 +53,21 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
         await updateProfile({ trial_started_at: new Date().toISOString() });
     };
 
-    const addEntry = async (entry: Omit<LedgerEntry, 'id' | 'created_at'>) => {
+    const addEntry = async (entry: Omit<LedgerEntry, 'id'> & { created_at?: string }) => {
         console.log('[useLedger] Adding entry:', entry);
 
         if (isSupabaseConfigured && user && user.aud !== 'demo') {
             const { data, error } = await supabase
                 .from('ledger')
-                .insert([{ ...entry, user_id: user.id }])
+                .insert([{
+                    amount: entry.amount,
+                    currency: entry.currency,
+                    category: entry.category,
+                    description: entry.description,
+                    receipt_url: entry.receipt_url,
+                    user_id: user.id,
+                    ...(entry.created_at ? { created_at: entry.created_at } : {})
+                }])
                 .select();
 
             if (error) {
@@ -74,7 +82,7 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
             const newEntry: LedgerEntry = {
                 ...entry,
                 id: Math.random().toString(36).substr(2, 9),
-                created_at: new Date().toISOString()
+                created_at: entry.created_at || new Date().toISOString()
             };
             console.log('[useLedger] Entry saved to localStorage:', newEntry);
             setEntries(prev => [newEntry, ...prev]);

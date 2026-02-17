@@ -27,6 +27,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
+    const [receiptDate, setReceiptDate] = useState(new Date().toISOString().split('T')[0]);
     const [lastSavedEntry, setLastSavedEntry] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editAmount, setEditAmount] = useState('');
@@ -174,11 +175,13 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
             category,
             description,
             currency: 'MYR',
-            receipt_url
+            receipt_url,
+            created_at: new Date(receiptDate).toISOString()
         });
         setAmount('');
         setCategory('');
         setDescription('');
+        setReceiptDate(new Date().toISOString().split('T')[0]);
         setManualPhoto(null);
         setManualPhotoPreview(null);
         setShowForm(false);
@@ -522,27 +525,53 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                 </button>
 
                                 {showForm && (
-                                    <form onSubmit={handleSubmit} className="space-y-4 bg-oat/30 dark:bg-neutral-800/50 p-4 rounded-xl border border-clay/10 dark:border-white/5">
-                                        <input
-                                            required type="number" step="0.01" placeholder="Amount (RM)"
-                                            value={amount} onChange={e => setAmount(e.target.value)}
-                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white placeholder:text-charcoal/30 dark:placeholder:text-neutral-500"
-                                        />
-                                        <select
-                                            required value={category} onChange={e => setCategory(e.target.value)}
-                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white"
-                                        >
-                                            <option value="">Category</option>
-                                            <option value="Food">🍲 Food</option>
-                                            <option value="Transport">🚗 Transport</option>
-                                            <option value="Wellness">🧘 Wellness</option>
-                                            <option value="Misc">📦 Misc</option>
-                                        </select>
-                                        <input
-                                            placeholder="Description (Optional)"
-                                            value={description} onChange={e => setDescription(e.target.value)}
-                                            className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white placeholder:text-charcoal/30 dark:placeholder:text-neutral-500"
-                                        />
+                                    <form onSubmit={handleSubmit} className="space-y-4 bg-oat/30 dark:bg-neutral-800/50 p-5 rounded-xl border border-clay/10 dark:border-white/5">
+                                        <h4 className="text-sm font-bold text-charcoal/60 dark:text-neutral-400 uppercase tracking-wider">Manual Receipt Entry</h4>
+
+                                        {/* Amount */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-charcoal/50 dark:text-neutral-500">Amount (RM) *</label>
+                                            <input
+                                                required type="number" step="0.01" placeholder="0.00" inputMode="decimal"
+                                                value={amount} onChange={e => setAmount(e.target.value)}
+                                                className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white text-lg font-bold placeholder:text-charcoal/20 dark:placeholder:text-neutral-600"
+                                            />
+                                        </div>
+
+                                        {/* Date */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-charcoal/50 dark:text-neutral-500">Receipt Date *</label>
+                                            <input
+                                                required type="date"
+                                                value={receiptDate} onChange={e => setReceiptDate(e.target.value)}
+                                                className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white"
+                                            />
+                                        </div>
+
+                                        {/* Category */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-charcoal/50 dark:text-neutral-500">Category *</label>
+                                            <select
+                                                required value={category} onChange={e => setCategory(e.target.value)}
+                                                className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white"
+                                            >
+                                                <option value="">Select category</option>
+                                                <option value="Food">🍲 Food</option>
+                                                <option value="Transport">🚗 Transport</option>
+                                                <option value="Wellness">🧘 Wellness</option>
+                                                <option value="Misc">📦 Misc</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Description */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-charcoal/50 dark:text-neutral-500">Description</label>
+                                            <input
+                                                placeholder="e.g. Lunch at KFC"
+                                                value={description} onChange={e => setDescription(e.target.value)}
+                                                className="w-full bg-white dark:bg-neutral-900 px-4 py-3 rounded-lg border-none focus:ring-2 focus:ring-clay text-charcoal dark:text-white placeholder:text-charcoal/30 dark:placeholder:text-neutral-500"
+                                            />
+                                        </div>
 
                                         {/* Photo Upload */}
                                         <div className="space-y-2">

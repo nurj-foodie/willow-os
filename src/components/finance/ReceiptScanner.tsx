@@ -44,7 +44,16 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 body: { filePath }
             });
 
-            if (fnError) throw fnError;
+            if (fnError) {
+                console.error('[Scanner] Edge Function error:', fnError);
+                throw new Error(`AI processing failed: ${fnError.message || 'Unknown error'}`);
+            }
+
+            if (!data || data.error) {
+                console.error('[Scanner] AI returned error:', data);
+                throw new Error(data?.error || 'AI could not process the receipt');
+            }
+
             console.log('[Scanner] AI result:', data);
 
             const { data: urlData } = await supabase.storage
@@ -64,7 +73,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
 
         } catch (err: any) {
             console.error('[Scanner] Error:', err);
-            setErrorMessage(err.message || 'Upload failed');
+            setErrorMessage(err.message || 'Upload failed. Please try again.');
             setStatus('error');
         } finally {
             if (fileInputRef.current) {
