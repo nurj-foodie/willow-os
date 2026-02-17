@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar as CalendarIcon } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
 import type { Task } from '../../types';
 
 interface TaskEditModalProps {
@@ -15,6 +15,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState(4);
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     useEffect(() => {
         if (task) {
@@ -22,6 +23,8 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
             setDueDate(task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : '');
             setPriority(task.priority || 4);
         }
+        // Reset confirmation when task changes
+        setConfirmDelete(false);
     }, [task]);
 
     const handleSave = () => {
@@ -32,6 +35,23 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
             due_date: dueDate ? new Date(dueDate).toISOString() : null,
             priority,
         });
+        onClose();
+    };
+
+    const handleDelete = () => {
+        if (!confirmDelete) {
+            setConfirmDelete(true);
+            return;
+        }
+        // Second tap — actually delete
+        if (task && onDelete) {
+            onDelete(task.id);
+            onClose();
+        }
+    };
+
+    const handleClose = () => {
+        setConfirmDelete(false);
         onClose();
     };
 
@@ -52,7 +72,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-charcoal/50 backdrop-blur-sm z-50"
-                        onClick={onClose}
+                        onClick={handleClose}
                     />
 
                     {/* Modal */}
@@ -65,7 +85,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                         <div className="bg-oat rounded-[2rem] shadow-2xl max-w-md w-full p-6 relative">
                             {/* Close button */}
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 className="absolute top-6 right-6 p-2 rounded-full hover:bg-clay/20 transition-colors z-10"
                             >
                                 <X size={20} className="text-charcoal/60" />
@@ -128,7 +148,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                             {/* Actions */}
                             <div className="flex gap-3">
                                 <button
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                     className="flex-1 px-4 py-3 rounded-xl bg-charcoal/5 hover:bg-charcoal/10 text-charcoal font-medium transition-colors"
                                 >
                                     Cancel
@@ -141,17 +161,16 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                                 </button>
                             </div>
 
-                            {/* Delete button - separate and destructive */}
+                            {/* Delete button — two-tap confirmation (no window.confirm) */}
                             <button
-                                onClick={() => {
-                                    if (task && onDelete && window.confirm('Delete this task? This action cannot be undone.')) {
-                                        onDelete(task.id);
-                                        onClose();
-                                    }
-                                }}
-                                className="w-full mt-3 px-4 py-3 rounded-xl bg-clay/10 hover:bg-clay/20 text-clay font-medium transition-colors flex items-center justify-center gap-2"
+                                onClick={handleDelete}
+                                className={`w-full mt-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${confirmDelete
+                                        ? 'bg-red-500 text-white animate-pulse'
+                                        : 'bg-clay/10 hover:bg-clay/20 text-clay'
+                                    }`}
                             >
-                                <span>Delete Task</span>
+                                <Trash2 size={16} />
+                                <span>{confirmDelete ? 'Tap again to confirm delete' : 'Delete Task'}</span>
                             </button>
                         </div>
                     </motion.div>

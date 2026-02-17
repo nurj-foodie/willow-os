@@ -321,6 +321,9 @@ export function useTasks() {
     }
 
     async function deleteTask(id: string) {
+        // Optimistically remove from local state immediately
+        setTasks(prev => prev.filter(t => t.id !== id));
+
         if (isSupabaseConfigured && user) {
             const { error } = await supabase
                 .from('tasks')
@@ -328,9 +331,11 @@ export function useTasks() {
                 .eq('id', id)
                 .eq('user_id', user.id);
 
-            if (error) console.error('Error deleting task:', error);
-        } else {
-            setTasks(prev => prev.filter(t => t.id !== id));
+            if (error) {
+                console.error('Error deleting task:', error);
+                // Refetch to restore if delete failed
+                fetchTasks();
+            }
         }
     }
 
