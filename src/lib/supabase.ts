@@ -9,7 +9,10 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 export const supabase = isSupabaseConfigured
     ? createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-            flowType: 'implicit'
+            flowType: 'pkce',
+            detectSessionInUrl: true,
+            autoRefreshToken: true,
+            persistSession: true,
         }
     })
     : null as any; // Cast as any to avoid type errors in components that use it unsafely
