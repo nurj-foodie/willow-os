@@ -11,6 +11,10 @@ interface ReceiptScannerProps {
 
 type ScannerStatus = 'idle' | 'camera' | 'uploading' | 'processing' | 'done' | 'error';
 
+// iOS doesn't support getUserMedia well in PWA mode, but also doesn't kill the PWA
+// when the external camera opens — so native <input capture> is safe on iOS.
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, onManualEntry, userId }) => {
     const [status, setStatus] = useState<ScannerStatus>('idle');
     const [errorMessage, setErrorMessage] = useState('');
@@ -194,16 +198,37 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                         <p className="text-sm text-white/60 italic">Safe here, gone from your purse.</p>
 
                         <div className="flex gap-3">
-                            {/* In-app camera — uses getUserMedia, never leaves the PWA */}
-                            <button
-                                onClick={openCamera}
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
-                            >
-                                <Camera size={20} />
-                                <span>Camera</span>
-                            </button>
+                            {isIOS ? (
+                                /* iOS: native camera input — iOS doesn't kill the PWA */
+                                <>
+                                    <label
+                                        htmlFor="scanner-ios-camera"
+                                        className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <Camera size={20} />
+                                        <span>Camera</span>
+                                    </label>
+                                    <input
+                                        id="scanner-ios-camera"
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                </>
+                            ) : (
+                                /* Android: in-app camera via getUserMedia (avoids PWA kill) */
+                                <button
+                                    onClick={openCamera}
+                                    className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
+                                >
+                                    <Camera size={20} />
+                                    <span>Camera</span>
+                                </button>
+                            )}
 
-                            {/* Gallery — native label, opens in-browser file picker (safe on mobile) */}
+                            {/* Gallery — native label, opens in-browser file picker */}
                             <label
                                 htmlFor="scanner-gallery-input"
                                 className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all cursor-pointer"
