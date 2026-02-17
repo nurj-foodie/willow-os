@@ -3,6 +3,29 @@
 All notable changes to the Willow project will be documented in this file.
 
 
+## [2026-02-17] - Mobile PWA Hardening & Notification Infrastructure [20:00 UTC+8]
+
+### Fixed
+- **Android Camera PWA Kill (Critical):** Replaced `capture="environment"` with in-app camera via `getUserMedia()` to prevent Android from killing the PWA web view when launching external camera app.
+- **iOS Blank Screen After Login (Critical):** Guarded `Notification.permission` access with `'Notification' in window` check — iOS Safari doesn't have the Notification API, causing the entire app to crash silently.
+- **Safari OAuth (Critical):** Switched auth from `implicit` to `pkce` flow in Supabase config — Safari blocks third-party cookies which broke implicit hash token parsing.
+- **Task Deletion Not Working:** Delete button previously only set `status: 'archived'` and used `window.confirm` (unreliable on mobile PWAs). Now performs actual Supabase `.delete()` with optimistic local removal and two-tap inline confirmation.
+- **Manual Entry Photo Attachment:** Replaced programmatic `.click()` with native `<label>` + `<input>` pair to avoid PWA refresh on Android.
+
+### Added
+- **Error Boundary:** Global `ErrorBoundary` component in `main.tsx` catches React crashes and shows a friendly error message + Reload button instead of blank screen.
+- **Auth Callback State:** Visible "Signing you in..." animation during PKCE code exchange after OAuth redirect.
+- **Push Notification Infrastructure:** Enabled `pg_cron` + `pg_net` with a cron job calling `push-scheduler` edge function every 5 minutes. Added `notified` column to tasks table.
+- **Overdue Task Notifications:** Push scheduler now sends two notification types:
+  - 🌿 Upcoming: "Willow: Task" — due in next 10 minutes
+  - ⏰ Overdue: "Overdue: Task" — past due, not yet notified
+- **iOS Camera Fallback:** Platform detection (`isIOS`) routes iOS users to native `<input capture="environment">` (safe on iOS) while Android uses in-app `getUserMedia`.
+- **Two-Tap Delete Confirmation:** Delete button in TaskEditModal turns red with "Tap again to confirm" — replaces `window.confirm` for mobile reliability.
+
+### Changed
+- **Push Notifications Support:** `isPushSupported` now also checks for `Notification` API availability, gracefully disabling on iOS Safari.
+- **Auth Flow:** `flowType` changed from `implicit` to `pkce` with `detectSessionInUrl`, `autoRefreshToken`, and `persistSession` enabled.
+
 ## [2026-01-14] - Paper Trail, Dark Mode & Onboarding Polish [12:50 UTC+8]
 
 ### Added

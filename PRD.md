@@ -1,9 +1,10 @@
 # Willow - Product Requirements Document (PRD)
 
-**Version:** 0.6 (Paper Trail, Dark Mode & Onboarding Polish)  
-**Date:** January 14, 2026 (Updated)  
-**Target Audience:** Gen Z / Modern Professional ("Sofia")  
-**Platform:** Web PWA (Mobile & Desktop)
+**Version:** 1.0 (Core Complete — Mobile Hardened & Notification Infrastructure)  
+**Date:** February 17, 2026 (Updated)  
+**Target Audience:** Gen Z / Modern Professional / Micro-Influencers ("Sofia")  
+**Platform:** Web PWA (Mobile & Desktop)  
+**Philosophy:** "Dump everything here. Willow will take care of it."
 
 
 ---
@@ -66,11 +67,13 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
   - **Robustness:** Auto-triggers for new users, manual restart option.
 
 ### H. Web Push Notifications
-- **Requirement:** Background alerts for due tasks.
+- **Requirement:** Background alerts for due and overdue tasks.
 - **Logic:**
   - **VAPID Security:** Authenticated communication between Server and Browser.
   - **Local Timezone:** Service Worker calculates display time locally to ensure accuracy.
-  - **Smart Scheduling:** Edge Function runs every minute to find tasks starting in the next 10 minutes.
+  - **Smart Scheduling:** `pg_cron` triggers Edge Function every 5 minutes to find tasks due soon.
+  - **Overdue Alerts:** Separately notifies for missed tasks with distinct ⏰ messaging.
+  - **Cross-Platform:** Works on Android PWA and iOS 16.4+ PWA (Home Screen installed).
 
 ### I. Profile Command Center (Header Refactor)
 - **Requirement:** Clean, decluttered UI with a centralized settings home.
@@ -79,6 +82,15 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
   - **Unified Actions:** Notifications, Privacy, Archive, and Account Actions all live here.
   - **Inline Editing:** Update Display Name directly in the modal.
 
+### J. Mobile PWA Hardening
+- **Requirement:** Reliable cross-platform experience on Android and iOS.
+- **Logic:**
+  - **Platform Camera:** Android uses in-app `getUserMedia` (avoids PWA kill); iOS uses native `capture`.
+  - **Error Boundary:** Global React crash handler shows error + Reload instead of blank screen.
+  - **PKCE Auth:** OAuth uses code exchange (not hash fragments) for Safari compatibility.
+  - **Two-Tap Delete:** Inline confirmation replaces `window.confirm` (unreliable on mobile).
+  - **API Safety:** Service Worker uses `NetworkFirst` for all Supabase/API calls.
+
 ## 4. Design Guidelines ("The Vibe")
 - **Palette:** 
   - Background: `#FDFCF8` (Oat Milk/Cream)
@@ -86,3 +98,35 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
   - Accents: Sage Green, Muted Clay, Pale Lavender.
 - **Typography:** Mix of clean Sans-Serif (Inter) and trendy Serif (Playfair Display).
 - **Interactions:** Bouncy, forgiving, and "romanticized." No red text for errors/overdue items.
+
+## 5. Future Vision — "Idea Dump" Expansion
+
+Willow's core philosophy — **"Dump everything here, Willow takes care of it"** — extends naturally beyond tasks and receipts into the content creator ecosystem.
+
+### Phase 1: Idea Dump (Quick Capture)
+- **Voice Notes:** Record voice memos → Willow transcribes and tags them automatically.
+- **Quick Dump Input:** A brain-dump text area for content ideas, captions, random thoughts.
+- **Screenshot/Link Capture:** Paste a URL or screenshot → Willow extracts the key info.
+- **Tags & Categories:** Auto-tag ideas as "content", "marketing", "personal", "finance" using AI.
+
+### Phase 2: Content Calendar
+- **Post Scheduler View:** Visual calendar of planned content (Instagram, TikTok, YouTube).
+- **Drag Ideas → Calendar:** Move brain-dumped ideas to specific posting dates.
+- **Platform Tags:** Mark content for specific platforms with recommended post times.
+- **Status Tracking:** Draft → Filmed → Edited → Scheduled → Posted.
+
+### Phase 3: Marketing Dashboard
+- **Brand Deal Tracker:** Log collaborations, rates, deliverables, deadlines.
+- **Income Tracker:** Extend Paper Trail for influencer income (sponsorships, affiliates).
+- **Media Kit:** Auto-generate a simple media kit from tracked stats.
+
+### Phase 4: AI Copilot
+- **Caption Generator:** AI suggests captions based on dumped ideas and past content.
+- **Hashtag Recommendations:** Platform-specific hashtag suggestions.
+- **Content Remix:** Turn one idea into multiple formats (Reel script → Tweet → Blog outline).
+- **Trend Alerts:** Notify when a saved topic starts trending.
+
+### Phase 5: Collaboration
+- **Shared Boards:** Invite collaborators to shared idea dumps.
+- **Comments & Reactions:** Team feedback on ideas before filming.
+- **Media Uploads:** Attach raw footage, photos, and drafts to ideas.
