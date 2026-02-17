@@ -21,12 +21,11 @@ webpush.setVapidDetails(
 
 Deno.serve(async (req) => {
     try {
-        // 1. Find tasks due in the next 10 minutes that haven't been notified
-        // We check a window: due_date > now AND due_date < now + 10 mins
+        // 1. Find tasks due in the next 10 minutes (upcoming)
         const now = new Date()
         const tenMinutesLater = new Date(now.getTime() + 10 * 60000)
 
-        const { data: tasks, error: tasksError } = await supabase
+        const { data: upcomingTasks, error: upcomingError } = await supabase
             .from('tasks')
             .select('*, user_id')
             .eq('status', 'todo')
@@ -34,19 +33,35 @@ Deno.serve(async (req) => {
             .gt('due_date', now.toISOString())
             .lt('due_date', tenMinutesLater.toISOString())
 
-        if (tasksError) throw tasksError
+        if (upcomingError) throw upcomingError
 
-        if (!tasks || tasks.length === 0) {
+        // 2. Find overdue tasks (due_date already passed, not yet notified)
+        const { data: overdueTasks, error: overdueError } = await supabase
+            .from('tasks')
+            .select('*, user_id')
+            .eq('status', 'todo')
+            .eq('notified', false)
+            .lt('due_date', now.toISOString())
+
+        if (overdueError) throw overdueError
+
+        // Combine both lists with a type tag
+        const allTasks = [
+            ...(upcomingTasks || []).map(t => ({ ...t, _type: 'upcoming' })),
+            ...(overdueTasks || []).map(t => ({ ...t, _type: 'overdue' })),
+        ]
+
+        if (allTasks.length === 0) {
             return new Response(JSON.stringify({ message: 'No tasks to notify' }), {
                 headers: { 'Content-Type': 'application/json' },
             })
         }
 
-        console.log(`Found ${tasks.length} tasks to notify.`)
+        console.log(`Found ${allTasks.length} tasks to notify (${upcomingTasks?.length || 0} upcoming, ${overdueTasks?.length || 0} overdue).`)
         const results = []
 
-        // 2. Process each task
-        for (const task of tasks) {
+        // 3. Process each task
+        for (const task of allTasks) {
             // Get subscriptions for this user
             const { data: subs } = await supabase
                 .from('push_subscriptions')
@@ -55,10 +70,14 @@ Deno.serve(async (req) => {
 
             if (!subs || subs.length === 0) continue
 
+            const isOverdue = task._type === 'overdue'
+
             const payload = JSON.stringify({
-                title: `🌿 Willow: ${task.title}`,
-                body: 'Time to flow', // Fallback
-                due_date: task.due_date, // Send raw ISO string
+                title: isOverdue
+                    ? `⏰ Overdue: ${task.title}`
+                    : `🌿 Willow: ${task.title}`,
+                body: isOverdue ? 'This task is overdue!' : 'Time to flow',
+                due_date: task.due_date,
                 url: '/'
             })
 
