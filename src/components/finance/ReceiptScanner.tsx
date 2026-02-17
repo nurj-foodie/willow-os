@@ -14,12 +14,15 @@ type ScannerStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, onManualEntry, userId }) => {
     const [status, setStatus] = useState<ScannerStatus>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const processedDataRef = useRef<any>(null);
+    const lastInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Save ref to the input that triggered this, so we can reset it
+        lastInputRef.current = e.target;
 
         console.log('[Scanner] File selected:', file.name, file.size, 'bytes', file.type);
         setStatus('uploading');
@@ -76,8 +79,9 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
             setErrorMessage(err.message || 'Upload failed. Please try again.');
             setStatus('error');
         } finally {
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+            // Reset the file input so the same file can be selected again
+            if (lastInputRef.current) {
+                lastInputRef.current.value = '';
             }
         }
     };
@@ -126,47 +130,53 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-sm text-white/60 italic">Safe here, gone from your purse.</p>
 
-                        {/* Upload Options */}
+                        {/* Upload Options - Using native <label> to avoid mobile PWA page refresh bug */}
                         <div className="flex gap-3">
-                            <button
-                                onClick={() => {
-                                    if (fileInputRef.current) {
-                                        fileInputRef.current.accept = 'image/*';
-                                        fileInputRef.current.capture = 'environment';
-                                        fileInputRef.current.click();
-                                    }
-                                }}
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
+                            <label
+                                htmlFor="scanner-camera-input"
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform cursor-pointer"
                             >
                                 <Upload size={20} />
                                 <span>Camera</span>
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (fileInputRef.current) {
-                                        fileInputRef.current.accept = 'image/*';
-                                        fileInputRef.current.removeAttribute('capture');
-                                        fileInputRef.current.click();
-                                    }
-                                }}
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all"
+                            </label>
+                            <input
+                                id="scanner-camera-input"
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+
+                            <label
+                                htmlFor="scanner-gallery-input"
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all cursor-pointer"
                             >
                                 <Image size={20} />
                                 <span>Gallery</span>
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (fileInputRef.current) {
-                                        fileInputRef.current.accept = 'image/*,application/pdf';
-                                        fileInputRef.current.removeAttribute('capture');
-                                        fileInputRef.current.click();
-                                    }
-                                }}
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all"
+                            </label>
+                            <input
+                                id="scanner-gallery-input"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+
+                            <label
+                                htmlFor="scanner-pdf-input"
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all cursor-pointer"
                             >
                                 <FileUp size={20} />
                                 <span>PDF</span>
-                            </button>
+                            </label>
+                            <input
+                                id="scanner-pdf-input"
+                                type="file"
+                                accept="image/*,application/pdf"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
                         </div>
                     </div>
                 )}
@@ -245,13 +255,6 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     </div>
                 )}
             </div>
-
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileSelect}
-                className="hidden"
-            />
 
             <p className="text-[10px] text-white/30 text-center font-medium leading-relaxed">
                 Receipts are processed securely by Google AI.
