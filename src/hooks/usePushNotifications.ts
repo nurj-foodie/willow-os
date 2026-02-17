@@ -6,11 +6,11 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 export function usePushNotifications(user: User | null) {
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [permission, setPermission] = useState<NotificationPermission>(Notification.permission);
+    const [permission, setPermission] = useState<NotificationPermission>('Notification' in window ? Notification.permission : 'denied');
     const [loading, setLoading] = useState(false);
 
     // Check if push is supported
-    const isPushSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+    const isPushSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 
     // Helper to convert VAPID key
     const urlBase64ToUint8Array = (base64String: string | undefined) => {
@@ -61,6 +61,7 @@ export function usePushNotifications(user: User | null) {
             const registration = await navigator.serviceWorker.ready;
 
             // 2. Request Permission
+            if (!('Notification' in window)) throw new Error('Notifications not supported on this device');
             const perm = await Notification.requestPermission();
             setPermission(perm);
 
