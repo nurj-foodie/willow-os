@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { FileText, Upload, X, CheckCircle2, Sparkles, Image, FileUp } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { FileText, X, CheckCircle2, Sparkles, Image, Camera, Aperture } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ReceiptScannerProps {
@@ -9,26 +9,93 @@ interface ReceiptScannerProps {
     userId: string;
 }
 
-type ScannerStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
+type ScannerStatus = 'idle' | 'camera' | 'uploading' | 'processing' | 'done' | 'error';
 
 export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onClose, onManualEntry, userId }) => {
     const [status, setStatus] = useState<ScannerStatus>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const processedDataRef = useRef<any>(null);
-    const lastInputRef = useRef<HTMLInputElement | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    // Stop camera stream when component unmounts or status changes away from camera
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => stopCamera();
+    }, [stopCamera]);
+
+    // Open in-app camera using getUserMedia (stays inside PWA, no external app)
+    const openCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+            });
+            streamRef.current = stream;
+            setStatus('camera');
+
+            // Wait for next render then attach stream to video
+            requestAnimationFrame(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    videoRef.current.play().catch(console.error);
+                }
+            });
+        } catch (err: any) {
+            console.error('[Scanner] Camera access denied:', err);
+            setErrorMessage('Camera access denied. Please use Gallery instead.');
+            setStatus('error');
+        }
+    };
+
+    // Capture a photo from the live video stream
+    const capturePhoto = () => {
+        if (!videoRef.current || !canvasRef.current) return;
+
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(video, 0, 0);
+
+        stopCamera();
+
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                setErrorMessage('Failed to capture photo.');
+                setStatus('error');
+                return;
+            }
+
+            const file = new File([blob], `receipt_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            await processFile(file);
+        }, 'image/jpeg', 0.85);
+    };
+
+    // Handle file from gallery picker
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        e.target.value = ''; // Reset input
+        await processFile(file);
+    };
 
-        // Save ref to the input that triggered this, so we can reset it
-        lastInputRef.current = e.target;
-
+    // Shared upload + AI processing logic
+    const processFile = async (file: File) => {
         console.log('[Scanner] File selected:', file.name, file.size, 'bytes', file.type);
         setStatus('uploading');
 
         try {
-            const fileExt = file.name.split('.').pop();
+            const fileExt = file.name.split('.').pop() || 'jpg';
             const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const filePath = `${userId}/${fileName}`;
 
@@ -78,11 +145,6 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
             console.error('[Scanner] Error:', err);
             setErrorMessage(err.message || 'Upload failed. Please try again.');
             setStatus('error');
-        } finally {
-            // Reset the file input so the same file can be selected again
-            if (lastInputRef.current) {
-                lastInputRef.current.value = '';
-            }
         }
     };
 
@@ -95,6 +157,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
     };
 
     const handleRetry = () => {
+        stopCamera();
         setStatus('idle');
         setErrorMessage('');
     };
@@ -130,24 +193,17 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-sm text-white/60 italic">Safe here, gone from your purse.</p>
 
-                        {/* Upload Options - Using native <label> to avoid mobile PWA page refresh bug */}
                         <div className="flex gap-3">
-                            <label
-                                htmlFor="scanner-camera-input"
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform cursor-pointer"
+                            {/* In-app camera — uses getUserMedia, never leaves the PWA */}
+                            <button
+                                onClick={openCamera}
+                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white text-charcoal rounded-2xl font-bold text-sm hover:scale-105 transition-transform"
                             >
-                                <Upload size={20} />
+                                <Camera size={20} />
                                 <span>Camera</span>
-                            </label>
-                            <input
-                                id="scanner-camera-input"
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                onChange={handleFileSelect}
-                                className="hidden"
-                            />
+                            </button>
 
+                            {/* Gallery — native label, opens in-browser file picker (safe on mobile) */}
                             <label
                                 htmlFor="scanner-gallery-input"
                                 className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all cursor-pointer"
@@ -162,22 +218,38 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                                 onChange={handleFileSelect}
                                 className="hidden"
                             />
+                        </div>
+                    </div>
+                )}
 
-                            <label
-                                htmlFor="scanner-pdf-input"
-                                className="flex flex-col items-center gap-2 px-5 py-4 bg-white/10 text-white rounded-2xl font-bold text-sm hover:scale-105 hover:bg-white/20 transition-all cursor-pointer"
-                            >
-                                <FileUp size={20} />
-                                <span>PDF</span>
-                            </label>
-                            <input
-                                id="scanner-pdf-input"
-                                type="file"
-                                accept="image/*,application/pdf"
-                                onChange={handleFileSelect}
-                                className="hidden"
+                {/* IN-APP CAMERA STATE */}
+                {status === 'camera' && (
+                    <div className="flex flex-col items-center gap-4 w-full">
+                        <div className="relative w-full rounded-xl overflow-hidden bg-black" style={{ maxHeight: '300px' }}>
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="w-full h-auto rounded-xl"
+                                style={{ maxHeight: '300px', objectFit: 'cover' }}
                             />
                         </div>
+                        <div className="flex gap-3 items-center">
+                            <button
+                                onClick={() => { stopCamera(); setStatus('idle'); }}
+                                className="px-5 py-3 bg-white/10 text-white rounded-2xl font-bold text-sm hover:bg-white/20 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={capturePhoto}
+                                className="w-16 h-16 bg-white rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                            >
+                                <Aperture size={28} className="text-charcoal" />
+                            </button>
+                        </div>
+                        <p className="text-xs text-white/40">Point at your receipt and tap the shutter</p>
                     </div>
                 )}
 
@@ -185,8 +257,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 {status === 'uploading' && (
                     <div className="flex flex-col items-center gap-4">
                         <div
-                            className="w-12 h-12 border-4 border-matcha/30 border-t-matcha rounded-full"
-                            style={{ animation: 'spin 1s linear infinite' }}
+                            className="w-12 h-12 border-4 border-matcha/30 border-t-matcha rounded-full animate-spin"
                         />
                         <p className="text-lg font-bold text-matcha">Uploading...</p>
                         <p className="text-sm text-white/50">Please wait</p>
@@ -197,8 +268,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 {status === 'processing' && (
                     <div className="flex flex-col items-center gap-4">
                         <div
-                            className="w-12 h-12 border-4 border-matcha/30 border-t-matcha rounded-full"
-                            style={{ animation: 'spin 1s linear infinite' }}
+                            className="w-12 h-12 border-4 border-matcha/30 border-t-matcha rounded-full animate-spin"
                         />
                         <p className="text-lg font-bold text-matcha">Gemini is reading...</p>
                         <p className="text-sm text-white/50">Extracting receipt data</p>
@@ -256,17 +326,12 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onProcessed, onC
                 )}
             </div>
 
+            {/* Hidden canvas for photo capture */}
+            <canvas ref={canvasRef} className="hidden" />
+
             <p className="text-[10px] text-white/30 text-center font-medium leading-relaxed">
                 Receipts are processed securely by Google AI.
             </p>
-
-            {/* CSS for spinner animation */}
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
 };

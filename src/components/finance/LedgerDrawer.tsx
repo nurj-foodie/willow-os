@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, ChevronLeft, ChevronRight, Sparkles, FileText, Pencil, Trash2, Check, Download, BarChart3, Image, Camera } from 'lucide-react';
+import { X, Plus, ChevronLeft, ChevronRight, Sparkles, FileText, Pencil, Trash2, Check, Download, BarChart3, Camera } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import type { LedgerEntry } from '../../hooks/useLedger';
 import { ReceiptScanner } from './ReceiptScanner';
@@ -38,7 +38,7 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
     const [manualPhoto, setManualPhoto] = useState<File | null>(null);
     const [manualPhotoPreview, setManualPhotoPreview] = useState<string | null>(null);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
-    const manualPhotoRef = useRef<HTMLInputElement>(null);
+
 
     // Monthly navigation state
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -598,42 +598,22 @@ export const LedgerDrawer: React.FC<LedgerDrawerProps> = ({
                                                 </div>
                                             ) : (
                                                 <div className="flex gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (manualPhotoRef.current) {
-                                                                manualPhotoRef.current.accept = 'image/*';
-                                                                manualPhotoRef.current.capture = 'environment';
-                                                                manualPhotoRef.current.click();
-                                                            }
-                                                        }}
-                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-neutral-900 rounded-lg text-charcoal/60 dark:text-neutral-400 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+                                                    <label
+                                                        htmlFor="manual-photo-input"
+                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-neutral-900 rounded-lg text-charcoal/60 dark:text-neutral-400 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                                                     >
                                                         <Camera size={18} />
-                                                        <span className="text-sm font-medium">Camera</span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (manualPhotoRef.current) {
-                                                                manualPhotoRef.current.accept = 'image/*';
-                                                                manualPhotoRef.current.removeAttribute('capture');
-                                                                manualPhotoRef.current.click();
-                                                            }
-                                                        }}
-                                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-neutral-900 rounded-lg text-charcoal/60 dark:text-neutral-400 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
-                                                    >
-                                                        <Image size={18} />
-                                                        <span className="text-sm font-medium">Gallery</span>
-                                                    </button>
+                                                        <span className="text-sm font-medium">Photo</span>
+                                                    </label>
+                                                    <input
+                                                        id="manual-photo-input"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleManualPhotoSelect}
+                                                        className="hidden"
+                                                    />
                                                 </div>
                                             )}
-                                            <input
-                                                type="file"
-                                                ref={manualPhotoRef}
-                                                onChange={handleManualPhotoSelect}
-                                                className="hidden"
-                                            />
                                         </div>
 
                                         <button
