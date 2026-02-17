@@ -8,9 +8,10 @@ interface TaskEditModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (id: string, updates: Partial<Task>) => void;
+    onDelete?: (id: string) => void;
 }
 
-export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onClose, onSave }) => {
+export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onClose, onSave, onDelete }) => {
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState(4);
@@ -143,8 +144,8 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({ task, isOpen, onCl
                             {/* Delete button - separate and destructive */}
                             <button
                                 onClick={() => {
-                                    if (task && window.confirm('Delete this task? This action cannot be undone.')) {
-                                        onSave(task.id, { status: 'archived' });
+                                    if (task && onDelete && window.confirm('Delete this task? This action cannot be undone.')) {
+                                        onDelete(task.id);
                                         onClose();
                                     }
                                 }}

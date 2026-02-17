@@ -41,7 +41,7 @@ import { useTheme } from './hooks/useTheme';
 
 function App() {
   console.log('🌿 Willow App Loaded - Build:', new Date().toISOString());
-  const { tasks, allTasks, loading: tasksLoading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, logout, deleteAccount } = useTasks();
+  const { tasks, allTasks, loading: tasksLoading, user, selectedDate, setSelectedDate, addTask, updateTask, updateTasks, reorderTasks, deleteTask, logout, deleteAccount } = useTasks();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -523,6 +523,7 @@ function App() {
           isOpen={!!editingTask}
           onClose={() => setEditingTask(null)}
           onSave={updateTask}
+          onDelete={deleteTask}
         />
       </div>
     </DndContext>

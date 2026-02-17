@@ -320,6 +320,20 @@ export function useTasks() {
         }
     }
 
+    async function deleteTask(id: string) {
+        if (isSupabaseConfigured && user) {
+            const { error } = await supabase
+                .from('tasks')
+                .delete()
+                .eq('id', id)
+                .eq('user_id', user.id);
+
+            if (error) console.error('Error deleting task:', error);
+        } else {
+            setTasks(prev => prev.filter(t => t.id !== id));
+        }
+    }
+
     const logout = async () => {
         const demoEmail = localStorage.getItem('willow_demo_email');
         if (demoEmail) {
@@ -386,6 +400,7 @@ export function useTasks() {
         updateTask,
         updateTasks,
         reorderTasks,
+        deleteTask,
         logout,
         deleteAccount
     };
