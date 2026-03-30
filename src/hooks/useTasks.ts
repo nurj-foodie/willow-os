@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { Task } from '../types';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
@@ -49,12 +49,13 @@ export function useTasks() {
     const fetchTasks = useCallback(async () => {
         if (isSupabaseConfigured && user) {
             try {
-                // Fetch ALL tasks - done tasks will be shown until "Wrap the Day"
-                // No status filter since we need done tasks visible in the stream
+                // Fetch active tasks only — archived tasks excluded to reduce IO
+                // Done tasks stay visible until "Wrap the Day"
                 const { data, error } = await supabase
                     .from('tasks')
                     .select('*')
                     .eq('user_id', user.id)
+                    .neq('status', 'archived')
                     .order('position_rank', { ascending: true });
 
                 if (error) throw error;
@@ -176,6 +177,10 @@ export function useTasks() {
         }
     }, [user]);
 
+    // Debounce ref to prevent rapid-fire refetches from Realtime
+    // (e.g., when cron updates notified flags on multiple tasks)
+    const realtimeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     useEffect(() => {
         fetchTasks();
 
@@ -186,12 +191,21 @@ export function useTasks() {
                     'postgres_changes',
                     { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${user.id}` },
                     () => {
-                        fetchTasks();
+                        // Debounce: wait 1s before refetching to batch rapid changes
+                        if (realtimeDebounceRef.current) {
+                            clearTimeout(realtimeDebounceRef.current);
+                        }
+                        realtimeDebounceRef.current = setTimeout(() => {
+                            fetchTasks();
+                        }, 1000);
                     }
                 )
                 .subscribe();
 
             return () => {
+                if (realtimeDebounceRef.current) {
+                    clearTimeout(realtimeDebounceRef.current);
+                }
                 supabase.removeChannel(channel);
             };
         }

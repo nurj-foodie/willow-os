@@ -25,6 +25,7 @@ export const useLedger = (user: User | null, _profile: any, updateProfile: any) 
             const { data, error } = await supabase
                 .from('ledger')
                 .select('*')
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) console.error('Error fetching ledger:', error);

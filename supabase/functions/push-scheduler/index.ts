@@ -21,27 +21,44 @@ webpush.setVapidDetails(
 
 Deno.serve(async (req) => {
     try {
-        // 1. Find tasks due in the next 10 minutes (upcoming)
+        // Early exit: check if ANY push subscriptions exist at all
+        const { count: subCount } = await supabase
+            .from('push_subscriptions')
+            .select('id', { count: 'exact', head: true })
+
+        if (!subCount || subCount === 0) {
+            return new Response(JSON.stringify({ message: 'No push subscriptions registered, skipping' }), {
+                headers: { 'Content-Type': 'application/json' },
+            })
+        }
+
+        // 1. Find tasks due in the next 30 minutes (upcoming)
         const now = new Date()
-        const tenMinutesLater = new Date(now.getTime() + 10 * 60000)
+        const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000)
 
         const { data: upcomingTasks, error: upcomingError } = await supabase
             .from('tasks')
-            .select('*, user_id')
+            .select('id, title, user_id, due_date')
             .eq('status', 'todo')
             .eq('notified', false)
             .gt('due_date', now.toISOString())
-            .lt('due_date', tenMinutesLater.toISOString())
+            .lt('due_date', thirtyMinutesLater.toISOString())
+            .limit(50)
 
         if (upcomingError) throw upcomingError
 
-        // 2. Find overdue tasks (due_date already passed, not yet notified)
+        // 2. Find overdue tasks — BOUNDED to last 24 hours only
+        // Tasks older than 24h overdue are no longer notified to avoid noise
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60000)
+
         const { data: overdueTasks, error: overdueError } = await supabase
             .from('tasks')
-            .select('*, user_id')
+            .select('id, title, user_id, due_date')
             .eq('status', 'todo')
             .eq('notified', false)
             .lt('due_date', now.toISOString())
+            .gt('due_date', twentyFourHoursAgo.toISOString())
+            .limit(50)
 
         if (overdueError) throw overdueError
 
@@ -57,7 +74,7 @@ Deno.serve(async (req) => {
             })
         }
 
-        console.log(`Found ${allTasks.length} tasks to notify (${upcomingTasks?.length || 0} upcoming, ${overdueTasks?.length || 0} overdue).`)
+        console.log(`[push-scheduler] Found ${allTasks.length} tasks (${upcomingTasks?.length || 0} upcoming, ${overdueTasks?.length || 0} overdue). Active subs: ${subCount}`)
         const results = []
 
         // 3. Process each task

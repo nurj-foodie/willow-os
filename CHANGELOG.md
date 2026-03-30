@@ -3,6 +3,30 @@
 All notable changes to the Willow project will be documented in this file.
 
 
+## [2026-03-30] - Critical: Disk IO Budget Fix [18:00 UTC+8]
+
+### Fixed
+- **Supabase Disk IO Depletion (Critical):** Identified and resolved 5 root causes that depleted the free tier IO budget, causing Supabase to pause the project.
+  - **pg_cron/pg_net garbage buildup:** `cron.job_run_details` and `net._http_response` tables accumulated ~35,000+ rows over 41 days with no cleanup. Created `DISK_IO_FIX.sql` remediation script to purge and VACUUM.
+  - **Unbounded overdue query:** `push-scheduler` scanned ALL historical overdue tasks every 5 minutes. Bounded to last 24 hours only.
+  - **Cron frequency too high:** Reduced from every 5 minutes (288 runs/day) to every 30 minutes (48 runs/day) — 6x IO reduction.
+  - **Missing database indexes:** Added indexes on `tasks(user_id)`, `tasks(user_id, status)`, `tasks(status, notified, due_date)`, and `ledger(user_id)`.
+  - **Realtime cascade loop:** Cron `notified` flag updates triggered WAL → Realtime → client refetch. Added 1-second debounce.
+
+### Added
+- **`DISK_IO_FIX.sql`:** One-shot remediation script to run after unpausing Supabase (cleanup + indexes + optimized cron).
+- **Auto-Cleanup Cron Job:** Daily job at 3 AM UTC purges `cron.job_run_details` and `net._http_response` older than 3 days — prevents future buildup.
+- **Push Scheduler Early Exit:** Edge function now skips all queries if no push subscriptions exist, saving IO when no users have notifications enabled.
+
+### Changed
+- **Push Scheduler (`push-scheduler/index.ts`):**
+  - Upcoming window expanded from 10 → 30 minutes (matches new 30-min cron interval).
+  - Overdue window bounded to 24 hours (was unbounded/infinite).
+  - Uses `SELECT id, title, user_id, due_date` instead of `SELECT *`.
+  - Added `.limit(50)` safety cap on both queries.
+- **`useTasks.ts`:** Excludes `archived` tasks from fetch query. Realtime callback debounced (1s) to batch rapid cron updates.
+- **`useLedger.ts`:** Added explicit `.eq('user_id', user.id)` filter (was relying solely on RLS).
+
 ## [2026-02-17] - Mobile PWA Hardening & Notification Infrastructure [20:00 UTC+8]
 
 ### Fixed
