@@ -71,7 +71,8 @@ To create a "Low-Stakes Productivity" tool that replaces grid-based anxiety with
 - **Logic:**
   - **VAPID Security:** Authenticated communication between Server and Browser.
   - **Local Timezone:** Service Worker calculates display time locally to ensure accuracy.
-  - **Smart Scheduling:** `pg_cron` triggers Edge Function every 5 minutes to find tasks due soon.
+  - **Smart Scheduling:** `pg_cron` triggers Edge Function every 30 minutes to find tasks due soon.
+  - **Auto-Cleanup:** Daily setup purges execution logs to prevent Supabase Disk IO depletion.
   - **Overdue Alerts:** Separately notifies for missed tasks with distinct ⏰ messaging.
   - **Cross-Platform:** Works on Android PWA and iOS 16.4+ PWA (Home Screen installed).
 

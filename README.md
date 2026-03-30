@@ -72,6 +72,7 @@ npm run dev
 - [x] Gen Z Onboarding Polish ✨
 - [x] Mobile PWA Hardening (Camera, Auth, Error Handling) 📱
 - [x] Task Deletion Fix (Two-Tap Confirm) 🗑️
+- [x] Supabase Disk IO Optimization (Cron cleanup + Indexes) 💽
 
 ### 🔮 Next: "Idea Dump" Expansion
 - [ ] Voice Notes (Record → Auto-transcribe → Tag)
